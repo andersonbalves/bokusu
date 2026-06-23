@@ -7,11 +7,18 @@ export default defineConfig({
   plugins: [
     react(),
     {
-      name: 'move-index-html',
+      name: 'flask-integration',
+      buildStart() {
+        const assetsDir = path.resolve(__dirname, '../pikaraoke/static/assets')
+        if (fs.existsSync(assetsDir)) {
+          fs.rmSync(assetsDir, { recursive: true, force: true })
+        }
+      },
       closeBundle() {
         const src = path.resolve(__dirname, '../pikaraoke/static/index.html')
         const dest = path.resolve(__dirname, '../pikaraoke/templates/index.html')
         if (fs.existsSync(src)) {
+          fs.mkdirSync(path.dirname(dest), { recursive: true })
           fs.renameSync(src, dest)
         }
       }
