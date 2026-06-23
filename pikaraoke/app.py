@@ -27,12 +27,9 @@ from pikaraoke.lib.current_app import get_karaoke_instance
 from pikaraoke.lib.ffmpeg import is_ffmpeg_installed
 from pikaraoke.lib.file_resolver import delete_tmp_dir
 from pikaraoke.lib.get_platform import (
-    get_data_directory,
     get_platform,
     has_js_runtime,
-    is_windows,
 )
-from pikaraoke.lib.song_manager import SongManager
 from pikaraoke.lib.youtube_dl import upgrade_youtubedl
 from pikaraoke.routes.admin import admin_bp
 from pikaraoke.routes.background_music import background_music_bp
@@ -278,7 +275,7 @@ def main() -> None:
 
     spawn(upgrade_youtubedl)
 
-    server = WSGIServer(("0.0.0.0", int(args.port)), app, log=None, error_log=logging.getLogger())
+    server = WSGIServer(("0.0.0.0", int(args.port)), app, log=None, error_log=logging.getLogger())  # nosec B104
     server.start()
 
     # Handle sigterm, apparently cherrypy won't shut down without explicit handling

@@ -6,7 +6,7 @@ import configparser
 import logging
 import os
 import shutil
-from typing import Any
+from typing import Any, ClassVar
 
 from flask_babel import _
 
@@ -21,7 +21,7 @@ class PreferenceManager:
     """
 
     # Default values for all user preferences (single source of truth)
-    DEFAULTS = {
+    DEFAULTS: ClassVar[dict[str, Any]] = {
         "hide_url": False,
         "hide_notifications": False,
         "high_quality": False,

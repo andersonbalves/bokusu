@@ -2,7 +2,7 @@
 
 import os
 import zipfile
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -325,7 +325,7 @@ class TestFileResolverHandleMp3Cdg:
         mp3_file = tmp_path / "song.mp3"
         mp3_file.touch()
 
-        with pytest.raises(Exception, match="No matching .cdg file found"):
+        with pytest.raises(Exception, match=r"No matching .cdg file found"):
             FileResolver(str(mp3_file))
 
 
@@ -338,7 +338,7 @@ class TestFileResolverHandleZippedCdg:
         """Test extracting valid CDG zip file."""
         # Create a valid CDG zip
         zip_path = tmp_path / "song.zip"
-        extracted_dir = tmp_path / "extracted"
+        tmp_path / "extracted"
 
         with zipfile.ZipFile(zip_path, "w") as zf:
             zf.writestr("track.mp3", b"fake mp3 data")
@@ -361,7 +361,7 @@ class TestFileResolverHandleZippedCdg:
             zf.writestr("track.mp3", b"fake mp3 data")
 
         with patch("pikaraoke.lib.file_resolver.get_tmp_dir", return_value=str(tmp_path)):
-            with pytest.raises(Exception, match="No .mp3 or .cdg was found"):
+            with pytest.raises(Exception, match=r"No .mp3 or .cdg was found"):
                 FileResolver(str(zip_path))
 
     @patch("pikaraoke.lib.file_resolver.create_tmp_dir")
@@ -374,7 +374,7 @@ class TestFileResolverHandleZippedCdg:
             zf.writestr("track2.cdg", b"fake cdg data")
 
         with patch("pikaraoke.lib.file_resolver.get_tmp_dir", return_value=str(tmp_path)):
-            with pytest.raises(Exception, match="did not have a matching .cdg file"):
+            with pytest.raises(Exception, match=r"did not have a matching .cdg file"):
                 FileResolver(str(zip_path))
 
 

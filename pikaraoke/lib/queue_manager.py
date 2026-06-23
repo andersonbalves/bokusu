@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import logging
 import random
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from flask_babel import _
 
@@ -155,7 +156,7 @@ class QueueManager:
 
     def queue_add_random(self, amount: int) -> bool:
         """Add random songs to the queue. Returns False if ran out of songs."""
-        logging.info("Adding %d random songs to queue" % amount)
+        logging.info(f"Adding {amount} random songs to queue")
 
         if not self._get_available_songs:
             logging.error("No available songs callback provided!")
@@ -183,7 +184,7 @@ class QueueManager:
             self.enqueue(song, "Randomizer")
 
         if sample_size < amount:
-            logging.warning("Ran out of songs! Only added %d" % sample_size)
+            logging.warning(f"Ran out of songs! Only added {sample_size}")
             return False
 
         return True

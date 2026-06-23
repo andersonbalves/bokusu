@@ -97,7 +97,7 @@ def get_system_stats():
     try:
         # We can afford to block a bit here since it is async
         cpu = str(psutil.cpu_percent(interval=1)) + "%"
-    except:
+    except Exception:
         cpu = _("CPU usage query unsupported")
 
     # mem

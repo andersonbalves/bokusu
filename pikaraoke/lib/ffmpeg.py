@@ -27,7 +27,7 @@ def get_media_duration(file_path: str) -> int | None:
     try:
         duration = ffmpeg.probe(file_path)["format"]["duration"]
         return round(float(duration))
-    except:
+    except Exception:
         return None
 
 
@@ -168,7 +168,7 @@ def build_ffmpeg_cmd(
         )
 
     args = output.get_args()
-    logging.debug(f"COMMAND: ffmpeg " + " ".join(args))
+    logging.debug("COMMAND: ffmpeg " + " ".join(args))
     return output
 
 

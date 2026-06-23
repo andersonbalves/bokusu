@@ -5,6 +5,7 @@ import os
 import threading
 import unicodedata
 from collections.abc import Iterator
+from typing import ClassVar
 
 
 class SongList:
@@ -27,7 +28,7 @@ class SongList:
     """
 
     # Supported song file extensions
-    VALID_EXTENSIONS = {".mp4", ".mp3", ".zip", ".mkv", ".avi", ".webm", ".mov"}
+    VALID_EXTENSIONS: ClassVar[set[str]] = {".mp4", ".mp3", ".zip", ".mkv", ".avi", ".webm", ".mov"}
 
     def __init__(self, sort_key=None):
         """Initialize an empty SongList.
