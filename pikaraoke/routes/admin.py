@@ -14,7 +14,7 @@ from marshmallow import Schema, fields
 
 from pikaraoke.karaoke import Karaoke
 from pikaraoke.lib.current_app import get_admin_password, get_karaoke_instance, is_admin
-from pikaraoke.lib.youtube_dl import get_youtubedl_version, upgrade_youtubedl
+from pikaraoke.lib.youtube_dl import upgrade_youtubedl
 
 _ = flask_babel.gettext
 

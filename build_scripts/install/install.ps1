@@ -120,7 +120,7 @@ try {
         $iconPath = Join-Path ([System.IO.Path]::GetDirectoryName($pikaraokeExe)) "logo.ico"
         $iconFound = $false
         try {
-            $iconUrl = "https://raw.githubusercontent.com/vicwomg/pikaraoke/refs/heads/master/pikaraoke/static/icons/logo.ico"
+            $iconUrl = "https://raw.githubusercontent.com/andersonbalves/bokusu/refs/heads/main/pikaraoke/static/icons/logo.ico"
             if (!(Test-Path $iconPath)) {
                 Invoke-WebRequest -Uri $iconUrl -OutFile $iconPath -ErrorAction Stop
             }

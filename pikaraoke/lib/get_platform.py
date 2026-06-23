@@ -1,6 +1,5 @@
 """Platform detection utilities for PiKaraoke."""
 
-import io
 import os
 import platform
 import shutil
@@ -14,7 +13,7 @@ def is_raspberry_pi() -> bool:
         True if running on a Raspberry Pi, False otherwise.
     """
     try:
-        with io.open("/sys/firmware/devicetree/base/model", "r") as m:
+        with open("/sys/firmware/devicetree/base/model") as m:
             if "raspberry pi" in m.read().lower():
                 return True
     except Exception:
@@ -101,7 +100,7 @@ def get_platform() -> str:
         return "android"
     elif is_raspberry_pi():
         try:
-            with open("/proc/device-tree/model", "r") as file:
+            with open("/proc/device-tree/model") as file:
                 model = file.read().strip()
                 if "Raspberry Pi" in model:
                     return model  # Returns something like "Raspberry Pi 4 Model B Rev 1.2"

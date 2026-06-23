@@ -28,7 +28,7 @@ def get_youtubedl_version() -> str:
         Version string of the installed yt-dlp or an error message.
     """
     try:
-        cmd = yt_dlp_cmd + ["--version"]
+        cmd = [*yt_dlp_cmd, "--version"]
         return subprocess.check_output(cmd).strip().decode("utf8")
     except (subprocess.CalledProcessError, FileNotFoundError, PermissionError) as e:
         logging.warning(f"Could not get yt-dlp version: {e}")
@@ -72,7 +72,7 @@ def upgrade_youtubedl() -> str:
     """
     try:
         output = (
-            subprocess.check_output(yt_dlp_cmd + ["-U"], stderr=subprocess.STDOUT)
+            subprocess.check_output([*yt_dlp_cmd, "-U"], stderr=subprocess.STDOUT)
             .decode("utf8")
             .strip()
         )
@@ -167,7 +167,7 @@ def get_search_results(query: str) -> list[list[str]]:
     logging.info(f"Searching YouTube for: {query}")
     num_results = 10
     yt_search = f'ytsearch{num_results}:"{query}"'
-    cmd = yt_dlp_cmd + ["-j", "--no-playlist", "--flat-playlist", yt_search]
+    cmd = [*yt_dlp_cmd, "-j", "--no-playlist", "--flat-playlist", yt_search]
     logging.debug(f"yt-dlp search command: {' '.join(cmd)}")
     try:
         output = subprocess.check_output(cmd).decode("utf-8", "ignore")
@@ -201,7 +201,7 @@ def get_stream_url(video_url: str) -> str | None:
     Returns:
         Direct playable stream URL, or None if yt-dlp failed.
     """
-    cmd = yt_dlp_cmd + ["-g", "-f", "worst[ext=mp4]/worst"] + _js_runtime_args()
+    cmd = [*yt_dlp_cmd, "-g", "-f", "worst[ext=mp4]/worst", *_js_runtime_args()]
     cmd += [video_url]
     logging.debug(f"yt-dlp get stream URL command: {' '.join(cmd)}")
     try:

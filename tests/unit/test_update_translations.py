@@ -28,7 +28,7 @@ class TestProtectPlaceholders:
 
     def test_percent_d(self):
         text = "Download queued (#%d): %s"
-        protected, tokens = _protect_placeholders(text)
+        _protected, tokens = _protect_placeholders(text)
         assert tokens == ["%d", "%s"]
 
     def test_named_placeholder(self):
@@ -39,14 +39,14 @@ class TestProtectPlaceholders:
 
     def test_html_tags(self):
         text = '<a onClick="handleConfirmation()">confirm</a>'
-        protected, tokens = _protect_placeholders(text)
+        _protected, tokens = _protect_placeholders(text)
         assert len(tokens) == 2
         assert '<a onClick="handleConfirmation()">' in tokens
         assert "</a>" in tokens
 
     def test_mixed_placeholders_and_html(self):
         text = "<small><i>'%(search_term)s'</i></small>"
-        protected, tokens = _protect_placeholders(text)
+        _protected, tokens = _protect_placeholders(text)
         assert "%(search_term)s" in tokens
         assert "<small>" in tokens
         assert "</small>" in tokens
@@ -59,7 +59,7 @@ class TestProtectPlaceholders:
 
     def test_literal_percent_percent(self):
         text = "100%% complete"
-        protected, tokens = _protect_placeholders(text)
+        _protected, tokens = _protect_placeholders(text)
         assert tokens == ["%%"]
 
 

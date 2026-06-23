@@ -1,7 +1,5 @@
 """Unit tests for Karaoke queue operations."""
 
-import pytest
-
 
 class TestEnqueue:
     """Tests for the enqueue method."""

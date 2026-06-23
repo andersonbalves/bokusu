@@ -3,8 +3,6 @@
 These tests verify that queue operations are accessible through the queue_manager.
 """
 
-import pytest
-
 
 class TestKaraokeQueueInterface:
     """Verify Karaoke class exposes queue methods with correct signatures."""

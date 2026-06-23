@@ -61,7 +61,7 @@ REQUEST_DELAY = 0.5
 
 def run_pybabel(args: list[str]) -> None:
     """Run a pybabel command, raising on failure."""
-    cmd = [sys.executable, "-m", "babel.messages.frontend"] + args
+    cmd = [sys.executable, "-m", "babel.messages.frontend", *args]
     print(f"  Running: pybabel {' '.join(args)}")
     result = subprocess.run(cmd, cwd=str(PIKARAOKE_DIR), capture_output=True, text=True)
     if result.returncode != 0:

@@ -8,12 +8,14 @@
 
 **Tech Stack:** React 18, Vite, TypeScript, TailwindCSS, DaisyUI, Lucide React, Zustand, TanStack Query, React Router DOM.
 
----
+______________________________________________________________________
 
 ### Task 1: Inicialização do Projeto e Configuração do Vite
 
 **Files:**
+
 - Create: `bokusu-front/package.json`
+
 - Create: `bokusu-front/vite.config.ts`
 
 - [ ] **Step 1: Criar o projeto Vite**
@@ -54,6 +56,7 @@ cd bokusu-front
 npm install
 npm run build
 ```
+
 Expected: Arquivos gerados em `pikaraoke/templates/index.html` e `pikaraoke/static/assets/`.
 
 - [ ] **Step 4: Commit**
@@ -66,8 +69,11 @@ git commit -m "chore: setup vite react-ts project for pikaraoke front"
 ### Task 2: Configuração TailwindCSS e DaisyUI
 
 **Files:**
+
 - Create: `bokusu-front/tailwind.config.js`
+
 - Create: `bokusu-front/postcss.config.js`
+
 - Modify: `bokusu-front/src/index.css`
 
 - [ ] **Step 1: Instalar dependências**
@@ -142,7 +148,9 @@ git commit -m "chore: configure tailwind, daisyui and global css"
 ### Task 3: Gerenciamento de Estado (Zustand & TanStack Query)
 
 **Files:**
+
 - Create: `bokusu-front/src/store/useAppStore.ts`
+
 - Modify: `bokusu-front/src/main.tsx`
 
 - [ ] **Step 1: Instalar dependências**
@@ -206,8 +214,11 @@ git commit -m "feat: setup zustand and tanstack query"
 ### Task 4: React Router e Estrutura de Layouts
 
 **Files:**
+
 - Create: `bokusu-front/src/layouts/AppLayout.tsx`
+
 - Create: `bokusu-front/src/layouts/PlayerLayout.tsx`
+
 - Modify: `bokusu-front/src/App.tsx`
 
 - [ ] **Step 1: Instalar React Router**
@@ -227,7 +238,7 @@ import { useAppStore } from '../store/useAppStore'
 
 export function AppLayout() {
   const theme = useAppStore((state) => state.theme)
-  
+
   return (
     <div data-theme={theme} className="min-h-screen bg-base-100 text-base-content">
       <nav className="navbar bg-base-200">
@@ -298,6 +309,7 @@ git commit -m "feat: setup react router with distinct layouts"
 ### Task 5: Rota Catch-all no Flask
 
 **Files:**
+
 - Modify: `pikaraoke/routes/home.py`
 
 - [ ] **Step 1: Criar rota catch-all no Flask**
@@ -307,14 +319,16 @@ Modificar `pikaraoke/routes/home.py` para injetar um fallback para o front-end S
 Adicionar no final do arquivo:
 
 ```python
-@home_bp.route('/', defaults={'path': ''})
-@home_bp.route('/<path:path>')
+@home_bp.route("/", defaults={"path": ""})
+@home_bp.route("/<path:path>")
 def catch_all(path):
     """Fallback route for React SPA."""
     from flask import render_template
+
     # Evitar conflitos com rotas de API
-    if path.startswith('api/') or path.startswith('static/'):
+    if path.startswith("api/") or path.startswith("static/"):
         from flask import abort
+
         abort(404)
     return render_template("index.html")
 ```
@@ -324,6 +338,7 @@ def catch_all(path):
 ```bash
 python -m py_compile pikaraoke/routes/home.py
 ```
+
 Expected: Nenhum erro de sintaxe.
 
 - [ ] **Step 3: Commit**

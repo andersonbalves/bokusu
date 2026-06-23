@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 
 import flask_babel
-from flask import current_app, jsonify, render_template, request, url_for
+from flask import current_app, jsonify, render_template, request
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 

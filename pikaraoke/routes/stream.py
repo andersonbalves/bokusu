@@ -40,7 +40,7 @@ def stream_playlist(id):
     if os.path.exists(file_path):
         # Read file content and return with no-cache headers
         # This is critical for iOS Safari which aggressively caches playlists
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             content = f.read()
         response = make_response(content)
         response.headers["Content-Type"] = "application/vnd.apple.mpegurl"
@@ -183,7 +183,7 @@ def stream_file_path_full(file_path):
             "Content-Length": str(len(data)),
         }
         return Response(data, status=status_code, headers=headers)
-    except IOError:
+    except OSError:
         return Response("File not found.", status=404)
 
 

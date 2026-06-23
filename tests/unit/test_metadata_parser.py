@@ -797,7 +797,7 @@ class TestProvenanceRouting:
     @patch("pikaraoke.lib.metadata_parser.lookup_lastfm")
     def test_no_raw_filename_uses_lastfm(self, mock_lookup):
         mock_lookup.return_value = "Artist - Song"
-        result = get_song_correct_name("Artist - Song")
+        get_song_correct_name("Artist - Song")
         mock_lookup.assert_called_once_with("Artist - Song")
 
     @patch("pikaraoke.lib.metadata_parser.lookup_lastfm")

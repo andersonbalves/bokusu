@@ -1,8 +1,12 @@
-# PiKaraoke
+# Bokusu (PiKaraoke React Fork)
+
+> **Note:** This project is a fork of the amazing [PiKaraoke](https://github.com/vicwomg/pikaraoke) created by [Vic Wong (@vicwomg)](https://github.com/vicwomg).
+> The main goal of this fork is to modernize the user interface using React, while keeping the robust backend and core features of the original project intact.
+> All original credits and huge thanks go to Vic Wong for creating such an incredible karaoke machine!
 
 <img width="588" height="339" alt="Image" src="https://i.ibb.co/Z6MTM4wt/pikaraoke-readme.png" />
 
-PiKaraoke is a cross-platform karaoke server that brings the professional "KTV" experience to your home. It transforms your computer or Raspberry Pi into a dedicated karaoke station with a full-screen player and an instant web interface. Guests can join by simply scanning a QR code—no app downloads required—to browse your local library, manage the queue, and access countless karaoke hits from YouTube.
+Bokusu (based on PiKaraoke) is a cross-platform karaoke server that brings the professional "KTV" experience to your home. It transforms your computer or Raspberry Pi into a dedicated karaoke station with a full-screen player and an instant web interface. Guests can join by simply scanning a QR code—no app downloads required—to browse your local library, manage the queue, and access countless karaoke hits from YouTube.
 
 - 📱 Instant Mobile Remote: Search and queue songs from any smartphone—just scan and sing.
 - 📺 Dedicated Player: High-performance splash screen that can be opened on any web browser for a true karaoke room feel.
@@ -42,13 +46,13 @@ For a streamlined installation that handles all dependencies (uv, ffmpeg, deno) 
 ### Linux & macOS
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/vicwomg/pikaraoke/master/build_scripts/install/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/andersonbalves/bokusu/main/build_scripts/install/install.sh | bash
 ```
 
 ### Windows (PowerShell)
 
 ```powershell
-irm https://raw.githubusercontent.com/vicwomg/pikaraoke/master/build_scripts/install/install.ps1 | iex
+irm https://raw.githubusercontent.com/andersonbalves/bokusu/main/build_scripts/install/install.ps1 | iex
 ```
 
 After installation, you can launch pikaraoke from the command line with `pikaraoke` or from a desktop shortcut. Re-running the above command will update a previous pikaraoke installation to the latest version.
