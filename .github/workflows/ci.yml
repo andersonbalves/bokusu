@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize]
   push:
     branches:
-    - master
+    - main
 
 env:
   PYTHON_VERSION: '3.10'
@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SKIP: no-commit-to-branch  # skips commit to main check
-      PRE_COMMIT_CONFIG: code_quality/.pre-commit-config.yaml
+      PRE_COMMIT_CONFIG: .pre-commit-config.yaml
       VENV: venv
       VENV_ACTIVATE: venv/bin/activate
 
@@ -44,7 +44,6 @@ jobs:
     - name: Docstring Coverage
       run: |
         mkdir -p docs/badges/ docstr
-        mv code_quality/.docstr.yaml . # --config option didn't work
         docstr-coverage 2>&1 | tee docstr/docstring_coverage.txt
         ls docs/badges
 

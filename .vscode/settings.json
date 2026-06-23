@@ -1,16 +1,13 @@
 {
-  "pylint.args": [
-    "--rcfile=${workspaceFolder}/code_quality/.pylintrc",
-    "--max-line-length=100"
-  ],
   "[python]": {
     "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.codeActionsOnSave": {
-      "source.organizeImports": "explicit"
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
     }
   },
   "[yaml]": {
     "editor.formatOnSave": false
-  },
-  "isort.args": ["--profile", "black"]
+  }
 }
