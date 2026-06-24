@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Michroma&family=Space+Grotesk:wght@400;600&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: aqua, acid;
+}
 
 :root {
   --font-display: "Michroma", sans-serif;
