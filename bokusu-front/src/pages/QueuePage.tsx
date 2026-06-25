@@ -64,6 +64,7 @@ export function QueuePage() {
                 song={song}
                 isAdmin={isAdmin}
                 onRemove={() => handleRemove(song)}
+                removeDisabled={true}
               />
             ))}
           </div>

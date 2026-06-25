@@ -13,12 +13,12 @@ test('renders position number, title, and singer', () => {
 
 test('calls onRemove when remove button clicked as admin', () => {
   const onRemove = vi.fn()
-  render(<QueueItem song={song} isAdmin={true} onRemove={onRemove} />)
+  render(<QueueItem song={song} isAdmin={true} onRemove={onRemove} removeDisabled={false} />)
   fireEvent.click(screen.getByRole('button', { name: /remover/i }))
   expect(onRemove).toHaveBeenCalledTimes(1)
 })
 
 test('shows lock badge when not admin', () => {
-  render(<QueueItem song={song} isAdmin={false} onRemove={() => {}} />)
+  render(<QueueItem song={song} isAdmin={false} onRemove={() => {}} removeDisabled={false} />)
   expect(screen.getByLabelText('admin necessário')).toBeInTheDocument()
 })

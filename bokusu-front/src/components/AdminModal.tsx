@@ -57,7 +57,7 @@ export function AdminModal() {
         </p>
         <input
           type="password"
-          className="input input-bordered w-full"
+          className="input w-full"
           placeholder="Senha"
           value={password}
           onChange={(e) => setPassword(e.target.value)}

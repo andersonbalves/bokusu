@@ -5,9 +5,10 @@ interface QueueItemProps {
   song: Song
   isAdmin: boolean
   onRemove: () => void
+  removeDisabled?: boolean
 }
 
-export function QueueItem({ song, isAdmin, onRemove }: QueueItemProps) {
+export function QueueItem({ song, isAdmin, onRemove, removeDisabled }: QueueItemProps) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-box bg-base-200 hover:bg-base-300 transition-colors">
       <span className="text-base-content/40 w-6 text-center tabular-nums text-sm">
@@ -26,6 +27,7 @@ export function QueueItem({ song, isAdmin, onRemove }: QueueItemProps) {
         <button
           className="btn btn-ghost btn-xs text-error"
           onClick={onRemove}
+          disabled={removeDisabled}
           aria-label="Remover"
         >
           <Trash2 size={16} />

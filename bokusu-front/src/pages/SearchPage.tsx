@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { Search } from 'lucide-react'
 import { useSearch } from '../hooks/useSearch'
 import { useAddToQueue } from '../hooks/useQueue'
@@ -6,15 +6,23 @@ import { SearchResultItem } from '../components/SearchResultItem'
 
 export function SearchPage() {
   const [query, setQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [addingId, setAddingId] = useState<string | null>(null)
   const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const { data: results = [], isFetching } = useSearch(query)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query), 300)
+    return () => clearTimeout(timer)
+  }, [query])
+
+  const { data: results = [], isFetching } = useSearch(debouncedQuery)
   const addMutation = useAddToQueue()
 
   const showToast = useCallback((msg: string) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     setToastMessage(msg)
-    setTimeout(() => setToastMessage(null), 2500)
+    toastTimerRef.current = setTimeout(() => setToastMessage(null), 2500)
   }, [])
 
   const handleAdd = (id: string, title: string) => {
@@ -35,7 +43,7 @@ export function SearchPage() {
     <div className="flex flex-col min-h-full">
       {/* Sticky search bar */}
       <div className="p-4 pb-2 sticky top-0 bg-base-100 z-10 border-b border-base-200">
-        <label className="input input-bordered flex items-center gap-2 w-full">
+        <label className="input flex items-center gap-2 w-full">
           <Search size={18} className="text-base-content/40" />
           <input
             type="search"
@@ -50,9 +58,9 @@ export function SearchPage() {
 
       {/* Results */}
       <div className="flex-1 px-4 py-2">
-        {results.length === 0 && query.length > 0 && !isFetching && (
+        {results.length === 0 && debouncedQuery.length > 0 && !isFetching && (
           <p className="text-center text-base-content/40 py-12">
-            Nenhum resultado para &quot;{query}&quot;
+            Nenhum resultado para &quot;{debouncedQuery}&quot;
           </p>
         )}
         {results.map((result) => (

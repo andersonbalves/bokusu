@@ -38,21 +38,21 @@ export function AppLayout() {
         <Outlet />
       </main>
 
-      {/* Bottom Nav — mobile only */}
-      <nav className="btm-nav btm-nav-sm lg:hidden z-40">
+      {/* Dock — mobile only (DaisyUI v5 btm-nav replacement) */}
+      <div className="dock lg:hidden z-40">
         {navItems.map(({ to, label, Icon }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
-              isActive ? 'active text-primary' : 'text-base-content/60'
+              isActive ? 'dock-active text-primary' : 'text-base-content/60'
             }
           >
             <Icon size={22} />
-            <span className="btm-nav-label text-xs">{label}</span>
+            <span className="dock-label text-xs">{label}</span>
           </NavLink>
         ))}
-      </nav>
+      </div>
 
       <AdminModal />
     </div>
