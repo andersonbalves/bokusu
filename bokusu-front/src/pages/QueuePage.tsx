@@ -21,7 +21,7 @@ export function QueuePage() {
     skipMutation.mutate()
   }
 
-  const handleRemove = (song: Song) => {
+  const handleRemove = (_song: Song) => {
     if (!isAdmin) {
       openAdminModal(() => {
         /* remove endpoint wired in future task — backend /api/queue/<id> DELETE */

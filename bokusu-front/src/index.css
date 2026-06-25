@@ -23,3 +23,11 @@ h1, h2, h3, h4, .font-display {
   --radius-field: 1.5rem;
   --radius-selector: 1.5rem;
 }
+
+/* TV legibility: contrast outline for text over any background */
+.text-outlined {
+  -webkit-text-stroke: 1.5px rgba(0, 0, 0, 0.85);
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.95),
+    0 0 2px rgba(0, 0, 0, 1);
+}

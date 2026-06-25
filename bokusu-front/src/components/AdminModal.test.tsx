@@ -31,7 +31,7 @@ test('cancel closes modal without calling pendingAdminAction', () => {
 })
 
 test('correct password sets isAdmin=true and calls pendingAdminAction', async () => {
-  global.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({}) })
+  globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({}) })
   const action = vi.fn()
   useAppStore.setState({ pendingAdminAction: action })
   render(<AdminModal />)
@@ -43,7 +43,7 @@ test('correct password sets isAdmin=true and calls pendingAdminAction', async ()
 })
 
 test('wrong password shows error message and does not set isAdmin', async () => {
-  global.fetch = vi.fn().mockResolvedValue({ ok: false, json: () => Promise.resolve({}) })
+  globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, json: () => Promise.resolve({}) })
   render(<AdminModal />)
   fireEvent.change(screen.getByPlaceholderText(/senha/i), { target: { value: 'wrong' } })
   fireEvent.click(screen.getByRole('button', { name: /confirmar/i }))
