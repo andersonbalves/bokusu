@@ -1,10 +1,11 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import fs from 'fs'
 import path from 'path'
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     tailwindcss(),
@@ -26,7 +27,7 @@ export default defineConfig({
       }
     }
   ],
-  base: '/static/',
+  base: command === 'build' ? '/static/' : '/',
   build: {
     outDir: '../pikaraoke/static',
     emptyOutDir: false, // não apagar os outros assets do Flask
@@ -37,5 +38,10 @@ export default defineConfig({
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
       }
     }
-  }
-})
+  },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/test-setup.ts'],
+  },
+}))
