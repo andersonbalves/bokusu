@@ -9,7 +9,7 @@ const wrapper = ({ children }: { children: ReactNode }) => {
 }
 
 test('useQueue fetches from /api/queue', async () => {
-  global.fetch = vi.fn().mockResolvedValue({
+  globalThis.fetch = vi.fn().mockResolvedValue({
     ok: true,
     json: () => Promise.resolve([{ id: '1', title: 'Test Song', singerName: 'Alice', position: 0 }]),
   })

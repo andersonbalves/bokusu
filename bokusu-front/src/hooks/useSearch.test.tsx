@@ -9,7 +9,7 @@ const wrapper = ({ children }: { children: ReactNode }) => {
 }
 
 test('useSearch fetches from /api/search with query param', async () => {
-  global.fetch = vi.fn().mockResolvedValue({
+  globalThis.fetch = vi.fn().mockResolvedValue({
     ok: true,
     json: () => Promise.resolve([{ id: 'abc', title: 'Found Song' }]),
   })
