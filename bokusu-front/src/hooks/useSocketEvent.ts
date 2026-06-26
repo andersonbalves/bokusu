@@ -1,12 +1,15 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { socket } from '../lib/socket'
 
 export function useSocketEvent(eventName: string, callback: (...args: any[]) => void) {
+  const cbRef = useRef(callback)
+  cbRef.current = callback
+
   useEffect(() => {
-    socket.on(eventName, callback)
-    
+    const handler = (...args: any[]) => cbRef.current(...args)
+    socket.on(eventName, handler)
     return () => {
-      socket.off(eventName, callback)
+      socket.off(eventName, handler)
     }
-  }, [eventName, callback])
+  }, [eventName])
 }

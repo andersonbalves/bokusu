@@ -18,5 +18,9 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     throw new Error(`API error: ${response.status} ${response.statusText}`)
   }
 
+  if (response.status === 204) {
+    return null
+  }
+
   return response.json()
 }

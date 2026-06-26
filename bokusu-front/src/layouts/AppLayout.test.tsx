@@ -1,38 +1,35 @@
-/**
- * @vitest-environment jsdom
- */
-import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppLayout } from './AppLayout'
 import { useAppStore } from '../store/useAppStore'
+import type { ReactNode } from 'react'
 
-describe('AppLayout', () => {
-  beforeEach(() => {
-    useAppStore.setState({ isConnected: true })
-  })
+const wrapper = ({ children }: { children: ReactNode }) => (
+  <QueryClientProvider client={new QueryClient()}>
+    <MemoryRouter initialEntries={['/queue']}>{children}</MemoryRouter>
+  </QueryClientProvider>
+)
 
-  it('shows connection error banner when disconnected', () => {
-    useAppStore.setState({ isConnected: false })
+beforeEach(() => {
+  useAppStore.setState({ isConnected: true })
+})
 
-    render(
-      <MemoryRouter>
-        <AppLayout />
-      </MemoryRouter>
-    )
+test('renders three navigation links', () => {
+  render(<AppLayout />, { wrapper })
+  expect(screen.getAllByRole('link', { name: /fila/i })[0]).toBeInTheDocument()
+  expect(screen.getAllByRole('link', { name: /buscar/i })[0]).toBeInTheDocument()
+  expect(screen.getAllByRole('link', { name: /configurações/i })[0]).toBeInTheDocument()
+})
 
-    expect(screen.getByText('Sem conexão com o servidor')).not.toBeNull()
-  })
+test('shows connection error banner when disconnected', () => {
+  useAppStore.setState({ isConnected: false })
+  render(<AppLayout />, { wrapper })
+  expect(screen.getByText(/sem conexão com o servidor/i)).toBeInTheDocument()
+})
 
-  it('hides connection error banner when connected', () => {
-    useAppStore.setState({ isConnected: true })
-
-    render(
-      <MemoryRouter>
-        <AppLayout />
-      </MemoryRouter>
-    )
-
-    expect(screen.queryByText('Sem conexão com o servidor')).toBeNull()
-  })
+test('hides connection error banner when connected', () => {
+  useAppStore.setState({ isConnected: true })
+  render(<AppLayout />, { wrapper })
+  expect(screen.queryByText(/sem conexão com o servidor/i)).not.toBeInTheDocument()
 })
