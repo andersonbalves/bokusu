@@ -1,20 +1,38 @@
+/**
+ * @vitest-environment jsdom
+ */
+import { describe, it, expect, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppLayout } from './AppLayout'
-import type { ReactNode } from 'react'
+import { useAppStore } from '../store/useAppStore'
 
-const wrapper = ({ children }: { children: ReactNode }) => (
-  <QueryClientProvider client={new QueryClient()}>
-    <MemoryRouter initialEntries={['/queue']}>
-      {children}
-    </MemoryRouter>
-  </QueryClientProvider>
-)
+describe('AppLayout', () => {
+  beforeEach(() => {
+    useAppStore.setState({ isConnected: true })
+  })
 
-test('renders three navigation links', () => {
-  render(<AppLayout />, { wrapper })
-  expect(screen.getAllByRole('link', { name: /fila/i })[0]).toBeInTheDocument()
-  expect(screen.getAllByRole('link', { name: /buscar/i })[0]).toBeInTheDocument()
-  expect(screen.getAllByRole('link', { name: /configurações/i })[0]).toBeInTheDocument()
+  it('shows connection error banner when disconnected', () => {
+    useAppStore.setState({ isConnected: false })
+
+    render(
+      <MemoryRouter>
+        <AppLayout />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText('Sem conexão com o servidor')).not.toBeNull()
+  })
+
+  it('hides connection error banner when connected', () => {
+    useAppStore.setState({ isConnected: true })
+
+    render(
+      <MemoryRouter>
+        <AppLayout />
+      </MemoryRouter>
+    )
+
+    expect(screen.queryByText('Sem conexão com o servidor')).toBeNull()
+  })
 })
