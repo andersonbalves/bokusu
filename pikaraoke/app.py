@@ -107,6 +107,11 @@ for bp in _api_blueprints:
 for bp in _internal_blueprints:
     app.register_blueprint(bp)
 
+from pikaraoke.routes.api import api_blueprints
+
+for bp in api_blueprints:
+    api.register_blueprint(bp)
+
 
 def get_locale() -> str | None:
     """Select the language to display based on user preference or Accept-Language header.
