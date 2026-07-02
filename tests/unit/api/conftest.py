@@ -15,12 +15,16 @@ def fake_karaoke(tmp_path):
     from pikaraoke.karaoke import Karaoke
     from pikaraoke.lib.playback_controller import PlaybackController
 
+    from pikaraoke.lib.queue_manager import QueueManager
+
     k = MagicMock(spec=Karaoke)
     k.preferences = PreferenceManager(config_file_path=str(tmp_path / "config.ini"))
     k.volume = 0.85
     k.playback_controller = MagicMock(spec=PlaybackController)
     k.playback_controller.now_playing_transpose = 0
     k.playback_controller.is_paused = False
+    k.queue_manager = MagicMock(spec=QueueManager)
+    k.queue_manager._events = MagicMock()
     return k
 
 
