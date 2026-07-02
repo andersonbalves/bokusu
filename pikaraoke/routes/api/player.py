@@ -33,10 +33,14 @@ def player_action(body):
 
     success = True
     if action == "play":
-        if pc.is_paused:
+        if not pc.is_playing:
+            success = False
+        elif pc.is_paused:
             success = pc.pause()
     elif action == "pause":
-        if not pc.is_paused:
+        if not pc.is_playing:
+            success = False
+        elif not pc.is_paused:
             success = pc.pause()
     elif action == "stop":
         pc.end_song()
@@ -82,5 +86,7 @@ def get_player_pitch():
 @api_player_bp.arguments(PitchBody, location="json")
 def player_pitch(body):
     k = current_app.config["KARAOKE_INSTANCE"]
+    if not k.playback_controller.is_playing:
+        return jsonify({"success": False, "pitch": body["level"]}), 409
     k.transpose_current(body["level"])
     return jsonify({"success": True, "pitch": body["level"]})

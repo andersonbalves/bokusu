@@ -97,3 +97,24 @@ def test_post_player_pitch(admin_client, fake_karaoke):
     resp = admin_client.post("/api/player/pitch", json={"level": -2})
     assert resp.status_code == 200
     fake_karaoke.transpose_current.assert_called_once_with(-2)
+
+
+def test_post_player_action_play_not_playing(admin_client, fake_karaoke):
+    fake_karaoke.playback_controller.is_playing = False
+    resp = admin_client.post("/api/player/action", json={"action": "play"})
+    assert resp.status_code == 409
+    assert resp.json["success"] is False
+
+
+def test_post_player_action_pause_not_playing(admin_client, fake_karaoke):
+    fake_karaoke.playback_controller.is_playing = False
+    resp = admin_client.post("/api/player/action", json={"action": "pause"})
+    assert resp.status_code == 409
+    assert resp.json["success"] is False
+
+
+def test_post_player_pitch_not_playing(admin_client, fake_karaoke):
+    fake_karaoke.playback_controller.is_playing = False
+    resp = admin_client.post("/api/player/pitch", json={"level": -2})
+    assert resp.status_code == 409
+    assert resp.json["success"] is False
