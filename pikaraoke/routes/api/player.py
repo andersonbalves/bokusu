@@ -31,18 +31,32 @@ def player_action(body):
     pc = k.playback_controller
     action = body["action"]
 
+    success = True
     if action == "play":
-        pc.unpause()
+        if pc.is_paused:
+            success = pc.pause()
     elif action == "pause":
-        pc.pause()
+        if not pc.is_paused:
+            success = pc.pause()
     elif action == "stop":
-        pc.stop()
+        pc.end_song()
+        success = True
     elif action == "skip":
-        pc.skip()
+        success = pc.skip()
     elif action == "restart":
-        pc.restart()
+        success = k.restart()
+
+    if not success:
+        return jsonify({"success": False, "action": action}), 409
 
     return jsonify({"success": True, "action": action})
+
+
+@api_player_bp.route("/volume", methods=["GET"])
+@require_admin
+def get_player_volume():
+    k = current_app.config["KARAOKE_INSTANCE"]
+    return jsonify({"volume": k.volume})
 
 
 @api_player_bp.route("/volume", methods=["POST"])
@@ -50,8 +64,17 @@ def player_action(body):
 @api_player_bp.arguments(VolumeBody, location="json")
 def player_volume(body):
     k = current_app.config["KARAOKE_INSTANCE"]
-    k.set_volume(body["level"])
+    success = k.volume_change(body["level"])
+    if not success:
+        return jsonify({"success": False, "volume": body["level"]}), 409
     return jsonify({"success": True, "volume": body["level"]})
+
+
+@api_player_bp.route("/pitch", methods=["GET"])
+@require_admin
+def get_player_pitch():
+    k = current_app.config["KARAOKE_INSTANCE"]
+    return jsonify({"pitch": k.playback_controller.now_playing_transpose})
 
 
 @api_player_bp.route("/pitch", methods=["POST"])
@@ -59,5 +82,5 @@ def player_volume(body):
 @api_player_bp.arguments(PitchBody, location="json")
 def player_pitch(body):
     k = current_app.config["KARAOKE_INSTANCE"]
-    k.set_audio_pitch(body["level"])
+    k.transpose_current(body["level"])
     return jsonify({"success": True, "pitch": body["level"]})

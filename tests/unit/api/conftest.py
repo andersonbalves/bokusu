@@ -12,9 +12,15 @@ from pikaraoke.lib.preference_manager import PreferenceManager
 @pytest.fixture
 def fake_karaoke(tmp_path):
     """Karaoke fake: PreferenceManager real (leve), resto MagicMock."""
-    k = MagicMock()
+    from pikaraoke.karaoke import Karaoke
+    from pikaraoke.lib.playback_controller import PlaybackController
+
+    k = MagicMock(spec=Karaoke)
     k.preferences = PreferenceManager(config_file_path=str(tmp_path / "config.ini"))
     k.volume = 0.85
+    k.playback_controller = MagicMock(spec=PlaybackController)
+    k.playback_controller.now_playing_transpose = 0
+    k.playback_controller.is_paused = False
     return k
 
 
@@ -29,6 +35,7 @@ def app(fake_karaoke):
     app.config["ADMIN_PASSWORD"] = "secret"
     app.config["SITE_NAME"] = "PiKaraoke"
     from flask_babel import Babel
+
     Babel(app)
     api = Api(app)
 
