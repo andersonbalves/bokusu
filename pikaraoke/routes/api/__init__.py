@@ -7,6 +7,8 @@ api_blueprints: list = []
 
 from pikaraoke.routes.api.auth import api_auth_bp
 from pikaraoke.routes.api.preferences import api_prefs_bp
+from pikaraoke.routes.api.player import api_player_bp
 
 api_blueprints.append(api_auth_bp)
 api_blueprints.append(api_prefs_bp)
+api_blueprints.append(api_player_bp)
