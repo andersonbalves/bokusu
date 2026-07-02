@@ -28,6 +28,8 @@ def app(fake_karaoke):
     app.config["KARAOKE_INSTANCE"] = fake_karaoke
     app.config["ADMIN_PASSWORD"] = "secret"
     app.config["SITE_NAME"] = "PiKaraoke"
+    from flask_babel import Babel
+    Babel(app)
     api = Api(app)
 
     from pikaraoke.routes.api import api_blueprints
