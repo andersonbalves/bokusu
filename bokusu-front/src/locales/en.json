@@ -32,7 +32,9 @@
     "paused": "Paused",
     "singer": "Singer",
     "skip": "Skip",
-    "scanToSing": "Scan to sing"
+    "scanToSing": "Scan to sing",
+    "play": "Play",
+    "pause": "Pause"
   },
   "settings": {
     "title": "Settings",

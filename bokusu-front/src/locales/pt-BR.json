@@ -32,7 +32,9 @@
     "paused": "Pausado",
     "singer": "Cantor",
     "skip": "Pular",
-    "scanToSing": "Escaneie para cantar"
+    "scanToSing": "Escaneie para cantar",
+    "play": "Tocar",
+    "pause": "Pausar"
   },
   "settings": {
     "title": "Configurações",

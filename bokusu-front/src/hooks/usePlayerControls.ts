@@ -9,6 +9,13 @@ export function usePlayerControls() {
         body: JSON.stringify({ action: 'skip' }),
       }),
   })
+  const play = useMutation({
+    mutationFn: () =>
+      apiFetch<{ success: boolean }>('/api/player/action', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'play' }),
+      }),
+  })
   const pause = useMutation({
     mutationFn: () =>
       apiFetch<{ success: boolean }>('/api/player/action', {
@@ -37,5 +44,5 @@ export function usePlayerControls() {
         body: JSON.stringify({ level }),
       }),
   })
-  return { skip, pause, restart, setVolume, setTranspose }
+  return { skip, play, pause, restart, setVolume, setTranspose }
 }

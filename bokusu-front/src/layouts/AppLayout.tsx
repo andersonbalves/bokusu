@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { AdminModal } from '../components/AdminModal'
 import { ToastHost } from '../components/ToastHost'
+import { MiniPlayer } from '../components/MiniPlayer'
 
 const navItems = [
   { to: '/queue', labelKey: 'nav.queue', Icon: ListMusic },
@@ -43,12 +44,20 @@ export function AppLayout() {
             ))}
           </ul>
         </nav>
+        <div className="p-4 border-t border-base-300">
+          <MiniPlayer onExpand={() => {}} />
+        </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto pb-20 lg:pb-0">
+      <main className="flex-1 overflow-auto pb-36 lg:pb-0">
         <Outlet />
       </main>
+
+      {/* MiniPlayer for mobile - fixed above dock */}
+      <div className="fixed bottom-16 left-0 right-0 lg:hidden z-30 px-4 pb-2">
+        <MiniPlayer onExpand={() => {}} />
+      </div>
 
       {/* Dock — mobile only */}
       <div className="dock lg:hidden z-40">
