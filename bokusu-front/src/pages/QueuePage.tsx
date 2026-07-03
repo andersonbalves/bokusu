@@ -1,19 +1,52 @@
 import { Music } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useQueue } from '../hooks/useQueue'
+import { useQueue, useReorderQueue } from '../hooks/useQueue'
 import { useNowPlaying } from '../hooks/useNowPlaying'
 import { usePlayerControls } from '../hooks/usePlayerControls'
 import { useAppStore } from '../store/useAppStore'
 import { NowPlayingCard } from '../components/NowPlayingCard'
 import { QueueItem } from '../components/QueueItem'
 import type { QueueItem as QueueItemType } from '../types/api'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import type { DragEndEvent } from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
 
 export function QueuePage() {
   const { t } = useTranslation()
   const { data: queue = [], isLoading } = useQueue()
   const { data: nowPlaying } = useNowPlaying()
   const { skip } = usePlayerControls()
+  const reorderQueue = useReorderQueue()
   const { isAdmin, openAdminModal } = useAppStore()
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // prevents accidental drags during simple clicks
+      },
+    })
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const oldIndex = queue.findIndex((item) => item.file === active.id)
+    const newIndex = queue.findIndex((item) => item.file === over.id)
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      reorderQueue.mutate({ oldIndex, newIndex })
+    }
+  }
 
   const handleSkip = () => {
     if (!isAdmin) {
@@ -59,18 +92,29 @@ export function QueuePage() {
           <h3 className="font-display text-sm uppercase tracking-widest text-base-content/50 mb-3">
             {t('queue.upNext')}
           </h3>
-          <div className="flex flex-col gap-2">
-            {queue.map((item, idx) => (
-              <QueueItem
-                key={item.file}
-                item={item}
-                position={idx + 1}
-                isAdmin={isAdmin}
-                onRemove={() => handleRemove(item)}
-                removeDisabled={true}
-              />
-            ))}
-          </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={queue.map((item) => item.file)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="flex flex-col gap-2">
+                {queue.map((item, idx) => (
+                  <QueueItem
+                    key={item.file}
+                    item={item}
+                    position={idx + 1}
+                    isAdmin={isAdmin}
+                    onRemove={() => handleRemove(item)}
+                    removeDisabled={true}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         </section>
       )}
     </div>
