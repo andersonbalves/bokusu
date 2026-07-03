@@ -43,7 +43,8 @@ test('clicking Acid radio updates store theme to acid', async () => {
   expect(useAppStore.getState().theme).toBe('acid')
 })
 
-test('clicking Cinemático radio updates store playerMode to cinematic', async () => {
+test('clicking Cinemático radio updates store playerMode to cinematic when admin', async () => {
+  useAppStore.setState({ isAdmin: true })
   render(<SettingsPage />, { wrapper })
   const radio = await screen.findByRole('radio', { name: /cinemático/i })
   fireEvent.click(radio)
@@ -56,6 +57,14 @@ test('clicking Cinemático radio updates store playerMode to cinematic', async (
       })
     )
   })
+})
+
+test('clicking Cinemático radio opens admin modal if not admin', async () => {
+  const openAdminModalSpy = vi.spyOn(useAppStore.getState(), 'openAdminModal')
+  render(<SettingsPage />, { wrapper })
+  const radio = await screen.findByRole('radio', { name: /cinemático/i })
+  fireEvent.click(radio)
+  expect(openAdminModalSpy).toHaveBeenCalled()
 })
 
 test('shows admin login button when not admin', async () => {

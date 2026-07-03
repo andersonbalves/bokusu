@@ -10,8 +10,15 @@ export function SettingsPage() {
   const { data: preferences } = usePreferences()
   const setPreference = useSetPreference()
   const playerMode = preferences?.splash_display_mode ?? 'integration'
-  const setPlayerMode = (mode: 'integration' | 'cinematic') =>
+  const setPlayerMode = (mode: 'integration' | 'cinematic') => {
+    if (!isAdmin) {
+      openAdminModal(() =>
+        setPreference.mutate({ key: 'splash_display_mode', value: mode })
+      )
+      return
+    }
     setPreference.mutate({ key: 'splash_display_mode', value: mode })
+  }
 
   return (
     <div className="p-4 max-w-2xl mx-auto flex flex-col gap-6">
