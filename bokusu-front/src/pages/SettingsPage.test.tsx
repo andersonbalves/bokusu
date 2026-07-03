@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
 import { SettingsPage } from './SettingsPage'
 import { useAppStore } from '../store/useAppStore'
 import type { ReactNode } from 'react'
@@ -7,7 +8,9 @@ import { vi, test, expect, beforeEach, afterEach } from 'vitest'
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-    {children}
+    <MemoryRouter>
+      {children}
+    </MemoryRouter>
   </QueryClientProvider>
 )
 

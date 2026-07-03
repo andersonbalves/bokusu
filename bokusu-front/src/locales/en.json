@@ -73,7 +73,28 @@
     "score": "Score settings",
     "advanced": "Advanced settings",
     "restoreDefaults": "Restore Defaults",
-    "restoreConfirm": "Are you sure you want to restore all server settings to factory defaults?"
+    "restoreConfirm": "Are you sure you want to restore all server settings to factory defaults?",
+    "manageLibrary": "Manage Library"
+  },
+  "library": {
+    "title": "Manage Library",
+    "searchPlaceholder": "Filter library...",
+    "loadError": "Error loading library files.",
+    "empty": "No songs found in the library.",
+    "artist": "Artist / Singer",
+    "titleInput": "Song Title",
+    "editMetadata": "Edit Metadata",
+    "deletedSuccess": "File successfully deleted!",
+    "deletedError": "Error deleting the file.",
+    "renamedSuccess": "File successfully renamed!",
+    "renamedError": "Error renaming the file.",
+    "pageOf": "Page {{current}} of {{total}}",
+    "totalSongs": "songs",
+    "deleteTitle": "Delete Song",
+    "deleteConfirmMessage": "Are you sure you want to permanently delete this file from the library? This action cannot be undone.",
+    "enqueue": "Add to Queue",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "prefs": {
     "volume": "Player Volume",

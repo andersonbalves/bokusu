@@ -4,6 +4,7 @@ import { PlayerLayout } from './layouts/PlayerLayout'
 import { QueuePage } from './pages/QueuePage'
 import { SearchPage } from './pages/SearchPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { LibraryPage } from './pages/LibraryPage'
 import { PlayerPage } from './pages/PlayerPage'
 import { useAuthStatus } from './hooks/useAuthStatus'
 
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/queue" element={<QueuePage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/library" element={<LibraryPage />} />
         </Route>
         <Route element={<PlayerLayout />}>
           <Route path="/player" element={<PlayerPage />} />

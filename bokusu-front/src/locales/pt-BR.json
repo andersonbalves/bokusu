@@ -73,7 +73,28 @@
     "score": "Pontuação",
     "advanced": "Configurações Avançadas",
     "restoreDefaults": "Restaurar Padrões",
-    "restoreConfirm": "Tem certeza de que deseja restaurar todas as configurações do servidor para os padrões de fábrica?"
+    "restoreConfirm": "Tem certeza de que deseja restaurar todas as configurações do servidor para os padrões de fábrica?",
+    "manageLibrary": "Gerenciar Biblioteca"
+  },
+  "library": {
+    "title": "Gerenciar Biblioteca",
+    "searchPlaceholder": "Filtrar biblioteca...",
+    "loadError": "Erro ao carregar os arquivos da biblioteca.",
+    "empty": "Nenhuma música encontrada na biblioteca.",
+    "artist": "Artista / Cantor",
+    "titleInput": "Título da Música",
+    "editMetadata": "Editar Metadados",
+    "deletedSuccess": "Arquivo excluído com sucesso!",
+    "deletedError": "Erro ao excluir o arquivo.",
+    "renamedSuccess": "Arquivo renomeado com sucesso!",
+    "renamedError": "Erro ao renomear o arquivo.",
+    "pageOf": "Página {{current}} de {{total}}",
+    "totalSongs": "músicas",
+    "deleteTitle": "Excluir Música",
+    "deleteConfirmMessage": "Deseja mesmo excluir permanentemente este arquivo da biblioteca? Esta ação não pode ser desfeita.",
+    "enqueue": "Adicionar à Fila",
+    "edit": "Editar",
+    "delete": "Excluir"
   },
   "prefs": {
     "volume": "Volume do Reprodutor",
