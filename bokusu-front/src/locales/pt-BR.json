@@ -105,7 +105,22 @@
   "toasts": {
     "syncStarted": "Sincronizando biblioteca...",
     "syncFinished": "Biblioteca sincronizada",
-    "noConnection": "Sem conexão com o servidor"
+    "noConnection": "Sem conexão com o servidor",
+    "updateYtdlStarted": "Atualização do yt-dlp iniciada!",
+    "actionDispatched": "Comando enviado ao servidor!",
+    "actionFailed": "Erro ao executar comando"
+  },
+  "system": {
+    "title": "Painel do Sistema",
+    "songCount": "Músicas Locais",
+    "syncLibrary": "Sincronizar Biblioteca",
+    "updateYtdl": "Atualizar yt-dlp",
+    "dangerZone": "Zona de Perigo (Ações do Servidor)",
+    "reboot": "Reiniciar Servidor",
+    "shutdown": "Desligar Servidor",
+    "quit": "Sair do Reprodutor",
+    "expandFs": "Expandir Armazenamento",
+    "confirmDanger": "Atenção: Esta ação afetará a reprodução e disponibilidade do sistema. Tem certeza de que deseja continuar?"
   },
   "common": {
     "close": "Fechar",

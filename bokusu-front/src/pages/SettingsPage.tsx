@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { setLanguage } from '../lib/i18n'
 import { ServerPreferences } from '../components/settings/ServerPreferences'
+import { SystemPanel } from '../components/settings/SystemPanel'
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation()
@@ -109,6 +110,9 @@ export function SettingsPage() {
 
       {/* Server Preferences (Admin Only) */}
       {isAdmin && <ServerPreferences />}
+
+      {/* System Panel (Admin Only) */}
+      {isAdmin && <SystemPanel />}
     </div>
   )
 }

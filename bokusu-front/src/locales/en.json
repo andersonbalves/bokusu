@@ -105,7 +105,22 @@
   "toasts": {
     "syncStarted": "Syncing library...",
     "syncFinished": "Library synced",
-    "noConnection": "No connection to the server"
+    "noConnection": "No connection to the server",
+    "updateYtdlStarted": "yt-dlp update started!",
+    "actionDispatched": "Command sent to the server!",
+    "actionFailed": "Error executing command"
+  },
+  "system": {
+    "title": "System Panel",
+    "songCount": "Local Songs",
+    "syncLibrary": "Sync Library",
+    "updateYtdl": "Update yt-dlp",
+    "dangerZone": "Danger Zone (Server Actions)",
+    "reboot": "Reboot Server",
+    "shutdown": "Shutdown Server",
+    "quit": "Quit Player",
+    "expandFs": "Expand Storage",
+    "confirmDanger": "Warning: This action will impact system playback and availability. Are you sure you want to continue?"
   },
   "common": {
     "close": "Close",
