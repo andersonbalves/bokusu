@@ -5,6 +5,8 @@ import { useAppStore } from '../store/useAppStore'
 import { AdminModal } from '../components/AdminModal'
 import { ToastHost } from '../components/ToastHost'
 import { MiniPlayer } from '../components/MiniPlayer'
+import { RemoteDrawer } from '../components/RemoteDrawer'
+import { useState } from 'react'
 
 const navItems = [
   { to: '/queue', labelKey: 'nav.queue', Icon: ListMusic },
@@ -16,6 +18,7 @@ export function AppLayout() {
   const { t } = useTranslation()
   const theme = useAppStore((state) => state.theme)
   const isConnected = useAppStore((state) => state.isConnected)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
     <div data-theme={theme} className="min-h-screen bg-base-100 text-base-content lg:flex relative">
@@ -45,7 +48,7 @@ export function AppLayout() {
           </ul>
         </nav>
         <div className="p-4 border-t border-base-300">
-          <MiniPlayer onExpand={() => {}} />
+          <MiniPlayer onExpand={() => setDrawerOpen(true)} />
         </div>
       </aside>
 
@@ -56,7 +59,7 @@ export function AppLayout() {
 
       {/* MiniPlayer for mobile - fixed above dock */}
       <div className="fixed bottom-16 left-0 right-0 lg:hidden z-30 px-4 pb-2">
-        <MiniPlayer onExpand={() => {}} />
+        <MiniPlayer onExpand={() => setDrawerOpen(true)} />
       </div>
 
       {/* Dock — mobile only */}
@@ -77,6 +80,7 @@ export function AppLayout() {
 
       <AdminModal />
       <ToastHost />
+      {drawerOpen && <RemoteDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />}
     </div>
   )
 }

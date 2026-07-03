@@ -34,7 +34,10 @@
     "skip": "Skip",
     "scanToSing": "Scan to sing",
     "play": "Play",
-    "pause": "Pause"
+    "pause": "Pause",
+    "restart": "Restart",
+    "volume": "Volume",
+    "transpose": "Transpose"
   },
   "settings": {
     "title": "Settings",

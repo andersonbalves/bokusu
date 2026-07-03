@@ -34,7 +34,10 @@
     "skip": "Pular",
     "scanToSing": "Escaneie para cantar",
     "play": "Tocar",
-    "pause": "Pausar"
+    "pause": "Pausar",
+    "restart": "Reiniciar",
+    "volume": "Volume",
+    "transpose": "Tom"
   },
   "settings": {
     "title": "Configurações",
