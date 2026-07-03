@@ -259,7 +259,7 @@ class QueueManager:
         if index == -1:
             logging.error("Song not found in queue: " + song_path)
             return False
-        
+
         self.queue[index]["user"] = new_user
         logging.info(f"Changed user for {song_path} to {new_user}")
         self._events.emit("queue_update")
@@ -293,14 +293,3 @@ class QueueManager:
 
         logging.error("Unrecognized action: " + action)
         return False
-
-    def edit_user(self, song_path: str, new_user: str) -> bool:
-        """Edit the user for a song in the queue. Returns False if not found."""
-        index = self._find_song_index(song_path)
-        if index == -1:
-            logging.error("Song not found in queue: " + song_path)
-            return False
-
-        self.queue[index]["user"] = new_user
-        self._events.emit("queue_update")
-        return True

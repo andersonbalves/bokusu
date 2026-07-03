@@ -285,6 +285,7 @@ def test_preference_manager_defaults_exist():
         "high_score_phrases",
         "show_splash_clock",
         "enable_title_tidy",
+        "splash_display_mode",
     }
 
     assert set(PreferenceManager.DEFAULTS.keys()) == expected_keys

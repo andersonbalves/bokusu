@@ -6,7 +6,6 @@ beforeEach(() => {
     theme: 'aqua',
     isAdmin: false,
     isConnected: true,
-    playerMode: 'integration',
     showAdminModal: false,
     pendingAdminAction: null,
   })
@@ -16,17 +15,6 @@ test('isConnected defaults to true and is settable', () => {
   expect(useAppStore.getState().isConnected).toBe(true)
   act(() => useAppStore.getState().setIsConnected(false))
   expect(useAppStore.getState().isConnected).toBe(false)
-})
-
-test('playerMode defaults to integration', () => {
-  const { result } = renderHook(() => useAppStore())
-  expect(result.current.playerMode).toBe('integration')
-})
-
-test('setPlayerMode updates playerMode', () => {
-  const { result } = renderHook(() => useAppStore())
-  act(() => result.current.setPlayerMode('cinematic'))
-  expect(result.current.playerMode).toBe('cinematic')
 })
 
 test('openAdminModal sets showAdminModal=true and stores action', () => {

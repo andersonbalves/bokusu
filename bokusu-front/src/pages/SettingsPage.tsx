@@ -1,9 +1,14 @@
 import { Tv, Palette, ShieldCheck, LogOut } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
+import { usePreferences, useSetPreference } from '../hooks/usePreferences'
 
 export function SettingsPage() {
-  const { theme, setTheme, playerMode, setPlayerMode, isAdmin, openAdminModal, setIsAdmin } =
-    useAppStore()
+  const { theme, setTheme, isAdmin, openAdminModal, setIsAdmin } = useAppStore()
+  const { data: preferences } = usePreferences()
+  const setPreference = useSetPreference()
+  const playerMode = preferences?.splash_display_mode ?? 'integration'
+  const setPlayerMode = (mode: 'integration' | 'cinematic') =>
+    setPreference.mutate({ key: 'splash_display_mode', value: mode })
 
   return (
     <div className="p-4 max-w-2xl mx-auto flex flex-col gap-6">

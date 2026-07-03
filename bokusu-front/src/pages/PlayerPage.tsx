@@ -1,5 +1,5 @@
 import { QRCodeSVG } from 'qrcode.react'
-import { useAppStore } from '../store/useAppStore'
+import { usePreferences } from '../hooks/usePreferences'
 import { useQueue } from '../hooks/useQueue'
 import type { Song } from '../types/api'
 
@@ -16,7 +16,8 @@ function extractHost(url: string): string {
 }
 
 export function PlayerPage({ appUrl = window.location.origin }: PlayerPageProps) {
-  const playerMode = useAppStore((state) => state.playerMode)
+  const { data: preferences } = usePreferences()
+  const playerMode = preferences?.splash_display_mode ?? 'integration'
   const { data: songs = [] } = useQueue()
 
   const nowPlaying: Song | undefined = songs[0]

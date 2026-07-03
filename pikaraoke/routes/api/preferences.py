@@ -4,6 +4,7 @@ from flask import current_app, jsonify
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 
+from pikaraoke.lib.current_app import broadcast_event
 from pikaraoke.routes.api._utils import require_admin
 
 api_prefs_bp = Blueprint("api_prefs", __name__, url_prefix="/api")
@@ -28,6 +29,12 @@ def put_preference(body, key):
         return jsonify({"error": "Unknown preference"}), 404
 
     success, message = k.preferences.set(key, body["value"])
+    if success:
+        broadcast_event("preferences_update", {"key": key, "value": body["value"]})
+        if key in ["low_score_phrases", "mid_score_phrases", "high_score_phrases"]:
+            from pikaraoke.routes.splash import _get_active_score_phrases
+
+            broadcast_event("score_phrases_update", _get_active_score_phrases(k))
     status_code = 200 if success else 500
     return jsonify({"success": success, "message": message}), status_code
 
@@ -37,5 +44,12 @@ def put_preference(body, key):
 def delete_preferences():
     k = current_app.config["KARAOKE_INSTANCE"]
     success, message = k.preferences.reset_all()
+    if success:
+        from pikaraoke.lib.preference_manager import PreferenceManager
+
+        broadcast_event("preferences_reset", PreferenceManager.DEFAULTS)
+        from pikaraoke.routes.splash import _get_active_score_phrases
+
+        broadcast_event("score_phrases_update", _get_active_score_phrases(k))
     status_code = 200 if success else 500
     return jsonify({"success": success, "message": message}), status_code

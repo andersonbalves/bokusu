@@ -14,11 +14,11 @@ def fake_karaoke(tmp_path):
     """Karaoke fake: PreferenceManager real (leve), resto MagicMock."""
     from pikaraoke.karaoke import Karaoke
     from pikaraoke.lib.playback_controller import PlaybackController
-
     from pikaraoke.lib.queue_manager import QueueManager
 
     k = MagicMock(spec=Karaoke)
-    k.preferences = PreferenceManager(config_file_path=str(tmp_path / "config.ini"))
+    k.preferences = PreferenceManager(config_file_path=str(tmp_path / "config.ini"), target=k)
+    k.preferences.apply_all()
     k.volume = 0.85
     k.playback_controller = MagicMock(spec=PlaybackController)
     k.playback_controller.now_playing_transpose = 0

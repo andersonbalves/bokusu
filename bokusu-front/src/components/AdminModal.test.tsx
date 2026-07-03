@@ -106,7 +106,7 @@ test('does not submit duplicate requests if already pending', async () => {
   render(<AdminModal />)
   const input = screen.getByPlaceholderText(/senha/i)
   fireEvent.change(input, { target: { value: 'secret' } })
-  
+
   // Submit first time
   fireEvent.keyDown(input, { key: 'Enter' })
   // Try to submit second time immediately
@@ -119,5 +119,3 @@ test('does not submit duplicate requests if already pending', async () => {
   resolveFetch(new Response(JSON.stringify({ isAdmin: true }), { status: 200 }))
   await waitFor(() => expect(useAppStore.getState().showAdminModal).toBe(false))
 })
-
-
