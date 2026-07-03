@@ -48,7 +48,7 @@ def delete_preferences():
         from pikaraoke.lib.preference_manager import PreferenceManager
 
         broadcast_event("preferences_reset", PreferenceManager.DEFAULTS)
-        from pikaraoke.routes.splash import _get_active_score_phrases
+        from pikaraoke.routes.preferences import _get_active_score_phrases
 
         broadcast_event("score_phrases_update", _get_active_score_phrases(k))
     status_code = 200 if success else 500

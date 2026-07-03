@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { X } from 'lucide-react'
 import { useAppStore, type Toast } from '../store/useAppStore'
 import { useSocketEvent } from '../hooks/useSocketEvent'
 
@@ -39,7 +40,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
         className="btn btn-ghost btn-circle btn-xs text-current"
         aria-label={t('common.close')}
       >
-        ✕
+        <X size={14} />
       </button>
     </div>
   )

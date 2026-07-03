@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next'
+import { QRCodeSVG } from 'qrcode.react'
+import { extractHost } from '../lib/url'
 import { useNowPlaying } from '../hooks/useNowPlaying'
 import { usePreferences } from '../hooks/usePreferences'
 import { useQueue } from '../hooks/useQueue'
@@ -9,6 +11,7 @@ import { IdleScreen } from '../components/player/IdleScreen'
 import { KaraokePlayer } from '../components/player/KaraokePlayer'
 import { NotificationBanner } from '../components/player/NotificationBanner'
 import { ScoreScreen } from '../components/player/ScoreScreen'
+import { Mic } from 'lucide-react'
 import type { NowPlaying, ScorePhrases } from '../types/api'
 
 const EMPTY_PHRASES: ScorePhrases = { low: [], mid: [], high: [] }
@@ -63,7 +66,11 @@ export function PlayerPage({ appUrl = window.location.origin }: PlayerPageProps)
               onError={machine.handleError}
             />
             {machine.state === 'playing' && !(preferences?.hide_overlay ?? false) && (
-              <PlayingOverlay nowPlaying={nowPlaying} />
+              <PlayingOverlay 
+                nowPlaying={nowPlaying} 
+                appUrl={appUrl} 
+                hideUrl={preferences?.hide_url ?? false} 
+              />
             )}
           </div>
         )}
@@ -80,22 +87,47 @@ export function PlayerPage({ appUrl = window.location.origin }: PlayerPageProps)
   )
 }
 
-function PlayingOverlay({ nowPlaying }: { nowPlaying: NowPlaying }) {
+function PlayingOverlay({
+  nowPlaying,
+  appUrl,
+  hideUrl,
+}: {
+  nowPlaying: NowPlaying
+  appUrl: string
+  hideUrl: boolean
+}) {
   const { t } = useTranslation()
+  const host = extractHost(appUrl)
   return (
     <>
       <div className="absolute left-6 top-6 z-30">
-        <p className="text-outlined text-2xl font-bold text-white">{nowPlaying.now_playing}</p>
+        <p className="text-outlined text-3xl font-bold text-white mb-1">{nowPlaying.now_playing}</p>
         {nowPlaying.now_playing_user && (
-          <p className="text-outlined text-white/70">{nowPlaying.now_playing_user}</p>
+          <p className="text-outlined text-xl font-bold text-white flex items-center gap-2">
+            <Mic className="w-5 h-5" /> {nowPlaying.now_playing_user}
+          </p>
         )}
       </div>
+      
+      {!hideUrl && (
+        <div className="absolute bottom-6 left-6 z-30 flex items-center gap-4">
+          <div className="bg-white p-2 rounded-lg shadow-lg">
+            <QRCodeSVG value={appUrl} size={64} />
+          </div>
+          <p className="text-outlined text-white font-mono text-lg">{host}</p>
+        </div>
+      )}
+
       {nowPlaying.up_next && (
-        <div className="absolute bottom-6 left-6 z-30">
-          <p className="text-outlined text-white/70">
-            {t('player.upNext')}: {nowPlaying.up_next}
-            {nowPlaying.next_user ? ` — ${nowPlaying.next_user}` : ''}
+        <div className="absolute bottom-6 right-6 z-30 text-right">
+          <p className="text-outlined text-white font-bold mb-1">
+            {t('player.upNext')} <span className="font-normal">{nowPlaying.up_next}</span>
           </p>
+          {nowPlaying.next_user && (
+            <p className="text-outlined text-white font-bold">
+              {t('player.nextSinger')} <span className="font-normal">{nowPlaying.next_user}</span>
+            </p>
+          )}
         </div>
       )}
     </>

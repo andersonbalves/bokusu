@@ -85,7 +85,7 @@ function IntegrationMode({
   const host = extractHost(appUrl)
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-8 p-8">
+    <div className="relative z-10 w-full h-full flex flex-col items-center justify-center gap-8 p-8">
       {!hideUrl && (
         <div data-testid="qr-code" className="bg-white p-4 rounded-2xl shadow-2xl">
           <QRCodeSVG value={appUrl} size={256} />
@@ -97,18 +97,18 @@ function IntegrationMode({
           <p className="text-outlined font-display text-4xl font-bold tracking-wide text-white">
             {t('player.scanToSing')}
           </p>
-          <p className="text-outlined text-white/70 text-xl mt-2">{host}</p>
+          <p className="text-outlined text-white text-xl mt-2">{host}</p>
         </div>
       )}
 
       {upcoming.length > 0 && (
         <div className="flex flex-col items-center gap-2 mt-2">
-          <p className="text-outlined text-white/40 text-xs uppercase tracking-widest">{t('player.upNext')}</p>
+          <p className="text-outlined text-white text-sm font-bold uppercase tracking-widest">{t('player.upNext')}</p>
           {upcoming.map((item, index) => (
-            <p key={`${item.file}-${index}`} className="text-outlined text-white/80 text-base">
+            <p key={`${item.file}-${index}`} className="text-outlined text-white text-lg font-bold">
               {item.title}
               {item.user && (
-                <span className="text-outlined text-white/50"> — {item.user}</span>
+                <span className="text-outlined text-white font-normal"> — {item.user}</span>
               )}
             </p>
           ))}
@@ -132,7 +132,7 @@ function CinematicMode({
   const host = extractHost(appUrl)
 
   return (
-    <div className="w-full h-full relative">
+    <div className="relative z-10 w-full h-full">
       {!hideUrl && (
         <>
           {/* Top-right: small QR */}
@@ -144,7 +144,7 @@ function CinematicMode({
 
           {/* Bottom-left: IP address */}
           <div className="absolute bottom-6 left-6">
-            <p className="text-outlined text-white/50 text-sm font-mono">{host}</p>
+            <p className="text-outlined text-white text-lg font-mono">{host}</p>
           </div>
         </>
       )}
@@ -152,10 +152,10 @@ function CinematicMode({
       {/* Bottom-right: upcoming ticker */}
       {upcoming.length > 0 && (
         <div className="absolute bottom-6 right-6 max-w-xs text-right">
-          <p className="text-outlined text-white/40 text-xs uppercase tracking-widest mb-1">
+          <p className="text-outlined text-white text-xs font-bold uppercase tracking-widest mb-1">
             {t('player.upNext')}
           </p>
-          <p className="text-outlined text-white/60 text-sm truncate">
+          <p className="text-outlined text-white text-base truncate font-bold">
             {upcoming.map((s) => s.title).join(' · ')}
           </p>
         </div>

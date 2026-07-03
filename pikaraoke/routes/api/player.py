@@ -105,7 +105,7 @@ def player_pitch(body):
 @api_player_bp.route("/score-phrases", methods=["GET"])
 def get_score_phrases():
     """Active score phrases for the TV score screen. Public: the TV is not an admin client."""
-    from pikaraoke.routes.splash import _get_active_score_phrases
+    from pikaraoke.routes.preferences import _get_active_score_phrases
 
     k = current_app.config["KARAOKE_INSTANCE"]
     return jsonify(_get_active_score_phrases(k))

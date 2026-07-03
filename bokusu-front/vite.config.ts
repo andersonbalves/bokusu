@@ -44,4 +44,20 @@ export default defineConfig(({ command }) => ({
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:5555',
+        changeOrigin: true,
+      },
+      '/socket.io': {
+        target: 'http://127.0.0.1:5555',
+        ws: true,
+      },
+      '/stream': {
+        target: 'http://127.0.0.1:5555',
+        changeOrigin: true,
+      },
+    },
+  },
 }))
