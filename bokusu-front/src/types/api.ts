@@ -83,3 +83,9 @@ export interface DownloadsStatus {
   pending: DownloadItem[]
   errors: DownloadItem[]
 }
+
+export interface ScorePhrases {
+  low: string[]
+  mid: string[]
+  high: string[]
+}
