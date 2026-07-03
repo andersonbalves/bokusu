@@ -4,10 +4,9 @@ import type { SearchResult } from '../types/api'
 
 const result: SearchResult = { id: 'abc', title: 'Cool Song', url: 'https://youtube.com/watch?v=abc' }
 
-test('renders title and id', () => {
+test('renders title', () => {
   render(<SearchResultItem result={result} onAdd={() => {}} isAdding={false} />)
   expect(screen.getByText('Cool Song')).toBeInTheDocument()
-  expect(screen.getByText('abc')).toBeInTheDocument()
 })
 
 test('calls onAdd when add button clicked', () => {

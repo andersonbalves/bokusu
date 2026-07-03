@@ -12,7 +12,6 @@ export function SearchResultItem({ result, onAdd, isAdding }: SearchResultItemPr
     <div className="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors">
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate">{result.title}</p>
-        <p className="text-base-content/60 text-sm truncate font-mono">{result.id}</p>
       </div>
       <button
         className="btn btn-circle btn-sm btn-primary flex-shrink-0"

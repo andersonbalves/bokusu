@@ -25,6 +25,7 @@ class PitchBody(Schema):
 
 @api_player_bp.route("", methods=["GET"])
 def get_player_state():
+    """Get the currently playing song state. Public access so any connected client can render playback state."""
     k = current_app.config["KARAOKE_INSTANCE"]
     return jsonify(k.get_now_playing())
 

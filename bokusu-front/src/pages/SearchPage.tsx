@@ -28,7 +28,7 @@ export function SearchPage() {
   const handleAdd = (id: string, title: string) => {
     setAddingId(id)
     addMutation.mutate(
-      { song_id: id, user: 'Guest' },
+      { song_id: id, user: 'Guest' }, // TODO: user/singer name will be customizable in a future task
       {
         onSuccess: () => {
           showToast(`"${title}" adicionada à fila!`)
