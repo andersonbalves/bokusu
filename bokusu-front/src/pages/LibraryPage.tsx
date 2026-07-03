@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Library, Search, Edit3, Trash2, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Library, Search, Edit3, Trash2, Plus, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react'
 import { useLibrary, useRenameFile, useDeleteFile } from '../hooks/useLibrary'
 import { useEnqueue } from '../hooks/useQueue'
 import { useAppStore } from '../store/useAppStore'
@@ -85,9 +85,13 @@ export function LibraryPage() {
       {/* Header card */}
       <section className="card bg-base-200 border border-base-300">
         <div className="card-body gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Library size={24} className="text-primary" />
             <h1 className="font-display text-xl font-bold">{t('library.title') || 'Gerenciar Biblioteca'}</h1>
+            <Link to="/library/renamer" className="btn btn-xs btn-outline btn-secondary flex items-center gap-1" aria-label={t('renamer.title')}>
+              <RefreshCw size={12} />
+              {t('renamer.title') || 'Renomeador'}
+            </Link>
           </div>
           {/* Barra de busca integrada */}
           <div className="relative w-full md:max-w-xs">

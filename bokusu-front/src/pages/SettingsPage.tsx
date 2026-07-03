@@ -1,13 +1,13 @@
-import { Palette, ShieldCheck, LogOut, Globe, Library } from 'lucide-react'
+import { Palette, ShieldCheck, LogOut, Library } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useAppStore } from '../store/useAppStore'
-import { setLanguage } from '../lib/i18n'
 import { ServerPreferences } from '../components/settings/ServerPreferences'
 import { SystemPanel } from '../components/settings/SystemPanel'
+import { LanguageSection } from '../components/settings/LanguageSection'
 
 export function SettingsPage() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { theme, setTheme, isAdmin, openAdminModal, setIsAdmin } = useAppStore()
 
   return (
@@ -38,41 +38,8 @@ export function SettingsPage() {
         </div>
       </section>
 
-      {/* Language */}
-      <section className="card bg-base-200 border border-base-300">
-        <div className="card-body gap-4">
-          <div className="flex items-center gap-2">
-            <Globe size={18} className="text-primary" />
-            <h2 className="font-display text-lg">{t('settings.language')}</h2>
-          </div>
-          <div className="flex gap-6">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                className="radio radio-primary"
-                name="language"
-                value="pt-BR"
-                checked={i18n.language === 'pt-BR'}
-                onChange={() => setLanguage('pt-BR')}
-                aria-label="Português"
-              />
-              <span>Português</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                className="radio radio-primary"
-                name="language"
-                value="en"
-                checked={i18n.language.startsWith('en')}
-                onChange={() => setLanguage('en')}
-                aria-label="English"
-              />
-              <span>English</span>
-            </label>
-          </div>
-        </div>
-      </section>
+      {/* Language Section */}
+      <LanguageSection />
 
       {/* Admin */}
       <section className="card bg-base-200 border border-base-300">

@@ -74,7 +74,8 @@
     "advanced": "Advanced settings",
     "restoreDefaults": "Restore Defaults",
     "restoreConfirm": "Are you sure you want to restore all server settings to factory defaults?",
-    "manageLibrary": "Manage Library"
+    "manageLibrary": "Manage Library",
+    "languageSelectDesc": "Select management interface language:"
   },
   "library": {
     "title": "Manage Library",
@@ -95,6 +96,17 @@
     "enqueue": "Add to Queue",
     "edit": "Edit",
     "delete": "Delete"
+  },
+  "renamer": {
+    "title": "Smart Renamer",
+    "onlyMismatched": "Mismatched only",
+    "renamingProgress": "Applying renaming suggestions...",
+    "empty": "No renaming suggestions pending.",
+    "before": "Current Name",
+    "after": "Suggestion",
+    "apply": "Apply Selected",
+    "batchResultPartial": "Renamed: {{success}} successfully, {{fail}} failures",
+    "batchResultSuccess": "{{count}} files successfully renamed!"
   },
   "prefs": {
     "volume": "Player Volume",

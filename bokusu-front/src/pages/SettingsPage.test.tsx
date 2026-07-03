@@ -40,7 +40,7 @@ afterEach(() => {
 test('renders theme and language sections', async () => {
   render(<SettingsPage />, { wrapper })
   expect(await screen.findByText(/tema/i)).toBeInTheDocument()
-  expect(screen.getByText(/idioma/i)).toBeInTheDocument()
+  expect(screen.getByText(/^idioma$/i)).toBeInTheDocument()
 })
 
 test('clicking Acid radio updates store theme to acid', async () => {
