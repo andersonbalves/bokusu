@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Lock } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
+import { apiFetch, ApiError } from '../lib/api'
+import type { AuthStatus } from '../types/api'
 
 export function AdminModal() {
   const { showAdminModal, pendingAdminAction, closeAdminModal, setIsAdmin } = useAppStore()
@@ -11,35 +13,31 @@ export function AdminModal() {
   if (!showAdminModal) return null
 
   const handleConfirm = async () => {
-    if (!password) return
+    if (isPending || !password) return
     setIsPending(true)
     setError('')
-    let verified = false
     try {
-      const res = await fetch('/api/admin/verify', {
+      await apiFetch<AuthStatus>('/api/auth', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
       })
-      if (!res.ok) {
-        setError('Senha incorreta')
-        return
-      }
-      verified = true
-    } catch {
-      setError('Erro de conexão. Tente novamente.')
-    } finally {
-      setIsPending(false)
-    }
-    if (verified) {
       setIsAdmin(true)
       pendingAdminAction?.()
       closeAdminModal()
       setPassword('')
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 403) {
+        setError('Senha incorreta')
+      } else {
+        setError('Erro ao autenticar')
+      }
+    } finally {
+      setIsPending(false)
     }
   }
 
   const handleCancel = () => {
+    if (isPending) return
     closeAdminModal()
     setPassword('')
     setError('')
@@ -63,10 +61,16 @@ export function AdminModal() {
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm() }}
           autoFocus
+          disabled={isPending}
         />
         {error && <p className="text-error text-sm mt-2">{error}</p>}
         <div className="modal-action">
-          <button className="btn btn-ghost" onClick={handleCancel} aria-label="Cancelar">
+          <button
+            className="btn btn-ghost"
+            onClick={handleCancel}
+            disabled={isPending}
+            aria-label="Cancelar"
+          >
             Cancelar
           </button>
           <button

@@ -13,3 +13,8 @@ export interface SearchResult {
   artist?: string
   thumbnailUrl?: string
 }
+
+export interface AuthStatus {
+  isAdmin: boolean
+}
+

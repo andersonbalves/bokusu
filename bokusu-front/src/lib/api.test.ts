@@ -1,9 +1,12 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { apiFetch, ApiError } from './api'
 
 globalThis.fetch = vi.fn() as unknown as typeof fetch
 
 describe('apiFetch', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
   it('should call fetch with JSON headers', async () => {
     const mockResponse = { ok: true, json: () => Promise.resolve({ data: 'ok' }) }
     vi.mocked(globalThis.fetch).mockResolvedValue(mockResponse as unknown as Response)
