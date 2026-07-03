@@ -4,6 +4,7 @@ from flask import current_app, jsonify
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields, validate
 
+from pikaraoke.lib.current_app import broadcast_event
 from pikaraoke.routes.api._utils import require_admin
 
 api_player_bp = Blueprint("api_player", __name__, url_prefix="/api/player")
@@ -56,6 +57,8 @@ def player_action(body):
         success = pc.skip()
     elif action == "restart":
         success = k.restart()
+        if success:
+            broadcast_event("restart")
 
     if not success:
         return jsonify({"success": False, "action": action}), 409
@@ -97,3 +100,12 @@ def player_pitch(body):
         return jsonify({"success": False, "pitch": body["level"]}), 409
     k.transpose_current(body["level"])
     return jsonify({"success": True, "pitch": body["level"]})
+
+
+@api_player_bp.route("/score-phrases", methods=["GET"])
+def get_score_phrases():
+    """Active score phrases for the TV score screen. Public: the TV is not an admin client."""
+    from pikaraoke.routes.splash import _get_active_score_phrases
+
+    k = current_app.config["KARAOKE_INSTANCE"]
+    return jsonify(_get_active_score_phrases(k))
