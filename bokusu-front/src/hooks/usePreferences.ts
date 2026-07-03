@@ -59,3 +59,16 @@ export function useSetPreference() {
     },
   })
 }
+
+export function useResetPreferences() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () =>
+      apiFetch<{ success: boolean; message: string }>('/api/preferences', {
+        method: 'DELETE',
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
+  })
+}

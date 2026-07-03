@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SettingsPage } from './SettingsPage'
 import { useAppStore } from '../store/useAppStore'
 import type { ReactNode } from 'react'
-import { vi } from 'vitest'
+import { vi, test, expect, beforeEach, afterEach } from 'vitest'
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
@@ -30,10 +30,14 @@ beforeEach(() => {
   globalThis.fetch = fetchMock
 })
 
-test('renders theme and TV mode sections', async () => {
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
+test('renders theme and language sections', async () => {
   render(<SettingsPage />, { wrapper })
   expect(await screen.findByText(/tema/i)).toBeInTheDocument()
-  expect(screen.getByText(/modo da tv/i)).toBeInTheDocument()
+  expect(screen.getByText(/idioma/i)).toBeInTheDocument()
 })
 
 test('clicking Acid radio updates store theme to acid', async () => {
@@ -57,14 +61,6 @@ test('clicking Cinemático radio updates store playerMode to cinematic when admi
       })
     )
   })
-})
-
-test('clicking Cinemático radio opens admin modal if not admin', async () => {
-  const openAdminModalSpy = vi.spyOn(useAppStore.getState(), 'openAdminModal')
-  render(<SettingsPage />, { wrapper })
-  const radio = await screen.findByRole('radio', { name: /cinemático/i })
-  fireEvent.click(radio)
-  expect(openAdminModalSpy).toHaveBeenCalled()
 })
 
 test('shows admin login button when not admin', async () => {

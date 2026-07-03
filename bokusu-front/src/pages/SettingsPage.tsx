@@ -1,24 +1,12 @@
-import { Tv, Palette, ShieldCheck, LogOut, Globe } from 'lucide-react'
+import { Palette, ShieldCheck, LogOut, Globe } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
-import { usePreferences, useSetPreference } from '../hooks/usePreferences'
 import { setLanguage } from '../lib/i18n'
+import { ServerPreferences } from '../components/settings/ServerPreferences'
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation()
   const { theme, setTheme, isAdmin, openAdminModal, setIsAdmin } = useAppStore()
-  const { data: preferences } = usePreferences()
-  const setPreference = useSetPreference()
-  const playerMode = preferences?.splash_display_mode ?? 'integration'
-  const setPlayerMode = (mode: 'integration' | 'cinematic') => {
-    if (!isAdmin) {
-      openAdminModal(() =>
-        setPreference.mutate({ key: 'splash_display_mode', value: mode })
-      )
-      return
-    }
-    setPreference.mutate({ key: 'splash_display_mode', value: mode })
-  }
 
   return (
     <div className="p-4 max-w-2xl mx-auto flex flex-col gap-6">
@@ -84,52 +72,6 @@ export function SettingsPage() {
         </div>
       </section>
 
-      {/* TV / Player Mode */}
-      <section className="card bg-base-200 border border-base-300">
-        <div className="card-body gap-4">
-          <div className="flex items-center gap-2">
-            <Tv size={18} className="text-primary" />
-            <h2 className="font-display text-lg">{t('settings.tvMode')}</h2>
-          </div>
-          <div className="flex flex-col gap-4">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="radio"
-                className="radio radio-primary mt-0.5"
-                name="playerMode"
-                value="integration"
-                checked={playerMode === 'integration'}
-                onChange={() => setPlayerMode('integration')}
-                aria-label={t('settings.tvModeIntegration')}
-              />
-              <div>
-                <p className="font-medium">{t('settings.tvModeIntegration')}</p>
-                <p className="text-sm text-base-content/60">
-                  {t('settings.tvModeIntegrationDesc')}
-                </p>
-              </div>
-            </label>
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="radio"
-                className="radio radio-primary mt-0.5"
-                name="playerMode"
-                value="cinematic"
-                checked={playerMode === 'cinematic'}
-                onChange={() => setPlayerMode('cinematic')}
-                aria-label={t('settings.tvModeCinematic')}
-              />
-              <div>
-                <p className="font-medium">{t('settings.tvModeCinematic')}</p>
-                <p className="text-sm text-base-content/60">
-                  {t('settings.tvModeCinematicDesc')}
-                </p>
-              </div>
-            </label>
-          </div>
-        </div>
-      </section>
-
       {/* Admin */}
       <section className="card bg-base-200 border border-base-300">
         <div className="card-body gap-4">
@@ -164,7 +106,11 @@ export function SettingsPage() {
           )}
         </div>
       </section>
+
+      {/* Server Preferences (Admin Only) */}
+      {isAdmin && <ServerPreferences />}
     </div>
   )
 }
+
 
