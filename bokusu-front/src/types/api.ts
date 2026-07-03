@@ -56,3 +56,15 @@ export interface Preferences {
   mid_score_phrases: string
   high_score_phrases: string
 }
+
+export interface FileItem {
+  path: string
+  displayName: string
+}
+
+export interface BrowseFilesResponse {
+  files: FileItem[]
+  total: number
+  page: number
+  perPage: number
+}

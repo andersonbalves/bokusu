@@ -65,3 +65,22 @@ def test_delete_queue_all_requires_admin(client):
 def test_delete_queue_all_admin(admin_client, fake_karaoke):
     admin_client.delete("/api/queue")
     fake_karaoke.queue_manager.queue_clear.assert_called_once()
+
+
+def test_reorder_queue_requires_admin(client):
+    assert client.put("/api/queue/reorder", json={"old_index": 0, "new_index": 1}).status_code == 403
+
+
+def test_reorder_queue_admin_success(admin_client, fake_karaoke):
+    fake_karaoke.queue_manager.reorder.return_value = True
+    resp = admin_client.put("/api/queue/reorder", json={"old_index": 0, "new_index": 1})
+    assert resp.status_code == 200
+    assert resp.get_json() == {"success": True}
+    fake_karaoke.queue_manager.reorder.assert_called_once_with(0, 1)
+
+
+def test_reorder_queue_admin_failure(admin_client, fake_karaoke):
+    fake_karaoke.queue_manager.reorder.return_value = False
+    resp = admin_client.put("/api/queue/reorder", json={"old_index": 0, "new_index": 1})
+    assert resp.status_code == 400
+    assert resp.get_json() == {"error": "Failed to reorder queue"}

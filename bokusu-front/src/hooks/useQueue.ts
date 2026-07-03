@@ -25,3 +25,35 @@ export function useEnqueue() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['queue'] }),
   })
 }
+
+export function useReorderQueue() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ oldIndex, newIndex }: { oldIndex: number; newIndex: number }) =>
+      apiFetch<{ success: boolean }>('/api/queue/reorder', {
+        method: 'PUT',
+        body: JSON.stringify({ old_index: oldIndex, new_index: newIndex }),
+      }),
+    onMutate: async ({ oldIndex, newIndex }) => {
+      await queryClient.cancelQueries({ queryKey: ['queue'] })
+      const previous = queryClient.getQueryData<QueueItem[]>(['queue'])
+
+      if (previous) {
+        const next = [...previous]
+        const [moved] = next.splice(oldIndex, 1)
+        next.splice(newIndex, 0, moved)
+        queryClient.setQueryData(['queue'], next)
+      }
+
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['queue'], context.previous)
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['queue'] })
+    },
+  })
+}

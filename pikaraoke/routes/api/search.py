@@ -1,11 +1,11 @@
 """Search endpoints for the /api mirror."""
 
-from flask import jsonify
+from flask import jsonify, Response
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 
 from pikaraoke.lib.current_app import get_karaoke_instance
-from pikaraoke.lib.youtube_dl import get_search_results, get_stream_url
+from pikaraoke.lib.youtube_dl import get_search_results, get_stream_url, get_youtube_id_from_url
 
 api_search_bp = Blueprint("api_search", __name__, url_prefix="/api")
 
@@ -15,23 +15,27 @@ class SearchQuerySchema(Schema):
     non_karaoke = fields.Boolean(load_default=False)
 
 
-class AutocompleteQuery(Schema):
+class AutocompleteQuerySchema(Schema):
     q = fields.String(required=True)
 
 
-class PreviewQuery(Schema):
+class PreviewQuerySchema(Schema):
     url = fields.String(required=True)
 
 
 @api_search_bp.route("/search", methods=["GET"])
 @api_search_bp.arguments(SearchQuerySchema, location="query")
-def api_search(args):
+def api_search(args: dict) -> tuple[Response, int] | Response:
     """Search YouTube for karaoke videos."""
     query_str = args["q"]
     if not args["non_karaoke"]:
         query_str += " karaoke"
 
-    raw_results = get_search_results(query_str)
+    try:
+        raw_results = get_search_results(query_str)
+    except Exception as exc:
+        return jsonify({"error": f"Search failed: {exc}"}), 500
+
     results = []
     for item in raw_results:
         if len(item) >= 3:
@@ -44,8 +48,8 @@ def api_search(args):
 
 
 @api_search_bp.route("/search/autocomplete", methods=["GET"])
-@api_search_bp.arguments(AutocompleteQuery, location="query")
-def autocomplete(query):
+@api_search_bp.arguments(AutocompleteQuerySchema, location="query")
+def autocomplete(query: dict) -> Response:
     """Match local library songs for typeahead."""
     k = get_karaoke_instance()
     q = query["q"].lower()
@@ -62,10 +66,14 @@ def autocomplete(query):
 
 
 @api_search_bp.route("/search/preview", methods=["GET"])
-@api_search_bp.arguments(PreviewQuery, location="query")
-def preview(query):
+@api_search_bp.arguments(PreviewQuerySchema, location="query")
+def preview(query: dict) -> tuple[Response, int] | Response:
     """Resolve a direct stream URL for previewing a YouTube video."""
-    stream_url = get_stream_url(query["url"])
+    url = query["url"]
+    if not get_youtube_id_from_url(url):
+        return jsonify({"error": "Invalid YouTube URL"}), 400
+
+    stream_url = get_stream_url(url)
     if stream_url is None:
         return jsonify({"error": "Could not fetch stream URL"}), 500
     return jsonify({"stream_url": stream_url})

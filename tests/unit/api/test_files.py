@@ -47,7 +47,9 @@ def test_delete_refuses_queued_song(admin_client, fake_karaoke):
     assert resp.get_json() == {"error": "Song is in the current queue"}
 
 
-def test_delete_removes_song(admin_client, fake_karaoke):
+@patch("pikaraoke.routes.api.files.os.path.isfile")
+def test_delete_removes_song(mock_isfile, admin_client, fake_karaoke):
+    mock_isfile.return_value = True
     fake_karaoke.song_manager = MagicMock()
     fake_karaoke.queue_manager.is_song_in_queue.return_value = False
 
@@ -58,13 +60,30 @@ def test_delete_removes_song(admin_client, fake_karaoke):
 
 
 @patch("pikaraoke.routes.api.files.os.path.isfile")
+def test_delete_non_existent_file(mock_isfile, admin_client, fake_karaoke):
+    mock_isfile.return_value = False
+    fake_karaoke.queue_manager.is_song_in_queue.return_value = False
+
+    resp = admin_client.delete("/api/files?song=missing.mp4")
+    assert resp.status_code == 404
+    assert resp.get_json() == {"error": "Song file not found"}
+
+
+def test_rename_requires_admin(client):
+    resp = client.patch("/api/files", json={"old_file_name": "a", "new_file_name": "b"})
+    assert resp.status_code == 403
+
+
+@patch("pikaraoke.routes.api.files.os.path.isfile")
 @patch("pikaraoke.routes.api.files.youtube_id_suffix")
 def test_rename_delegates(mock_youtube_id_suffix, mock_isfile, admin_client, fake_karaoke):
     fake_karaoke.song_manager = MagicMock()
     fake_karaoke.song_manager.download_path = "/fake/path"
     fake_karaoke.queue_manager.is_song_in_queue.return_value = False
     mock_youtube_id_suffix.return_value = " [abc12345678]"
-    mock_isfile.return_value = False
+
+    # First isfile check for source, second for target
+    mock_isfile.side_effect = lambda path: path == "Old Song [abc12345678].mp4"
 
     resp = admin_client.patch(
         "/api/files",
@@ -79,3 +98,57 @@ def test_rename_delegates(mock_youtube_id_suffix, mock_isfile, admin_client, fak
     fake_karaoke.song_manager.rename.assert_called_once_with(
         "Old Song [abc12345678].mp4", "New Song [abc12345678]"
     )
+
+
+@patch("pikaraoke.routes.api.files.os.path.isfile")
+def test_rename_non_existent_source(mock_isfile, admin_client, fake_karaoke):
+    fake_karaoke.queue_manager.is_song_in_queue.return_value = False
+    mock_isfile.return_value = False  # Source doesn't exist
+
+    resp = admin_client.patch(
+        "/api/files",
+        json={"old_file_name": "missing.mp4", "new_file_name": "New Name"},
+    )
+    assert resp.status_code == 404
+    assert resp.get_json() == {"error": "Source song file not found"}
+
+
+@patch("pikaraoke.routes.api.files.os.path.isfile")
+@patch("pikaraoke.routes.api.files.youtube_id_suffix")
+def test_rename_target_collision(mock_youtube_id_suffix, mock_isfile, admin_client, fake_karaoke):
+    fake_karaoke.song_manager = MagicMock()
+    fake_karaoke.song_manager.download_path = "/fake/path"
+    fake_karaoke.queue_manager.is_song_in_queue.return_value = False
+    mock_youtube_id_suffix.return_value = " [abc12345678]"
+
+    # Source exists, target also exists
+    mock_isfile.return_value = True
+
+    resp = admin_client.patch(
+        "/api/files",
+        json={"old_file_name": "Old Song [abc12345678].mp4", "new_file_name": "New Song"},
+    )
+    assert resp.status_code == 409
+    assert resp.get_json() == {"error": "Filename already exists"}
+
+
+@patch("pikaraoke.routes.api.files.os.path.isfile")
+@patch("pikaraoke.routes.api.files.youtube_id_suffix")
+def test_rename_noop_casing(mock_youtube_id_suffix, mock_isfile, admin_client, fake_karaoke):
+    fake_karaoke.song_manager = MagicMock()
+    fake_karaoke.song_manager.download_path = "/fake/path"
+    fake_karaoke.queue_manager.is_song_in_queue.return_value = False
+    mock_youtube_id_suffix.return_value = " [abc12345678]"
+
+    # Source exists
+    mock_isfile.return_value = True
+
+    # Call with same name (no-op)
+    resp = admin_client.patch(
+        "/api/files",
+        json={"old_file_name": "/fake/path/Song [abc12345678].mp4", "new_file_name": "Song"},
+    )
+    assert resp.status_code == 200
+    assert resp.get_json() == {"success": True, "message": "Song renamed"}
+    # No rename should be performed if path is completely identical
+    fake_karaoke.song_manager.rename.assert_not_called()

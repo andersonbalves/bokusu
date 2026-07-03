@@ -39,9 +39,12 @@ def test_get_downloads_passthrough(client, fake_karaoke):
 
 def test_delete_error(client, fake_karaoke):
     fake_karaoke.download_manager = MagicMock()
-    fake_karaoke.download_manager.remove_error.return_value = True
+    fake_karaoke.download_manager.remove_error.side_effect = lambda eid: eid == "err1"
 
     resp = client.delete("/api/downloads/errors/err1")
     assert resp.status_code == 200
     assert resp.get_json() == {"success": True}
-    fake_karaoke.download_manager.remove_error.assert_called_once_with("err1")
+
+    resp_not_found = client.delete("/api/downloads/errors/err_missing")
+    assert resp_not_found.status_code == 404
+    assert resp_not_found.get_json() == {"error": "Download error ID not found"}

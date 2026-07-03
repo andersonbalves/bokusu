@@ -3,7 +3,7 @@
 import logging
 import os
 
-from flask import jsonify
+from flask import jsonify, Response
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 
@@ -14,25 +14,25 @@ from pikaraoke.routes.api._utils import require_admin
 api_files_bp = Blueprint("api_files", __name__, url_prefix="/api")
 
 
-class BrowseQuery(Schema):
+class BrowseQuerySchema(Schema):
     q = fields.String(load_default="")
     letter = fields.String(load_default="")
     sort = fields.String(load_default="alpha")
     page = fields.Integer(load_default=1)
 
 
-class RenameBody(Schema):
+class RenameBodySchema(Schema):
     old_file_name = fields.String(required=True)
     new_file_name = fields.String(required=True)
 
 
-class SongQuery(Schema):
+class SongQuerySchema(Schema):
     song = fields.String(required=True)
 
 
 @api_files_bp.route("/files/browse", methods=["GET"])
-@api_files_bp.arguments(BrowseQuery, location="query")
-def browse(query):
+@api_files_bp.arguments(BrowseQuerySchema, location="query")
+def browse(query: dict) -> Response:
     """Paginated, filterable list of library files."""
     k = get_karaoke_instance()
     songs = list(k.song_manager.songs)
@@ -70,31 +70,55 @@ def browse(query):
 
 
 @api_files_bp.route("/files", methods=["DELETE"])
-@api_files_bp.arguments(SongQuery, location="query")
+@api_files_bp.arguments(SongQuerySchema, location="query")
 @require_admin
-def delete_file(query):
+def delete_file(query: dict) -> tuple[Response, int] | Response:
     """Delete a library file unless it is queued."""
     k = get_karaoke_instance()
     song = query["song"]
     if k.queue_manager.is_song_in_queue(song):
         return jsonify({"error": "Song is in the current queue"}), 409
-    k.song_manager.delete(song)
+
+    if not os.path.isfile(song):
+        return jsonify({"error": "Song file not found"}), 404
+
+    try:
+        k.song_manager.delete(song)
+    except OSError as exc:
+        logging.error(f"Error deleting file: {exc}")
+        return jsonify({"error": f"Error deleting file: {exc}"}), 500
+
     return jsonify({"success": True, "message": "Song deleted"})
 
 
 @api_files_bp.route("/files", methods=["PATCH"])
-@api_files_bp.arguments(RenameBody, location="json")
+@api_files_bp.arguments(RenameBodySchema, location="json")
 @require_admin
-def rename_file(body):
+def rename_file(body: dict) -> tuple[Response, int] | Response:
     """Rename a library file, preserving the YouTube id suffix."""
     k = get_karaoke_instance()
     old_name = body["old_file_name"]
     if k.queue_manager.is_song_in_queue(old_name):
         return jsonify({"error": "Song is in the current queue"}), 409
 
+    if not os.path.isfile(old_name):
+        return jsonify({"error": "Source song file not found"}), 404
+
     new_name_full = body["new_file_name"] + youtube_id_suffix(old_name)
     extension = os.path.splitext(old_name)[1]
     target = os.path.join(k.song_manager.download_path, new_name_full + extension)
+
+    # Allow case-only renames or identical renames (no-op)
+    if os.path.abspath(old_name) == os.path.abspath(target):
+        if old_name != target:
+            # Let's perform the rename to change the casing
+            try:
+                k.song_manager.rename(old_name, new_name_full)
+            except OSError as exc:
+                logging.error(f"Error renaming file: {exc}")
+                return jsonify({"error": f"Error renaming file: {exc}"}), 500
+        return jsonify({"success": True, "message": "Song renamed"})
+
     if os.path.isfile(target):
         return jsonify({"error": "Filename already exists"}), 409
 

@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useSearch } from './useSearch'
+import { useSearch, useSearchAutocomplete, useSearchPreview } from './useSearch'
 import type { ReactNode } from 'react'
 
 const wrapper = ({ children }: { children: ReactNode }) => {
@@ -25,4 +25,26 @@ test('useSearch fetches from /api/search with query param', async () => {
 test('useSearch is disabled when query is empty', () => {
   const { result } = renderHook(() => useSearch(''), { wrapper })
   expect(result.current.fetchStatus).toBe('idle')
+})
+
+test('useSearchAutocomplete fetches autocomplete matching songs', async () => {
+  globalThis.fetch = vi.fn().mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve([{ path: '/s/song.mp4', fileName: 'Song.mp4', type: 'autocomplete' }]),
+  })
+  const { result } = renderHook(() => useSearchAutocomplete('queen'), { wrapper })
+  await waitFor(() => expect(result.current.isSuccess).toBe(true))
+  expect(result.current.data?.[0].fileName).toBe('Song.mp4')
+  expect(fetch).toHaveBeenCalledWith('/api/search/autocomplete?q=queen', expect.any(Object))
+})
+
+test('useSearchPreview fetches direct stream URL', async () => {
+  globalThis.fetch = vi.fn().mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve({ stream_url: 'https://stream.youtube.com/abc' }),
+  })
+  const { result } = renderHook(() => useSearchPreview('https://youtube.com/watch?v=123'), { wrapper })
+  await waitFor(() => expect(result.current.isSuccess).toBe(true))
+  expect(result.current.data?.stream_url).toBe('https://stream.youtube.com/abc')
+  expect(fetch).toHaveBeenCalledWith('/api/search/preview?url=https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3D123', expect.any(Object))
 })

@@ -1,6 +1,6 @@
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useQueue } from './useQueue'
+import { useQueue, useReorderQueue } from './useQueue'
 import type { ReactNode } from 'react'
 
 vi.mock('./useSocketEvent', () => ({ useSocketEvent: vi.fn() }))
@@ -45,4 +45,41 @@ test('useQueue uses useSocketEvent for queue_update', async () => {
   })
   renderHook(() => useQueue(), { wrapper })
   expect(useSocketEvent).toHaveBeenCalledWith('queue_update', expect.any(Function))
+})
+
+test('useReorderQueue PUTs old/new index and applies optimistic move', async () => {
+  const fetchMock = vi.fn().mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve({ success: true }),
+  })
+  globalThis.fetch = fetchMock
+
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  qc.setQueryData(['queue'], [
+    { user: 'A', file: '/a', title: 'A', semitones: 0 },
+    { user: 'B', file: '/b', title: 'B', semitones: 0 },
+  ])
+
+  const { result } = renderHook(() => useReorderQueue(), {
+    wrapper: ({ children }) => <QueryClientProvider client={qc}>{children}</QueryClientProvider>,
+  })
+
+  act(() => {
+    result.current.mutate({ oldIndex: 0, newIndex: 1 })
+  })
+
+  // Optimistic update: element at index 0 is now '/b'
+  await waitFor(() =>
+    expect((qc.getQueryData(['queue']) as any)?.[0]?.file).toBe('/b')
+  )
+
+  await waitFor(() =>
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/queue/reorder',
+      expect.objectContaining({
+        method: 'PUT',
+        body: JSON.stringify({ old_index: 0, new_index: 1 }),
+      })
+    )
+  )
 })
