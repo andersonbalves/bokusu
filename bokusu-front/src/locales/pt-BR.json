@@ -20,7 +20,13 @@
     "placeholder": "Buscar músicas...",
     "noResults": "Nenhum resultado para",
     "added": "\"{{title}}\" adicionada à fila!",
-    "error": "Erro ao adicionar. Tente novamente."
+    "error": "Erro ao adicionar. Tente novamente.",
+    "preview": "Prévia",
+    "downloadOnly": "Apenas baixar",
+    "addToQueue": "Adicionar à fila",
+    "downloadStarted": "Download de \"{{title}}\" iniciado!",
+    "localSuggestions": "Sugestões locais",
+    "previewError": "Erro ao carregar prévia"
   },
   "admin": {
     "title": "Acesso Administrador",

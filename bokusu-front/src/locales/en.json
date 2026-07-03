@@ -20,7 +20,13 @@
     "placeholder": "Search songs...",
     "noResults": "No results for",
     "added": "\"{{title}}\" added to queue!",
-    "error": "Error adding. Try again."
+    "error": "Error adding. Try again.",
+    "preview": "Preview",
+    "downloadOnly": "Download only",
+    "addToQueue": "Add to queue",
+    "downloadStarted": "Download of \"{{title}}\" started!",
+    "localSuggestions": "Local suggestions",
+    "previewError": "Error loading preview"
   },
   "admin": {
     "title": "Admin Access",
