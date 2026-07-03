@@ -43,7 +43,7 @@ test('pauses bg music when inactive', async () => {
 
 test('does not play when disableBgMusic', async () => {
   const { getByTestId } = render(
-    <BackgroundMedia {...baseProps} disableBgMusic={true} />,
+    <BackgroundMedia {...baseProps} disableBgMusic={true} disableBgVideo={true} />,
     { wrapper }
   )
   const audio = getByTestId('bg-music') as HTMLAudioElement

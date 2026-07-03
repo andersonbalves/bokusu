@@ -9,11 +9,14 @@ interface Particle {
 class Firework {
   particles: Particle[]
 
+  private color: string
+
   constructor(
     x: number,
     y: number,
-    private color: string
+    color: string
   ) {
+    this.color = color
     this.particles = Array.from({ length: 50 }, () => ({
       x,
       y,

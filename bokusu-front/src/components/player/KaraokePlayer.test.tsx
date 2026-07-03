@@ -1,8 +1,11 @@
 import { render, fireEvent } from '@testing-library/react'
 
-const hlsInstance = { loadSource: vi.fn(), attachMedia: vi.fn(), destroy: vi.fn() }
+const hlsInstance = { loadSource: vi.fn(), attachMedia: vi.fn(), destroy: vi.fn(), on: vi.fn() }
 vi.mock('hls.js', () => ({
-  default: vi.fn().mockImplementation(function() { return hlsInstance }),
+  default: Object.assign(
+    vi.fn().mockImplementation(function() { return hlsInstance }),
+    { Events: { ERROR: 'hlsError' } }
+  )
 }))
 vi.mock('libass-wasm', () => ({
   default: vi.fn().mockImplementation(function() { return { dispose: vi.fn() } }),

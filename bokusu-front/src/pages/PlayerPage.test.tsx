@@ -1,62 +1,100 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { render, screen } from '@testing-library/react'
+import type { NowPlaying, Preferences } from '../types/api'
+import { vi } from 'vitest'
+
+const mockNowPlaying: Partial<NowPlaying> = {
+  now_playing: null,
+  now_playing_url: null,
+  now_playing_subtitle_url: null,
+  is_paused: false,
+  volume: 0.8,
+  up_next: null,
+  next_user: null,
+}
+const mockPrefs: Partial<Preferences> = {
+  splash_display_mode: 'integration',
+  disable_score: false,
+  hide_url: false,
+  hide_overlay: false,
+  hide_notifications: false,
+  show_splash_clock: false,
+  screensaver_timeout: 0,
+  disable_bg_music: true,
+  disable_bg_video: true,
+  bg_music_volume: 0.5,
+}
+
+const nowPlayingState = { data: mockNowPlaying }
+const prefsState = { data: mockPrefs }
+
+vi.mock('../hooks/useNowPlaying', () => ({ useNowPlaying: () => nowPlayingState }))
+vi.mock('../hooks/usePreferences', () => ({ usePreferences: () => prefsState }))
+vi.mock('../hooks/useQueue', () => ({ useQueue: () => ({ data: [] }) }))
+vi.mock('../hooks/useScorePhrases', () => ({
+  useScorePhrases: () => ({ data: { low: ['a'], mid: ['b'], high: ['c'] } }),
+}))
+vi.mock('../hooks/useSplashRole', () => ({ useSplashRole: () => 'master' }))
+vi.mock('../components/player/IdleScreen', () => ({
+  IdleScreen: (props: { isLoading: boolean }) => (
+    <div data-testid="idle-screen" data-loading={props.isLoading} />
+  ),
+}))
+vi.mock('../components/player/KaraokePlayer', () => ({
+  KaraokePlayer: (props: { url: string; onCanPlay: () => void }) => (
+    <button data-testid="karaoke-video" data-url={props.url} onClick={props.onCanPlay} />
+  ),
+}))
+vi.mock('../components/player/ScoreScreen', () => ({
+  ScoreScreen: () => <div data-testid="score-screen" />,
+}))
+vi.mock('../components/player/NotificationBanner', () => ({
+  NotificationBanner: () => <div data-testid="tv-notification-host" />,
+}))
+
+import { fireEvent } from '@testing-library/react'
 import { PlayerPage } from './PlayerPage'
-import type { ReactNode } from 'react'
-
-const wrapper = ({ children }: { children: ReactNode }) => (
-  <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
-    {children}
-  </QueryClientProvider>
-)
-
-let splashDisplayMode: 'integration' | 'cinematic' = 'integration'
 
 beforeEach(() => {
-  splashDisplayMode = 'integration'
-  globalThis.fetch = vi.fn().mockImplementation((url) => {
-    if (url.includes('/api/preferences')) {
-      return Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ splash_display_mode: splashDisplayMode }),
-      })
-    }
-    return Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve([]),
-    })
-  })
+  nowPlayingState.data = { ...mockNowPlaying }
+  prefsState.data = { ...mockPrefs }
 })
 
-test('integration mode: renders QR code and welcome message', async () => {
-  splashDisplayMode = 'integration'
-  render(<PlayerPage appUrl="http://192.168.1.10:5000" />, { wrapper })
-  await waitFor(() => {
-    expect(screen.getByTestId('qr-code')).toBeInTheDocument()
-    expect(screen.getByText(/escaneie para cantar/i)).toBeInTheDocument()
-  })
+test('renders idle screen when nothing is playing', () => {
+  render(<PlayerPage appUrl="http://10.0.0.5:5555" />)
+  expect(screen.getByTestId('idle-screen')).toBeTruthy()
+  expect(screen.queryByTestId('karaoke-video')).toBeNull()
 })
 
-test('integration mode: renders host below QR', async () => {
-  splashDisplayMode = 'integration'
-  render(<PlayerPage appUrl="http://192.168.1.10:5000" />, { wrapper })
-  await waitFor(() => {
-    expect(screen.getByText('192.168.1.10:5000')).toBeInTheDocument()
-  })
+test('mounts KaraokePlayer in loading and shows it after canplay', () => {
+  nowPlayingState.data = { ...mockNowPlaying, now_playing_url: '/stream/abc.m3u8' }
+  render(<PlayerPage appUrl="http://10.0.0.5:5555" />)
+  const video = screen.getByTestId('karaoke-video')
+  expect(video.getAttribute('data-url')).toBe('/stream/abc.m3u8')
+  // loading: idle screen ainda visível como fundo com spinner
+  expect(screen.getByTestId('idle-screen').getAttribute('data-loading')).toBe('true')
+  fireEvent.click(video) // dispara onCanPlay
+  expect(screen.queryByTestId('idle-screen')).toBeNull()
 })
 
-test('cinematic mode: renders QR in corner and IP address', async () => {
-  splashDisplayMode = 'cinematic'
-  render(<PlayerPage appUrl="http://192.168.1.10:5000" />, { wrapper })
-  await waitFor(() => {
-    expect(screen.getByTestId('qr-code')).toBeInTheDocument()
-    expect(screen.getByText('192.168.1.10:5000')).toBeInTheDocument()
-  })
+test('playing overlay shows title and up next unless hide_overlay', () => {
+  nowPlayingState.data = {
+    ...mockNowPlaying,
+    now_playing: 'Bohemian Rhapsody',
+    now_playing_user: 'Alice',
+    now_playing_url: '/stream/abc.m3u8',
+    up_next: 'Hotel California',
+    next_user: 'Bob',
+  }
+  render(<PlayerPage appUrl="http://10.0.0.5:5555" />)
+  fireEvent.click(screen.getByTestId('karaoke-video'))
+  expect(screen.getByText('Bohemian Rhapsody')).toBeTruthy()
+  expect(screen.getByText(/Hotel California/)).toBeTruthy()
+
+  prefsState.data = { ...mockPrefs, hide_overlay: true }
+  render(<PlayerPage appUrl="http://10.0.0.5:5555" />)
 })
 
-test('cinematic mode: does not render welcome message', async () => {
-  splashDisplayMode = 'cinematic'
-  render(<PlayerPage appUrl="http://192.168.1.10:5000" />, { wrapper })
-  await waitFor(() => {
-    expect(screen.queryByText(/escaneie para cantar/i)).not.toBeInTheDocument()
-  })
+test('always renders the notification banner host', () => {
+  render(<PlayerPage appUrl="http://10.0.0.5:5555" />)
+  expect(screen.getByTestId('tv-notification-host')).toBeTruthy()
 })
