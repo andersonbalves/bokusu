@@ -1,10 +1,12 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Search } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useSearch } from '../hooks/useSearch'
 import { useEnqueue } from '../hooks/useQueue'
 import { SearchResultItem } from '../components/SearchResultItem'
 
 export function SearchPage() {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [addingId, setAddingId] = useState<string | null>(null)
@@ -31,11 +33,11 @@ export function SearchPage() {
       { song_id: id, user: 'Guest' }, // TODO: user/singer name will be customizable in a future task
       {
         onSuccess: () => {
-          showToast(`"${title}" adicionada à fila!`)
+          showToast(t('search.added', { title }))
           setAddingId(null)
         },
         onError: () => {
-          showToast('Erro ao adicionar. Tente novamente.')
+          showToast(t('search.error'))
           setAddingId(null)
         },
       }
@@ -51,7 +53,7 @@ export function SearchPage() {
           <input
             type="search"
             className="grow"
-            placeholder="Buscar músicas..."
+            placeholder={t('search.placeholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -63,9 +65,10 @@ export function SearchPage() {
       <div className="flex-1 px-4 py-2">
         {results.length === 0 && debouncedQuery.length > 0 && !isFetching && (
           <p className="text-center text-base-content/40 py-12">
-            Nenhum resultado para &quot;{debouncedQuery}&quot;
+            {t('search.noResults')} &quot;{debouncedQuery}&quot;
           </p>
         )}
+
         {results.map((result) => (
           <SearchResultItem
             key={result.id}

@@ -1,16 +1,18 @@
 import { Outlet, NavLink } from 'react-router-dom'
 import { ListMusic, Search, Settings } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { AdminModal } from '../components/AdminModal'
 import { ToastHost } from '../components/ToastHost'
 
 const navItems = [
-  { to: '/queue', label: 'Fila', Icon: ListMusic },
-  { to: '/search', label: 'Buscar', Icon: Search },
-  { to: '/settings', label: 'Configurações', Icon: Settings },
+  { to: '/queue', labelKey: 'nav.queue', Icon: ListMusic },
+  { to: '/search', labelKey: 'nav.search', Icon: Search },
+  { to: '/settings', labelKey: 'nav.settings', Icon: Settings },
 ]
 
 export function AppLayout() {
+  const { t } = useTranslation()
   const theme = useAppStore((state) => state.theme)
   const isConnected = useAppStore((state) => state.isConnected)
 
@@ -19,7 +21,7 @@ export function AppLayout() {
       {!isConnected && (
         <div className="toast toast-top toast-center z-50">
           <div className="alert alert-error">
-            <span>Sem conexão com o servidor</span>
+            <span>{t('toasts.noConnection')}</span>
           </div>
         </div>
       )}
@@ -31,11 +33,11 @@ export function AppLayout() {
         </div>
         <nav className="flex-1 px-3">
           <ul className="menu menu-lg gap-1 w-full p-0">
-            {navItems.map(({ to, label, Icon }) => (
+            {navItems.map(({ to, labelKey, Icon }) => (
               <li key={to}>
                 <NavLink to={to} className={({ isActive }) => (isActive ? 'active' : '')}>
                   <Icon size={20} />
-                  {label}
+                  {t(labelKey)}
                 </NavLink>
               </li>
             ))}
@@ -50,7 +52,7 @@ export function AppLayout() {
 
       {/* Dock — mobile only */}
       <div className="dock lg:hidden z-40">
-        {navItems.map(({ to, label, Icon }) => (
+        {navItems.map(({ to, labelKey, Icon }) => (
           <NavLink
             key={to}
             to={to}
@@ -59,7 +61,7 @@ export function AppLayout() {
             }
           >
             <Icon size={22} />
-            <span className="dock-label text-xs">{label}</span>
+            <span className="dock-label text-xs">{t(labelKey)}</span>
           </NavLink>
         ))}
       </div>
@@ -69,3 +71,4 @@ export function AppLayout() {
     </div>
   )
 }
+

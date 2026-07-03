@@ -1,4 +1,5 @@
 import { QRCodeSVG } from 'qrcode.react'
+import { useTranslation } from 'react-i18next'
 import { usePreferences } from '../hooks/usePreferences'
 import { useQueue } from '../hooks/useQueue'
 import type { QueueItem } from '../types/api'
@@ -16,6 +17,7 @@ function extractHost(url: string): string {
 }
 
 export function PlayerPage({ appUrl = window.location.origin }: PlayerPageProps) {
+  const { t } = useTranslation()
   const { data: preferences } = usePreferences()
   const playerMode = preferences?.splash_display_mode ?? 'integration'
   const { data: queue = [] } = useQueue()
@@ -23,12 +25,20 @@ export function PlayerPage({ appUrl = window.location.origin }: PlayerPageProps)
   const upcoming = queue.slice(0, 3)
 
   if (playerMode === 'integration') {
-    return <IntegrationMode appUrl={appUrl} upcoming={upcoming} />
+    return <IntegrationMode appUrl={appUrl} upcoming={upcoming} t={t} />
   }
-  return <CinematicMode appUrl={appUrl} upcoming={upcoming} />
+  return <CinematicMode appUrl={appUrl} upcoming={upcoming} t={t} />
 }
 
-function IntegrationMode({ appUrl, upcoming }: { appUrl: string; upcoming: QueueItem[] }) {
+function IntegrationMode({
+  appUrl,
+  upcoming,
+  t,
+}: {
+  appUrl: string
+  upcoming: QueueItem[]
+  t: (key: string) => string
+}) {
   const host = extractHost(appUrl)
 
   return (
@@ -39,14 +49,14 @@ function IntegrationMode({ appUrl, upcoming }: { appUrl: string; upcoming: Queue
 
       <div className="text-center">
         <p className="text-outlined font-display text-4xl font-bold tracking-wide text-white">
-          Escaneie para cantar
+          {t('player.scanToSing')}
         </p>
         <p className="text-outlined text-white/70 text-xl mt-2">{host}</p>
       </div>
 
       {upcoming.length > 0 && (
         <div className="flex flex-col items-center gap-2 mt-2">
-          <p className="text-outlined text-white/40 text-xs uppercase tracking-widest">A seguir</p>
+          <p className="text-outlined text-white/40 text-xs uppercase tracking-widest">{t('player.upNext')}</p>
           {upcoming.map((item) => (
             <p key={item.file} className="text-outlined text-white/80 text-base">
               {item.title}
@@ -64,9 +74,11 @@ function IntegrationMode({ appUrl, upcoming }: { appUrl: string; upcoming: Queue
 function CinematicMode({
   appUrl,
   upcoming,
+  t,
 }: {
   appUrl: string
   upcoming: QueueItem[]
+  t: (key: string) => string
 }) {
   const host = extractHost(appUrl)
 
@@ -88,7 +100,7 @@ function CinematicMode({
       {upcoming.length > 0 && (
         <div className="absolute bottom-6 right-6 max-w-xs text-right">
           <p className="text-outlined text-white/40 text-xs uppercase tracking-widest mb-1">
-            A seguir
+            {t('player.upNext')}
           </p>
           <p className="text-outlined text-white/60 text-sm truncate">
             {upcoming.map((s) => s.title).join(' · ')}
@@ -98,3 +110,4 @@ function CinematicMode({
     </div>
   )
 }
+

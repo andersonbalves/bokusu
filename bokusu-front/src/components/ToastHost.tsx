@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { useAppStore, Toast } from '../store/useAppStore'
+import { useTranslation } from 'react-i18next'
+import { useAppStore, type Toast } from '../store/useAppStore'
 import { useSocketEvent } from '../hooks/useSocketEvent'
 
 interface ToastItemProps {
@@ -8,6 +9,8 @@ interface ToastItemProps {
 }
 
 function ToastItem({ toast, onDismiss }: ToastItemProps) {
+  const { t } = useTranslation()
+
   useEffect(() => {
     const timer = setTimeout(() => {
       onDismiss(toast.id)
@@ -34,7 +37,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
       <button
         onClick={() => onDismiss(toast.id)}
         className="btn btn-ghost btn-circle btn-xs text-current"
-        aria-label="Fechar"
+        aria-label={t('common.close')}
       >
         ✕
       </button>
@@ -43,6 +46,7 @@ function ToastItem({ toast, onDismiss }: ToastItemProps) {
 }
 
 export function ToastHost() {
+  const { t } = useTranslation()
   const toasts = useAppStore((state) => state.toasts)
   const pushToast = useAppStore((state) => state.pushToast)
   const dismissToast = useAppStore((state) => state.dismissToast)
@@ -64,11 +68,11 @@ export function ToastHost() {
   })
 
   useSocketEvent('sync_started', () => {
-    pushToast('Sincronizando biblioteca...', 'info')
+    pushToast(t('toasts.syncStarted'), 'info')
   })
 
   useSocketEvent('sync_finished', () => {
-    pushToast('Biblioteca sincronizada', 'success')
+    pushToast(t('toasts.syncFinished'), 'success')
   })
 
   if (toasts.length === 0) return null
@@ -81,3 +85,4 @@ export function ToastHost() {
     </div>
   )
 }
+

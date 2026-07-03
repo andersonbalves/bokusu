@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "queue": "Queue",
+    "search": "Search",
+    "settings": "Settings"
+  },
+  "queue": {
+    "empty": "Queue is empty",
+    "upNext": "Up next",
+    "title": "Queue"
+  },
+  "search": {
+    "placeholder": "Search songs...",
+    "noResults": "No results for",
+    "added": "\"{{title}}\" added to queue!",
+    "error": "Error adding. Try again."
+  },
+  "admin": {
+    "title": "Admin Access",
+    "restricted": "Restricted Access",
+    "prompt": "Enter the Admin password to continue.",
+    "password": "Password",
+    "incorrect": "Incorrect password",
+    "error": "Authentication error",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "required": "admin required"
+  },
+  "player": {
+    "nowPlaying": "Now playing",
+    "upNext": "Up next",
+    "paused": "Paused",
+    "singer": "Singer",
+    "skip": "Skip",
+    "scanToSing": "Scan to sing"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "aqua": "Aqua",
+    "acid": "Acid",
+    "language": "Language",
+    "tvMode": "TV Mode",
+    "tvModeIntegration": "Integration / Welcome",
+    "tvModeIntegrationDesc": "Centered QR Code. Focus on attracting new singers.",
+    "tvModeCinematic": "Cinematic",
+    "tvModeCinematicDesc": "Minimalistic. QR in corners. Focus on background video.",
+    "admin": "Administrator",
+    "adminActive": "Admin mode active",
+    "adminLogout": "Exit Admin mode",
+    "adminLogin": "Enter as Admin"
+  },
+  "toasts": {
+    "syncStarted": "Syncing library...",
+    "syncFinished": "Library synced",
+    "noConnection": "No connection to the server"
+  },
+  "common": {
+    "close": "Close",
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "remove": "Remove",
+    "add": "Add"
+  }
+}

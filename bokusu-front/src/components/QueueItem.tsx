@@ -1,8 +1,9 @@
 import { Trash2, Lock } from 'lucide-react'
-import type { QueueItem } from '../types/api'
+import { useTranslation } from 'react-i18next'
+import type { QueueItem as QueueItemType } from '../types/api'
 
 interface QueueItemProps {
-  item: QueueItem
+  item: QueueItemType
   position: number
   isAdmin: boolean
   onRemove: () => void
@@ -10,6 +11,8 @@ interface QueueItemProps {
 }
 
 export function QueueItem({ item, position, isAdmin, onRemove, removeDisabled }: QueueItemProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="flex items-center gap-3 p-3 rounded-box bg-base-200 hover:bg-base-300 transition-colors">
       <span className="text-base-content/40 w-6 text-center tabular-nums text-sm">
@@ -23,13 +26,13 @@ export function QueueItem({ item, position, isAdmin, onRemove, removeDisabled }:
       </div>
       <div className="flex items-center gap-1">
         {!isAdmin && (
-          <Lock size={12} className="text-warning" aria-label="admin necessário" />
+          <Lock size={12} className="text-warning" aria-label={t('admin.required')} />
         )}
         <button
           className="btn btn-ghost btn-xs text-error"
           onClick={onRemove}
           disabled={removeDisabled}
-          aria-label="Remover"
+          aria-label={t('common.remove')}
         >
           <Trash2 size={16} />
         </button>
@@ -37,3 +40,4 @@ export function QueueItem({ item, position, isAdmin, onRemove, removeDisabled }:
     </div>
   )
 }
+

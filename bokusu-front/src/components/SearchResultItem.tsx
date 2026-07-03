@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { SearchResult } from '../types/api'
 
 interface SearchResultItemProps {
@@ -8,6 +9,8 @@ interface SearchResultItemProps {
 }
 
 export function SearchResultItem({ result, onAdd, isAdding }: SearchResultItemProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="flex items-center gap-3 p-3 rounded-box hover:bg-base-200 transition-colors">
       <div className="flex-1 min-w-0">
@@ -17,7 +20,7 @@ export function SearchResultItem({ result, onAdd, isAdding }: SearchResultItemPr
         className="btn btn-circle btn-sm btn-primary flex-shrink-0"
         onClick={onAdd}
         disabled={isAdding}
-        aria-label="Adicionar"
+        aria-label={t('common.add')}
       >
         {isAdding ? (
           <span className="loading loading-spinner loading-xs" />
@@ -28,3 +31,4 @@ export function SearchResultItem({ result, onAdd, isAdding }: SearchResultItemPr
     </div>
   )
 }
+

@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Lock } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { apiFetch, ApiError } from '../lib/api'
 import type { AuthStatus } from '../types/api'
 
 export function AdminModal() {
+  const { t } = useTranslation()
   const { showAdminModal, pendingAdminAction, closeAdminModal, setIsAdmin } = useAppStore()
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -27,9 +29,9 @@ export function AdminModal() {
       setPassword('')
     } catch (err) {
       if (err instanceof ApiError && err.status === 403) {
-        setError('Senha incorreta')
+        setError(t('admin.incorrect'))
       } else {
-        setError('Erro ao autenticar')
+        setError(t('admin.error'))
       }
     } finally {
       setIsPending(false)
@@ -48,15 +50,15 @@ export function AdminModal() {
       <div className="modal-box">
         <div className="flex items-center gap-3 mb-4">
           <Lock size={20} className="text-warning" />
-          <h3 className="font-display text-lg">Acesso Restrito</h3>
+          <h3 className="font-display text-lg">{t('admin.restricted')}</h3>
         </div>
         <p className="text-base-content/70 text-sm mb-4">
-          Digite a senha do Administrador para continuar.
+          {t('admin.prompt')}
         </p>
         <input
           type="password"
           className="input w-full"
-          placeholder="Senha"
+          placeholder={t('admin.password')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleConfirm() }}
@@ -69,18 +71,18 @@ export function AdminModal() {
             className="btn btn-ghost"
             onClick={handleCancel}
             disabled={isPending}
-            aria-label="Cancelar"
+            aria-label={t('admin.cancel')}
           >
-            Cancelar
+            {t('admin.cancel')}
           </button>
           <button
             className="btn btn-primary"
             onClick={handleConfirm}
             disabled={isPending || password.length === 0}
-            aria-label="Confirmar"
+            aria-label={t('admin.confirm')}
           >
             {isPending && <span className="loading loading-spinner loading-xs" />}
-            Confirmar
+            {t('admin.confirm')}
           </button>
         </div>
       </div>
@@ -88,3 +90,4 @@ export function AdminModal() {
     </div>
   )
 }
+

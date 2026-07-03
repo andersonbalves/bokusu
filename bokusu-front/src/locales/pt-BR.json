@@ -1,0 +1,66 @@
+{
+  "nav": {
+    "queue": "Fila",
+    "search": "Buscar",
+    "settings": "Configurações"
+  },
+  "queue": {
+    "empty": "Fila vazia",
+    "upNext": "A seguir",
+    "title": "Fila"
+  },
+  "search": {
+    "placeholder": "Buscar músicas...",
+    "noResults": "Nenhum resultado para",
+    "added": "\"{{title}}\" adicionada à fila!",
+    "error": "Erro ao adicionar. Tente novamente."
+  },
+  "admin": {
+    "title": "Acesso Administrador",
+    "restricted": "Acesso Restrito",
+    "prompt": "Digite a senha do Administrador para continuar.",
+    "password": "Senha",
+    "incorrect": "Senha incorreta",
+    "error": "Erro ao autenticar",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "required": "admin necessário"
+  },
+  "player": {
+    "nowPlaying": "Tocando agora",
+    "upNext": "A seguir",
+    "paused": "Pausado",
+    "singer": "Cantor",
+    "skip": "Pular",
+    "scanToSing": "Escaneie para cantar"
+  },
+  "settings": {
+    "title": "Configurações",
+    "theme": "Tema",
+    "aqua": "Aqua",
+    "acid": "Acid",
+    "language": "Idioma",
+    "tvMode": "Modo da TV",
+    "tvModeIntegration": "Integração / Boas-vindas",
+    "tvModeIntegrationDesc": "QR Code centralizado. Foco em atrair novos cantores.",
+    "tvModeCinematic": "Cinemático",
+    "tvModeCinematicDesc": "Minimalista. QR nos cantos. Foco no vídeo de fundo.",
+    "admin": "Administrador",
+    "adminActive": "Modo Admin ativo",
+    "adminLogout": "Sair do modo Admin",
+    "adminLogin": "Entrar como Admin"
+  },
+  "toasts": {
+    "syncStarted": "Sincronizando biblioteca...",
+    "syncFinished": "Biblioteca sincronizada",
+    "noConnection": "Sem conexão com o servidor"
+  },
+  "common": {
+    "close": "Fechar",
+    "loading": "Carregando...",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "remove": "Remover",
+    "add": "Adicionar"
+  }
+}

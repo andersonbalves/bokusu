@@ -1,4 +1,5 @@
 import { Music } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useQueue } from '../hooks/useQueue'
 import { useNowPlaying } from '../hooks/useNowPlaying'
 import { usePlayerControls } from '../hooks/usePlayerControls'
@@ -8,6 +9,7 @@ import { QueueItem } from '../components/QueueItem'
 import type { QueueItem as QueueItemType } from '../types/api'
 
 export function QueuePage() {
+  const { t } = useTranslation()
   const { data: queue = [], isLoading } = useQueue()
   const { data: nowPlaying } = useNowPlaying()
   const { skip } = usePlayerControls()
@@ -47,7 +49,7 @@ export function QueuePage() {
         <div className="card bg-base-200 border border-base-300">
           <div className="card-body items-center text-center gap-2">
             <Music size={40} className="text-base-content/30" />
-            <p className="text-base-content/60">Fila vazia</p>
+            <p className="text-base-content/60">{t('queue.empty')}</p>
           </div>
         </div>
       )}
@@ -55,7 +57,7 @@ export function QueuePage() {
       {queue.length > 0 && (
         <section>
           <h3 className="font-display text-sm uppercase tracking-widest text-base-content/50 mb-3">
-            A seguir
+            {t('queue.upNext')}
           </h3>
           <div className="flex flex-col gap-2">
             {queue.map((item, idx) => (

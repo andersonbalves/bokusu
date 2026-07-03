@@ -1,8 +1,11 @@
-import { Tv, Palette, ShieldCheck, LogOut } from 'lucide-react'
+import { Tv, Palette, ShieldCheck, LogOut, Globe } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { usePreferences, useSetPreference } from '../hooks/usePreferences'
+import { setLanguage } from '../lib/i18n'
 
 export function SettingsPage() {
+  const { t, i18n } = useTranslation()
   const { theme, setTheme, isAdmin, openAdminModal, setIsAdmin } = useAppStore()
   const { data: preferences } = usePreferences()
   const setPreference = useSetPreference()
@@ -17,23 +20,59 @@ export function SettingsPage() {
         <div className="card-body gap-4">
           <div className="flex items-center gap-2">
             <Palette size={18} className="text-primary" />
-            <h2 className="font-display text-lg">Tema</h2>
+            <h2 className="font-display text-lg">{t('settings.theme')}</h2>
           </div>
           <div className="flex gap-6">
-            {(['aqua', 'acid'] as const).map((t) => (
-              <label key={t} className="flex items-center gap-2 cursor-pointer">
+            {(['aqua', 'acid'] as const).map((themeName) => (
+              <label key={themeName} className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   className="radio radio-primary"
                   name="theme"
-                  value={t}
-                  checked={theme === t}
-                  onChange={() => setTheme(t)}
-                  aria-label={t.charAt(0).toUpperCase() + t.slice(1)}
+                  value={themeName}
+                  checked={theme === themeName}
+                  onChange={() => setTheme(themeName)}
+                  aria-label={t(`settings.${themeName}` as any)}
                 />
-                <span className="capitalize">{t}</span>
+                <span className="capitalize">{t(`settings.${themeName}` as any)}</span>
               </label>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Language */}
+      <section className="card bg-base-200 border border-base-300">
+        <div className="card-body gap-4">
+          <div className="flex items-center gap-2">
+            <Globe size={18} className="text-primary" />
+            <h2 className="font-display text-lg">{t('settings.language')}</h2>
+          </div>
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                className="radio radio-primary"
+                name="language"
+                value="pt-BR"
+                checked={i18n.language === 'pt-BR'}
+                onChange={() => setLanguage('pt-BR')}
+                aria-label="Português"
+              />
+              <span>Português</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                className="radio radio-primary"
+                name="language"
+                value="en"
+                checked={i18n.language.startsWith('en')}
+                onChange={() => setLanguage('en')}
+                aria-label="English"
+              />
+              <span>English</span>
+            </label>
           </div>
         </div>
       </section>
@@ -43,7 +82,7 @@ export function SettingsPage() {
         <div className="card-body gap-4">
           <div className="flex items-center gap-2">
             <Tv size={18} className="text-primary" />
-            <h2 className="font-display text-lg">Modo da TV</h2>
+            <h2 className="font-display text-lg">{t('settings.tvMode')}</h2>
           </div>
           <div className="flex flex-col gap-4">
             <label className="flex items-start gap-3 cursor-pointer">
@@ -54,12 +93,12 @@ export function SettingsPage() {
                 value="integration"
                 checked={playerMode === 'integration'}
                 onChange={() => setPlayerMode('integration')}
-                aria-label="Integração / Boas-vindas"
+                aria-label={t('settings.tvModeIntegration')}
               />
               <div>
-                <p className="font-medium">Integração / Boas-vindas</p>
+                <p className="font-medium">{t('settings.tvModeIntegration')}</p>
                 <p className="text-sm text-base-content/60">
-                  QR Code centralizado. Foco em atrair novos cantores.
+                  {t('settings.tvModeIntegrationDesc')}
                 </p>
               </div>
             </label>
@@ -71,12 +110,12 @@ export function SettingsPage() {
                 value="cinematic"
                 checked={playerMode === 'cinematic'}
                 onChange={() => setPlayerMode('cinematic')}
-                aria-label="Cinemático"
+                aria-label={t('settings.tvModeCinematic')}
               />
               <div>
-                <p className="font-medium">Cinemático</p>
+                <p className="font-medium">{t('settings.tvModeCinematic')}</p>
                 <p className="text-sm text-base-content/60">
-                  Minimalista. QR nos cantos. Foco no vídeo de fundo.
+                  {t('settings.tvModeCinematicDesc')}
                 </p>
               </div>
             </label>
@@ -89,31 +128,31 @@ export function SettingsPage() {
         <div className="card-body gap-4">
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-primary" />
-            <h2 className="font-display text-lg">Administrador</h2>
+            <h2 className="font-display text-lg">{t('settings.admin')}</h2>
           </div>
           {isAdmin ? (
             <div className="flex items-center justify-between">
               <span className="badge badge-success gap-1">
                 <ShieldCheck size={12} />
-                Modo Admin ativo
+                {t('settings.adminActive')}
               </span>
               <button
                 className="btn btn-sm btn-outline btn-error"
                 onClick={() => setIsAdmin(false)}
-                aria-label="Sair do modo Admin"
+                aria-label={t('settings.adminLogout')}
               >
                 <LogOut size={16} />
-                Sair do modo Admin
+                {t('settings.adminLogout')}
               </button>
             </div>
           ) : (
             <button
               className="btn btn-outline btn-primary w-fit"
               onClick={() => openAdminModal(() => {})}
-              aria-label="Entrar como Admin"
+              aria-label={t('settings.adminLogin')}
             >
               <ShieldCheck size={16} />
-              Entrar como Admin
+              {t('settings.adminLogin')}
             </button>
           )}
         </div>
@@ -121,3 +160,4 @@ export function SettingsPage() {
     </div>
   )
 }
+
