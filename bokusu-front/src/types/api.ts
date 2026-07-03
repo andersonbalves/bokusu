@@ -68,3 +68,18 @@ export interface BrowseFilesResponse {
   page: number
   perPage: number
 }
+
+export interface DownloadItem {
+  id: string
+  title: string
+  url: string
+  progress: number
+  status: 'active' | 'pending' | 'completed' | 'failed'
+  error?: string
+}
+
+export interface DownloadsStatus {
+  active: DownloadItem | null
+  pending: DownloadItem[]
+  errors: DownloadItem[]
+}

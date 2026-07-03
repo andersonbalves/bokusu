@@ -7,7 +7,14 @@
   "queue": {
     "empty": "Fila vazia",
     "upNext": "A seguir",
-    "title": "Fila"
+    "title": "Fila",
+    "options": "Opções",
+    "playNext": "Tocar a seguir",
+    "delete": "Apagar",
+    "clear": "Limpar fila",
+    "clearConfirm": "Tem certeza de que deseja apagar todas as músicas da fila?",
+    "addRandom": "Adicionar aleatórias",
+    "downloadErrors": "Erros de download"
   },
   "search": {
     "placeholder": "Buscar músicas...",
@@ -66,6 +73,7 @@
     "cancel": "Cancelar",
     "confirm": "Confirmar",
     "remove": "Remover",
-    "add": "Adicionar"
+    "add": "Adicionar",
+    "dismiss": "Descartar"
   }
 }

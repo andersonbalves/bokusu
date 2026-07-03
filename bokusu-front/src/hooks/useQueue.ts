@@ -57,3 +57,47 @@ export function useReorderQueue() {
     },
   })
 }
+
+export function useQueueItemAction() {
+  const queryClient = useQueryClient()
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['queue'] })
+
+  const move = useMutation({
+    mutationFn: ({ song, action }: { song: string; action: 'top' | 'bottom' | 'up' | 'down' }) =>
+      apiFetch<{ success: boolean }>('/api/queue/item', {
+        method: 'PATCH',
+        body: JSON.stringify({ song, action }),
+      }),
+    onSuccess: invalidate,
+  })
+
+  const remove = useMutation({
+    mutationFn: (song: string) =>
+      apiFetch<{ success: boolean }>(`/api/queue/item?song=${encodeURIComponent(song)}`, {
+        method: 'DELETE',
+      }),
+    onSuccess: invalidate,
+  })
+
+  return { move, remove }
+}
+
+export function useClearQueue() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => apiFetch<{ success: boolean }>('/api/queue', { method: 'DELETE' }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['queue'] }),
+  })
+}
+
+export function useAddRandom() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (amount: number) =>
+      apiFetch<{ success: boolean }>('/api/queue/random', {
+        method: 'POST',
+        body: JSON.stringify({ amount }),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['queue'] }),
+  })
+}

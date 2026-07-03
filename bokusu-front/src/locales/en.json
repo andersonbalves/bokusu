@@ -7,7 +7,14 @@
   "queue": {
     "empty": "Queue is empty",
     "upNext": "Up next",
-    "title": "Queue"
+    "title": "Queue",
+    "options": "Options",
+    "playNext": "Play next",
+    "delete": "Delete",
+    "clear": "Clear queue",
+    "clearConfirm": "Are you sure you want to delete all songs from the queue?",
+    "addRandom": "Add random",
+    "downloadErrors": "Download errors"
   },
   "search": {
     "placeholder": "Search songs...",
@@ -66,6 +73,7 @@
     "cancel": "Cancel",
     "confirm": "Confirm",
     "remove": "Remove",
-    "add": "Add"
+    "add": "Add",
+    "dismiss": "Dismiss"
   }
 }

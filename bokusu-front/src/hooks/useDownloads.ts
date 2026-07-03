@@ -1,21 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '../lib/api'
 import { useSocketEvent } from './useSocketEvent'
-
-export interface DownloadItem {
-  id: string
-  title: string
-  url: string
-  progress: number
-  status: 'active' | 'pending' | 'completed' | 'failed'
-  error?: string
-}
-
-export interface DownloadsStatus {
-  active: DownloadItem | null
-  pending: DownloadItem[]
-  errors: DownloadItem[]
-}
+import type { DownloadsStatus } from '../types/api'
 
 export function useDownloads() {
   const queryClient = useQueryClient()
@@ -31,6 +17,11 @@ export function useDownloads() {
   return useQuery({
     queryKey: ['downloads'],
     queryFn: () => apiFetch<DownloadsStatus>('/api/downloads'),
+    refetchInterval: (query) => {
+      const data = query.state.data
+      const busy = data && (data.active !== null || data.pending.length > 0)
+      return busy ? 3000 : false
+    },
   })
 }
 

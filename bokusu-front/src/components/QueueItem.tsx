@@ -1,8 +1,9 @@
-import { GripVertical, Trash2, Lock } from 'lucide-react'
+import { GripVertical, Lock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { QueueItem as QueueItemType } from '../types/api'
+import { QueueActionsMenu } from './QueueActionsMenu'
 
 interface QueueItemProps {
   item: QueueItemType
@@ -10,9 +11,15 @@ interface QueueItemProps {
   isAdmin: boolean
   onRemove: () => void
   removeDisabled?: boolean
+  isDownloading?: boolean
 }
 
-export function QueueItem({ item, position, isAdmin, onRemove, removeDisabled }: QueueItemProps) {
+export function QueueItem({
+  item,
+  position,
+  isAdmin,
+  isDownloading,
+}: QueueItemProps) {
   const { t } = useTranslation()
   const {
     attributes,
@@ -21,7 +28,7 @@ export function QueueItem({ item, position, isAdmin, onRemove, removeDisabled }:
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: item.file, disabled: !isAdmin })
+  } = useSortable({ id: item.file, disabled: !isAdmin || isDownloading })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -37,10 +44,10 @@ export function QueueItem({ item, position, isAdmin, onRemove, removeDisabled }:
         isDragging
           ? 'shadow-lg border-primary bg-base-300 scale-[1.02] touch-none z-50'
           : 'border-base-300 hover:bg-base-300'
-      }`}
+      } ${isDownloading ? 'opacity-50 select-none' : ''}`}
     >
       {/* Grab Handle */}
-      {isAdmin && (
+      {isAdmin && !isDownloading && (
         <div
           {...attributes}
           {...listeners}
@@ -48,6 +55,11 @@ export function QueueItem({ item, position, isAdmin, onRemove, removeDisabled }:
           aria-label="Drag handle"
         >
           <GripVertical size={18} />
+        </div>
+      )}
+      {isDownloading && (
+        <div className="p-1 flex items-center justify-center">
+          <span className="loading loading-spinner loading-xs text-primary" />
         </div>
       )}
       <span className="text-base-content/40 w-6 text-center tabular-nums text-sm">
@@ -63,14 +75,9 @@ export function QueueItem({ item, position, isAdmin, onRemove, removeDisabled }:
         {!isAdmin && (
           <Lock size={12} className="text-warning" aria-label={t('admin.required')} />
         )}
-        <button
-          className="btn btn-ghost btn-xs text-error"
-          onClick={onRemove}
-          disabled={removeDisabled}
-          aria-label={t('common.remove')}
-        >
-          <Trash2 size={16} />
-        </button>
+        {!isDownloading && (
+          <QueueActionsMenu song={item.file} />
+        )}
       </div>
     </div>
   )
