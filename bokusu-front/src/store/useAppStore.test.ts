@@ -8,7 +8,22 @@ beforeEach(() => {
     isConnected: true,
     showAdminModal: false,
     pendingAdminAction: null,
+    toasts: [],
   })
+})
+
+test('pushToast appends a toast and dismissToast removes it', () => {
+  const store = useAppStore.getState()
+  expect(store.toasts).toEqual([])
+
+  act(() => store.pushToast('Hello', 'info'))
+  expect(useAppStore.getState().toasts).toEqual([
+    { id: expect.any(Number), message: 'Hello', severity: 'info' }
+  ])
+
+  const id = useAppStore.getState().toasts[0].id
+  act(() => useAppStore.getState().dismissToast(id))
+  expect(useAppStore.getState().toasts).toEqual([])
 })
 
 test('isConnected defaults to true and is settable', () => {

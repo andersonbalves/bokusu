@@ -2,6 +2,7 @@ import { Outlet, NavLink } from 'react-router-dom'
 import { ListMusic, Search, Settings } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
 import { AdminModal } from '../components/AdminModal'
+import { ToastHost } from '../components/ToastHost'
 
 const navItems = [
   { to: '/queue', label: 'Fila', Icon: ListMusic },
@@ -64,6 +65,7 @@ export function AppLayout() {
       </div>
 
       <AdminModal />
+      <ToastHost />
     </div>
   )
 }
