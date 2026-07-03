@@ -40,11 +40,9 @@ def add_to_queue(body):
 @api_queue_bp.arguments(QueueEditBody, location="json")
 def edit_queue(body, item_id):
     k = current_app.config["KARAOKE_INSTANCE"]
-    index = k.queue_manager._find_song_index(item_id)
-    if index == -1:
+    success = k.queue_manager.edit_user(item_id, body["user"])
+    if not success:
         return jsonify({"error": "Item not found"}), 404
-    k.queue_manager.queue[index]["user"] = body["user"]
-    k.queue_manager._events.emit("queue_update")
     return jsonify({"success": True})
 
 

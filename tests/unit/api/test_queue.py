@@ -1,5 +1,6 @@
 """Tests for /api/queue."""
 
+
 def test_get_queue(client, fake_karaoke):
     fake_karaoke.queue_manager.queue = [{"file": "1", "song": "Test"}]
     resp = client.get("/api/queue")
@@ -28,16 +29,14 @@ def test_put_queue_item_requires_admin(client):
 
 
 def test_put_queue_item_admin(admin_client, fake_karaoke):
-    fake_karaoke.queue_manager._find_song_index.return_value = 0
-    fake_karaoke.queue_manager.queue = [{"file": "1", "user": "Old"}]
+    fake_karaoke.queue_manager.edit_user.return_value = True
     resp = admin_client.put("/api/queue/1", json={"user": "New"})
     assert resp.status_code == 200
-    assert fake_karaoke.queue_manager.queue[0]["user"] == "New"
-    fake_karaoke.queue_manager._events.emit.assert_called_with("queue_update")
+    fake_karaoke.queue_manager.edit_user.assert_called_once_with("1", "New")
 
 
 def test_put_queue_item_not_found(admin_client, fake_karaoke):
-    fake_karaoke.queue_manager._find_song_index.return_value = -1
+    fake_karaoke.queue_manager.edit_user.return_value = False
     resp = admin_client.put("/api/queue/1", json={"user": "New"})
     assert resp.status_code == 404
 
