@@ -40,6 +40,7 @@
     "required": "admin required"
   },
   "player": {
+    "yourScore": "Your score",
     "nowPlaying": "Now playing",
     "upNext": "Up next",
     "paused": "Paused",
