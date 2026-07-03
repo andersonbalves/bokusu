@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Search } from 'lucide-react'
 import { useSearch } from '../hooks/useSearch'
-import { useAddToQueue } from '../hooks/useQueue'
+import { useEnqueue } from '../hooks/useQueue'
 import { SearchResultItem } from '../components/SearchResultItem'
 
 export function SearchPage() {
@@ -17,7 +17,7 @@ export function SearchPage() {
   }, [query])
 
   const { data: results = [], isFetching } = useSearch(debouncedQuery)
-  const addMutation = useAddToQueue()
+  const addMutation = useEnqueue()
 
   const showToast = useCallback((msg: string) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
@@ -27,16 +27,19 @@ export function SearchPage() {
 
   const handleAdd = (id: string, title: string) => {
     setAddingId(id)
-    addMutation.mutate(id, {
-      onSuccess: () => {
-        showToast(`"${title}" adicionada à fila!`)
-        setAddingId(null)
-      },
-      onError: () => {
-        showToast('Erro ao adicionar. Tente novamente.')
-        setAddingId(null)
-      },
-    })
+    addMutation.mutate(
+      { song_id: id, user: 'Guest' },
+      {
+        onSuccess: () => {
+          showToast(`"${title}" adicionada à fila!`)
+          setAddingId(null)
+        },
+        onError: () => {
+          showToast('Erro ao adicionar. Tente novamente.')
+          setAddingId(null)
+        },
+      }
+    )
   }
 
   return (

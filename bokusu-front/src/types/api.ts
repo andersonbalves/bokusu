@@ -1,17 +1,28 @@
-export interface Song {
-  id: string
+export interface QueueItem {
+  user: string
+  file: string
   title: string
-  artist?: string
-  thumbnailUrl?: string
-  singerName?: string
-  position: number
+  semitones: number
+}
+
+export interface NowPlaying {
+  now_playing: string | null
+  now_playing_user: string | null
+  now_playing_duration: number | null
+  now_playing_transpose: number
+  now_playing_url: string | null
+  now_playing_subtitle_url: string | null
+  now_playing_position: number | null
+  is_paused: boolean
+  up_next: string | null
+  next_user: string | null
+  volume: number
 }
 
 export interface SearchResult {
-  id: string
   title: string
-  artist?: string
-  thumbnailUrl?: string
+  url: string
+  id: string
 }
 
 export interface AuthStatus {

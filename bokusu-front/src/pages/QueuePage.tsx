@@ -1,27 +1,27 @@
 import { Music } from 'lucide-react'
-import { useQueue, useSkipSong } from '../hooks/useQueue'
+import { useQueue } from '../hooks/useQueue'
+import { useNowPlaying } from '../hooks/useNowPlaying'
+import { usePlayerControls } from '../hooks/usePlayerControls'
 import { useAppStore } from '../store/useAppStore'
 import { NowPlayingCard } from '../components/NowPlayingCard'
 import { QueueItem } from '../components/QueueItem'
-import type { Song } from '../types/api'
+import type { QueueItem as QueueItemType } from '../types/api'
 
 export function QueuePage() {
-  const { data: songs = [], isLoading } = useQueue()
-  const skipMutation = useSkipSong()
+  const { data: queue = [], isLoading } = useQueue()
+  const { data: nowPlaying } = useNowPlaying()
+  const { skip } = usePlayerControls()
   const { isAdmin, openAdminModal } = useAppStore()
-
-  const nowPlaying: Song | undefined = songs[0]
-  const queue = songs.slice(1)
 
   const handleSkip = () => {
     if (!isAdmin) {
-      openAdminModal(() => skipMutation.mutate())
+      openAdminModal(() => skip.mutate())
       return
     }
-    skipMutation.mutate()
+    skip.mutate()
   }
 
-  const handleRemove = (_song: Song) => {
+  const handleRemove = (_item: QueueItemType) => {
     if (!isAdmin) {
       openAdminModal(() => {
         /* remove endpoint wired in future task — backend /api/queue/<id> DELETE */
@@ -41,8 +41,8 @@ export function QueuePage() {
 
   return (
     <div className="p-4 max-w-2xl mx-auto flex flex-col gap-6">
-      {nowPlaying ? (
-        <NowPlayingCard song={nowPlaying} onSkip={handleSkip} canSkip={isAdmin} />
+      {nowPlaying?.now_playing ? (
+        <NowPlayingCard nowPlaying={nowPlaying} onSkip={handleSkip} canSkip={isAdmin} />
       ) : (
         <div className="card bg-base-200 border border-base-300">
           <div className="card-body items-center text-center gap-2">
@@ -58,12 +58,13 @@ export function QueuePage() {
             A seguir
           </h3>
           <div className="flex flex-col gap-2">
-            {queue.map((song) => (
+            {queue.map((item, idx) => (
               <QueueItem
-                key={song.id}
-                song={song}
+                key={item.file}
+                item={item}
+                position={idx + 1}
                 isAdmin={isAdmin}
-                onRemove={() => handleRemove(song)}
+                onRemove={() => handleRemove(item)}
                 removeDisabled={true}
               />
             ))}

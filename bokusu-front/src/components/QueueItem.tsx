@@ -1,23 +1,24 @@
 import { Trash2, Lock } from 'lucide-react'
-import type { Song } from '../types/api'
+import type { QueueItem } from '../types/api'
 
 interface QueueItemProps {
-  song: Song
+  item: QueueItem
+  position: number
   isAdmin: boolean
   onRemove: () => void
   removeDisabled?: boolean
 }
 
-export function QueueItem({ song, isAdmin, onRemove, removeDisabled }: QueueItemProps) {
+export function QueueItem({ item, position, isAdmin, onRemove, removeDisabled }: QueueItemProps) {
   return (
     <div className="flex items-center gap-3 p-3 rounded-box bg-base-200 hover:bg-base-300 transition-colors">
       <span className="text-base-content/40 w-6 text-center tabular-nums text-sm">
-        {song.position + 1}
+        {position}
       </span>
       <div className="flex-1 min-w-0">
-        <p className="font-medium truncate">{song.title}</p>
-        {song.singerName && (
-          <p className="text-base-content/60 text-sm truncate">{song.singerName}</p>
+        <p className="font-medium truncate">{item.title}</p>
+        {item.user && (
+          <p className="text-base-content/60 text-sm truncate">{item.user}</p>
         )}
       </div>
       <div className="flex items-center gap-1">

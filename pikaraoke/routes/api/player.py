@@ -23,6 +23,12 @@ class PitchBody(Schema):
     level = fields.Integer(required=True, validate=validate.Range(min=-12, max=12))
 
 
+@api_player_bp.route("", methods=["GET"])
+def get_player_state():
+    k = current_app.config["KARAOKE_INSTANCE"]
+    return jsonify(k.get_now_playing())
+
+
 @api_player_bp.route("/action", methods=["POST"])
 @require_admin
 @api_player_bp.arguments(ActionBody, location="json")

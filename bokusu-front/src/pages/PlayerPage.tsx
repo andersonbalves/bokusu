@@ -1,7 +1,7 @@
 import { QRCodeSVG } from 'qrcode.react'
 import { usePreferences } from '../hooks/usePreferences'
 import { useQueue } from '../hooks/useQueue'
-import type { Song } from '../types/api'
+import type { QueueItem } from '../types/api'
 
 interface PlayerPageProps {
   appUrl?: string
@@ -18,18 +18,17 @@ function extractHost(url: string): string {
 export function PlayerPage({ appUrl = window.location.origin }: PlayerPageProps) {
   const { data: preferences } = usePreferences()
   const playerMode = preferences?.splash_display_mode ?? 'integration'
-  const { data: songs = [] } = useQueue()
+  const { data: queue = [] } = useQueue()
 
-  const nowPlaying: Song | undefined = songs[0]
-  const upcoming = songs.slice(1, 4)
+  const upcoming = queue.slice(0, 3)
 
   if (playerMode === 'integration') {
     return <IntegrationMode appUrl={appUrl} upcoming={upcoming} />
   }
-  return <CinematicMode appUrl={appUrl} nowPlaying={nowPlaying} upcoming={upcoming} />
+  return <CinematicMode appUrl={appUrl} upcoming={upcoming} />
 }
 
-function IntegrationMode({ appUrl, upcoming }: { appUrl: string; upcoming: Song[] }) {
+function IntegrationMode({ appUrl, upcoming }: { appUrl: string; upcoming: QueueItem[] }) {
   const host = extractHost(appUrl)
 
   return (
@@ -48,11 +47,11 @@ function IntegrationMode({ appUrl, upcoming }: { appUrl: string; upcoming: Song[
       {upcoming.length > 0 && (
         <div className="flex flex-col items-center gap-2 mt-2">
           <p className="text-outlined text-white/40 text-xs uppercase tracking-widest">A seguir</p>
-          {upcoming.map((song) => (
-            <p key={song.id} className="text-outlined text-white/80 text-base">
-              {song.title}
-              {song.singerName && (
-                <span className="text-outlined text-white/50"> — {song.singerName}</span>
+          {upcoming.map((item) => (
+            <p key={item.file} className="text-outlined text-white/80 text-base">
+              {item.title}
+              {item.user && (
+                <span className="text-outlined text-white/50"> — {item.user}</span>
               )}
             </p>
           ))}
@@ -64,30 +63,15 @@ function IntegrationMode({ appUrl, upcoming }: { appUrl: string; upcoming: Song[
 
 function CinematicMode({
   appUrl,
-  nowPlaying,
   upcoming,
 }: {
   appUrl: string
-  nowPlaying: Song | undefined
-  upcoming: Song[]
+  upcoming: QueueItem[]
 }) {
   const host = extractHost(appUrl)
 
   return (
     <div className="w-full h-full relative">
-      {/* Top-left: Now Playing */}
-      {nowPlaying && (
-        <div className="absolute top-6 left-6 max-w-sm">
-          <p className="text-outlined text-white/50 text-xs uppercase tracking-widest mb-1">
-            Tocando
-          </p>
-          <p className="text-outlined font-display text-2xl text-white">{nowPlaying.title}</p>
-          {nowPlaying.singerName && (
-            <p className="text-outlined text-white/70 text-sm">{nowPlaying.singerName}</p>
-          )}
-        </div>
-      )}
-
       {/* Top-right: small QR */}
       <div className="absolute top-6 right-6" data-testid="qr-code">
         <div className="bg-white p-2 rounded-lg shadow-lg">

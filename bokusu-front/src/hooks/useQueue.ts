@@ -1,42 +1,27 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { Song } from '../types/api'
-
-async function fetchQueue(): Promise<Song[]> {
-  const res = await fetch('/api/queue')
-  if (!res.ok) throw new Error('Failed to fetch queue')
-  return res.json()
-}
-
-async function skipSong(): Promise<void> {
-  const res = await fetch('/api/skip', { method: 'POST' })
-  if (!res.ok) throw new Error('Failed to skip song')
-}
-
-async function addToQueue(videoId: string): Promise<void> {
-  const res = await fetch('/api/queue', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ video_id: videoId }),
-  })
-  if (!res.ok) throw new Error('Failed to add to queue')
-}
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { apiFetch } from '../lib/api'
+import { useSocketEvent } from './useSocketEvent'
+import type { QueueItem } from '../types/api'
 
 export function useQueue() {
-  return useQuery({ queryKey: ['queue'], queryFn: fetchQueue, refetchInterval: 3000 })
-}
-
-export function useSkipSong() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: skipSong,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['queue'] }),
+  const queryClient = useQueryClient()
+  useSocketEvent('queue_update', () => {
+    queryClient.invalidateQueries({ queryKey: ['queue'] })
+  })
+  return useQuery({
+    queryKey: ['queue'],
+    queryFn: () => apiFetch<QueueItem[]>('/api/queue'),
   })
 }
 
-export function useAddToQueue() {
-  const qc = useQueryClient()
+export function useEnqueue() {
+  const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: addToQueue,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['queue'] }),
+    mutationFn: ({ song_id, user }: { song_id: string; user: string }) =>
+      apiFetch<{ success: boolean }>('/api/queue', {
+        method: 'POST',
+        body: JSON.stringify({ song_id, user }),
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['queue'] }),
   })
 }
