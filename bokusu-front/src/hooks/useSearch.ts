@@ -2,10 +2,12 @@ import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '../lib/api'
 import type { SearchResult } from '../types/api'
 
+const MIN_QUERY_LENGTH = 3
+
 export function useSearch(query: string) {
   return useQuery({
     queryKey: ['search', query],
-    enabled: query.length > 0,
+    enabled: query.length >= MIN_QUERY_LENGTH,
     queryFn: () => apiFetch<SearchResult[]>(`/api/search?q=${encodeURIComponent(query)}`),
   })
 }
@@ -19,7 +21,7 @@ export interface AutocompleteResult {
 export function useSearchAutocomplete(query: string) {
   return useQuery({
     queryKey: ['searchAutocomplete', query],
-    enabled: query.length > 0,
+    enabled: query.length >= MIN_QUERY_LENGTH,
     queryFn: () =>
       apiFetch<AutocompleteResult[]>(`/api/search/autocomplete?q=${encodeURIComponent(query)}`),
   })

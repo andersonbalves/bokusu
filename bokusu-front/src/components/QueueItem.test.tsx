@@ -16,8 +16,6 @@ function renderItem(isAdmin = true, isDownloading = false) {
         item={item}
         position={2}
         isAdmin={isAdmin}
-        onRemove={() => {}}
-        removeDisabled={false}
         isDownloading={isDownloading}
       />
     </QueryClientProvider>

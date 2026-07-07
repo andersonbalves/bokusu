@@ -14,7 +14,8 @@
     "clear": "Clear queue",
     "clearConfirm": "Are you sure you want to delete all songs from the queue?",
     "addRandom": "Add random",
-    "downloadErrors": "Download errors"
+    "downloadErrors": "Download errors",
+    "randomAmount": "Amount (1-20):"
   },
   "search": {
     "placeholder": "Search songs...",

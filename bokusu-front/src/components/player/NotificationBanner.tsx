@@ -43,7 +43,7 @@ export function NotificationBanner({ isMaster, hideNotifications }: Notification
     <div
       data-testid="tv-notification"
       role="status"
-      className={`alert ${alertClass} absolute left-1/2 top-6 z-50 w-auto max-w-3xl -translate-x-1/2 text-lg shadow-xl`}
+      className={`alert ${alertClass} absolute top-6 right-6 z-40 max-w-md text-lg shadow-xl`}
     >
       {notification.message}
     </div>

@@ -30,7 +30,8 @@ Jinja templates (except `index.html`) are progressively obsoleted by the SPA.
 
 ```bash
 # Backend (Flask)
-uv run python run.py
+uv run pikaraoke                       # produção local (abre browser kiosk na TV)
+uv run pikaraoke --hide-splash-screen  # desenvolvimento/testes (sem browser automático)
 
 # Frontend dev server (hot-reload, separate port)
 cd bokusu-front && npm run dev

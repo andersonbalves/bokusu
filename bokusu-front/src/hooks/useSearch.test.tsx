@@ -27,6 +27,14 @@ test('useSearch is disabled when query is empty', () => {
   expect(result.current.fetchStatus).toBe('idle')
 })
 
+test('useSearch is disabled for queries shorter than the minimum length', () => {
+  const fetchMock = vi.fn()
+  globalThis.fetch = fetchMock
+  const { result } = renderHook(() => useSearch('ro'), { wrapper })
+  expect(result.current.fetchStatus).toBe('idle')
+  expect(fetchMock).not.toHaveBeenCalled()
+})
+
 test('useSearchAutocomplete fetches autocomplete matching songs', async () => {
   globalThis.fetch = vi.fn().mockResolvedValue({
     ok: true,
@@ -36,6 +44,14 @@ test('useSearchAutocomplete fetches autocomplete matching songs', async () => {
   await waitFor(() => expect(result.current.isSuccess).toBe(true))
   expect(result.current.data?.[0].fileName).toBe('Song.mp4')
   expect(fetch).toHaveBeenCalledWith('/api/search/autocomplete?q=queen', expect.any(Object))
+})
+
+test('useSearchAutocomplete is disabled for queries shorter than the minimum length', () => {
+  const fetchMock = vi.fn()
+  globalThis.fetch = fetchMock
+  const { result } = renderHook(() => useSearchAutocomplete('a'), { wrapper })
+  expect(result.current.fetchStatus).toBe('idle')
+  expect(fetchMock).not.toHaveBeenCalled()
 })
 
 test('useSearchPreview fetches direct stream URL', async () => {

@@ -10,7 +10,7 @@ import { NowPlayingCard } from '../components/NowPlayingCard'
 import { QueueItem } from '../components/QueueItem'
 import { DownloadErrorsCard } from '../components/DownloadErrorsCard'
 import { ConfirmModal } from '../components/ConfirmModal'
-import type { QueueItem as QueueItemType } from '../types/api'
+import type { QueueItem as QueueItemType, DownloadItem } from '../types/api'
 import {
   DndContext,
   closestCenter,
@@ -74,9 +74,9 @@ export function QueuePage() {
     const ytIdMatch = item.file.match(/(?:---([^.-]+)|\[([^\]]+)\])\.[^.]+$/)
     const ytId = ytIdMatch ? (ytIdMatch[1] || ytIdMatch[2]) : null
 
-    const matches = (dl: any) => {
+    const matches = (dl: DownloadItem | null | undefined) => {
       if (!dl) return false
-      if (ytId && dl.url && dl.url.includes(ytId)) return true
+      if (ytId && dl.url?.includes(ytId)) return true
       if (dl.title && item.title && dl.title.toLowerCase() === item.title.toLowerCase()) return true
       return false
     }
@@ -150,8 +150,6 @@ export function QueuePage() {
                     item={item}
                     position={idx + 1}
                     isAdmin={isAdmin}
-                    onRemove={() => {}}
-                    removeDisabled={true}
                     isDownloading={isDownloading(item)}
                   />
                 ))}
@@ -180,7 +178,7 @@ export function QueuePage() {
             <h3 className="font-bold text-lg">{t('queue.addRandom')}</h3>
             <div className="py-4 flex flex-col gap-2">
               <label className="label text-sm text-base-content/70">
-                Quantidade (1-20):
+                {t('queue.randomAmount')}
               </label>
               <input
                 type="number"

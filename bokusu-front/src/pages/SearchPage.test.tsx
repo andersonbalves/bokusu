@@ -13,8 +13,10 @@ const autocompleteState: { data: AutocompleteResult[] } = { data: [] }
 const enqueueMutate = vi.fn()
 const startDownloadMutate = vi.fn()
 
-vi.mock('../hooks/useSearch', () => ({ useSearch: () => searchState }))
-vi.mock('../hooks/useAutocomplete', () => ({ useAutocomplete: () => autocompleteState }))
+vi.mock('../hooks/useSearch', () => ({
+  useSearch: () => searchState,
+  useSearchAutocomplete: () => autocompleteState,
+}))
 vi.mock('../hooks/useDownloads', () => ({
   useStartDownload: () => ({ mutate: startDownloadMutate }),
 }))

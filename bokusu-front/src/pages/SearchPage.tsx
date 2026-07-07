@@ -1,8 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { Search, FolderOpen, ListPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useSearch } from '../hooks/useSearch'
-import { useAutocomplete } from '../hooks/useAutocomplete'
+import { useSearch, useSearchAutocomplete } from '../hooks/useSearch'
 import { useStartDownload } from '../hooks/useDownloads'
 import { useEnqueue } from '../hooks/useQueue'
 import { SearchResultItem } from '../components/SearchResultItem'
@@ -38,7 +37,7 @@ export function SearchPage() {
   }, [])
 
   const { data: results = [], isFetching } = useSearch(debouncedQuery)
-  const { data: suggestions = [] } = useAutocomplete(debouncedQuery)
+  const { data: suggestions = [] } = useSearchAutocomplete(debouncedQuery)
   const startDownload = useStartDownload()
   const enqueue = useEnqueue()
 
@@ -137,7 +136,7 @@ export function SearchPage() {
 
       {/* Results */}
       <div className="flex-1 px-4 py-2 flex flex-col gap-2">
-        {results.length === 0 && debouncedQuery.length > 0 && !isFetching && (
+        {results.length === 0 && debouncedQuery.length >= 3 && !isFetching && (
           <p className="text-center text-base-content/40 py-12">
             {t('search.noResults')} &quot;{debouncedQuery}&quot;
           </p>

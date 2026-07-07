@@ -14,7 +14,8 @@
     "clear": "Limpar fila",
     "clearConfirm": "Tem certeza de que deseja apagar todas as músicas da fila?",
     "addRandom": "Adicionar aleatórias",
-    "downloadErrors": "Erros de download"
+    "downloadErrors": "Erros de download",
+    "randomAmount": "Quantidade (1-20):"
   },
   "search": {
     "placeholder": "Buscar músicas...",

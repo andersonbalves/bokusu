@@ -9,8 +9,6 @@ interface QueueItemProps {
   item: QueueItemType
   position: number
   isAdmin: boolean
-  onRemove: () => void
-  removeDisabled?: boolean
   isDownloading?: boolean
 }
 
