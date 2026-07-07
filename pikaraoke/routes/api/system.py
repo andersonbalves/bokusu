@@ -4,12 +4,13 @@ import threading
 import time
 
 import psutil
-from flask import jsonify, Response
+from flask import Response, jsonify
 from flask_smorest import Blueprint
 
-from pikaraoke.lib.current_app import delayed_halt, get_karaoke_instance
-from pikaraoke.lib.youtube_dl import upgrade_youtubedl
 from pikaraoke import VERSION
+from pikaraoke.lib.current_app import delayed_halt, get_karaoke_instance
+from pikaraoke.lib.get_platform import is_raspberry_pi
+from pikaraoke.lib.youtube_dl import upgrade_youtubedl
 from pikaraoke.routes.api._utils import require_admin
 
 api_system_bp = Blueprint("api_system", __name__, url_prefix="/api")
@@ -77,6 +78,13 @@ def update_ytdl() -> Response:
 
     threading.Thread(target=do_update).start()
     return jsonify({"status": "started"})
+
+
+@api_system_bp.route("/system/connection-info", methods=["GET"])
+def connection_info() -> Response:
+    """Public connection metadata for player screens (QR code URL, platform)."""
+    k = get_karaoke_instance()
+    return jsonify({"url": k.url, "isRaspberryPi": is_raspberry_pi()})
 
 
 @api_system_bp.route("/system/<action>", methods=["POST"])

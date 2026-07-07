@@ -26,9 +26,13 @@ const mockPrefs: Partial<Preferences> = {
 
 const nowPlayingState = { data: mockNowPlaying }
 const prefsState = { data: mockPrefs }
+let connectionInfoState: { data: { url: string; isRaspberryPi: boolean } | undefined } = {
+  data: undefined,
+}
 
 vi.mock('../hooks/useNowPlaying', () => ({ useNowPlaying: () => nowPlayingState }))
 vi.mock('../hooks/usePreferences', () => ({ usePreferences: () => prefsState }))
+vi.mock('../hooks/useSystem', () => ({ useConnectionInfo: () => connectionInfoState }))
 vi.mock('../hooks/useQueue', () => ({ useQueue: () => ({ data: [] }) }))
 vi.mock('../hooks/useScorePhrases', () => ({
   useScorePhrases: () => ({ data: { low: ['a'], mid: ['b'], high: ['c'] } }),
@@ -57,6 +61,7 @@ import { PlayerPage } from './PlayerPage'
 beforeEach(() => {
   nowPlayingState.data = { ...mockNowPlaying }
   prefsState.data = { ...mockPrefs }
+  connectionInfoState = { data: undefined }
 })
 
 test('renders idle screen when nothing is playing', () => {
@@ -97,4 +102,12 @@ test('playing overlay shows title and up next unless hide_overlay', () => {
 test('always renders the notification banner host', () => {
   render(<PlayerPage appUrl="http://10.0.0.5:5555" />)
   expect(screen.getByTestId('tv-notification-host')).toBeTruthy()
+})
+
+test('QR code uses the server-reported URL when no appUrl prop is given', () => {
+  connectionInfoState = { data: { url: 'http://192.168.0.10:5555', isRaspberryPi: false } }
+  nowPlayingState.data = { ...mockNowPlaying, now_playing_url: '/stream/abc.m3u8' }
+  render(<PlayerPage />)
+  fireEvent.click(screen.getByTestId('karaoke-video'))
+  expect(screen.getByText('192.168.0.10:5555')).toBeInTheDocument()
 })

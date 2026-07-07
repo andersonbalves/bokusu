@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cpu, Database, HardDrive, RefreshCw, LogOut, Power, Minimize, ShieldAlert } from 'lucide-react'
-import { useSystemInfo, useLibraryStats, useSystemAction } from '../../hooks/useSystem'
+import { useSystemInfo, useLibraryStats, useSystemAction, useConnectionInfo } from '../../hooks/useSystem'
 import { useAppStore } from '../../store/useAppStore'
 import { ConfirmModal } from '../ConfirmModal'
 
@@ -10,6 +10,7 @@ export function SystemPanel() {
   const isAdmin = useAppStore((s) => s.isAdmin)
   const { data: info, isLoading: infoLoading } = useSystemInfo()
   const { data: stats, isLoading: statsLoading } = useLibraryStats()
+  const { data: connectionInfo } = useConnectionInfo()
   const systemAction = useSystemAction()
   const pushToast = useAppStore((s) => s.pushToast)
 
@@ -153,14 +154,16 @@ export function SystemPanel() {
               <LogOut size={14} />
               {t('system.quit')}
             </button>
-            <button
-              type="button"
-              className="btn btn-sm btn-error btn-outline flex items-center gap-1.5"
-              onClick={() => setConfirmAction('expand-fs')}
-            >
-              <Minimize size={14} />
-              {t('system.expandFs')}
-            </button>
+            {connectionInfo?.isRaspberryPi && (
+              <button
+                type="button"
+                className="btn btn-sm btn-error btn-outline flex items-center gap-1.5"
+                onClick={() => setConfirmAction('expand-fs')}
+              >
+                <Minimize size={14} />
+                {t('system.expandFs')}
+              </button>
+            )}
           </div>
         </div>
       </section>

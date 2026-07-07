@@ -43,3 +43,16 @@ export function useSystemAction() {
       apiFetch<{ status: string }>(`/api/system/${action}`, { method: 'POST' }),
   })
 }
+
+export interface ConnectionInfo {
+  url: string
+  isRaspberryPi: boolean
+}
+
+export function useConnectionInfo() {
+  return useQuery({
+    queryKey: ['connectionInfo'],
+    staleTime: Infinity,
+    queryFn: () => apiFetch<ConnectionInfo>('/api/system/connection-info'),
+  })
+}
