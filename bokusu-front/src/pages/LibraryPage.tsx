@@ -25,6 +25,15 @@ export function LibraryPage() {
   const deleteFile = useDeleteFile()
   const renameFile = useRenameFile()
 
+  // Aguarda o /api/auth resolver antes de decidir; evita expulsar admin no F5
+  if (isAdmin === null) {
+    return (
+      <div className="flex justify-center items-center min-h-[50vh]">
+        <span className="loading loading-spinner loading-lg text-primary" />
+      </div>
+    )
+  }
+
   // Se não for admin, redireciona para as configurações
   if (!isAdmin) {
     return <Navigate to="/settings" replace />

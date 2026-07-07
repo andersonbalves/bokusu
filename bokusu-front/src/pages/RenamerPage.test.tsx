@@ -36,6 +36,14 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+test('shows loading state while auth check is pending instead of redirecting', () => {
+  useAppStore.setState({ isAdmin: null })
+  render(<RenamerPage />, { wrapper })
+  expect(screen.queryByText(/renomeador inteligente/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/configura/i)).not.toBeInTheDocument()
+  expect(document.querySelector('.loading')).toBeInTheDocument()
+})
+
 test('renders renamer page title and song suggestion list', async () => {
   render(<RenamerPage />, { wrapper })
   expect(await screen.findByText(/renomeador inteligente/i)).toBeInTheDocument()

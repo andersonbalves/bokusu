@@ -48,3 +48,11 @@ test('redirects non-admin users to settings', () => {
   render(<LibraryPage />, { wrapper })
   expect(screen.queryByText(/gerenciar biblioteca/i)).not.toBeInTheDocument()
 })
+
+test('shows loading state while auth check is pending instead of redirecting', () => {
+  useAppStore.setState({ isAdmin: null })
+  render(<LibraryPage />, { wrapper })
+  expect(screen.queryByText(/gerenciar biblioteca/i)).not.toBeInTheDocument()
+  expect(screen.queryByText(/configura/i)).not.toBeInTheDocument()
+  expect(document.querySelector('.loading')).toBeInTheDocument()
+})

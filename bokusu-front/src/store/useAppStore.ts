@@ -8,7 +8,7 @@ export interface Toast {
 
 interface AppState {
   theme: 'aqua' | 'acid'
-  isAdmin: boolean
+  isAdmin: boolean | null
   isConnected: boolean
   showAdminModal: boolean
   pendingAdminAction: (() => void) | null
@@ -26,7 +26,7 @@ let nextToastId = 1
 
 export const useAppStore = create<AppState>((set) => ({
   theme: 'aqua',
-  isAdmin: false,
+  isAdmin: null,
   isConnected: true,
   showAdminModal: false,
   pendingAdminAction: null,
