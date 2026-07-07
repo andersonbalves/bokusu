@@ -1,14 +1,20 @@
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import { setLanguage } from '../../lib/i18n'
+import { useSetPreference } from '../../hooks/usePreferences'
+
+const BACKEND_LANGUAGE_CODES: Record<string, string> = { 'pt-BR': 'pt_BR', en: 'en' }
 
 export function LanguageSection() {
   const { t, i18n } = useTranslation()
+  const setPreference = useSetPreference()
 
   const currentLanguage = i18n.language.startsWith('pt') ? 'pt-BR' : 'en'
 
   const handleChange = (lang: string) => {
     setLanguage(lang)
+    // Mantém o idioma do backend (notificações via flask_babel) em sincronia com a UI
+    setPreference.mutate({ key: 'preferred_language', value: BACKEND_LANGUAGE_CODES[lang] ?? 'en' })
   }
 
   return (

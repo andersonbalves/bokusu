@@ -55,6 +55,7 @@ export interface Preferences {
   low_score_phrases: string
   mid_score_phrases: string
   high_score_phrases: string
+  preferred_language?: string | null
 }
 
 export interface FileItem {
