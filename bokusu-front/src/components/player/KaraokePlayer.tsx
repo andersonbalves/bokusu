@@ -1,6 +1,6 @@
 import Hls from 'hls.js'
 import SubtitlesOctopus from 'libass-wasm'
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import workerUrl from 'libass-wasm/dist/js/subtitles-octopus-worker.js?url'
 import arialFontUrl from '../../assets/fonts/Arial.ttf?url'
 import fallbackFontUrl from '../../assets/fonts/DroidSansFallback.ttf?url'
@@ -9,6 +9,7 @@ import { socket } from '../../lib/socket'
 
 const POSITION_HEARTBEAT_MS = 1000
 const SLAVE_DRIFT_TOLERANCE_S = 2
+const MAX_RECOVERY_ATTEMPTS = 2
 
 export interface KaraokePlayerProps {
   url: string
@@ -32,6 +33,7 @@ export function KaraokePlayer({
   onError,
 }: KaraokePlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const hlsActiveRef = useRef(false)
 
   // Carrega a mídia: hls.js para .m3u8 sem suporte nativo; src direto nos demais casos
   useEffect(() => {
@@ -40,12 +42,26 @@ export function KaraokePlayer({
     let hls: Hls | null = null
     if (url.endsWith('.m3u8') && !video.canPlayType('application/vnd.apple.mpegurl')) {
       hls = new Hls({ startPosition: 0 })
+      hlsActiveRef.current = true
       hls.loadSource(url)
       hls.attachMedia(video)
+      // Chrome suspende o pipeline MSE após ~5min de pausa; erro fatal de mídia
+      // é recuperável — só desiste depois de esgotar as tentativas
+      let networkRetries = 0
+      let mediaRetries = 0
       hls.on(Hls.Events.ERROR, (_, data) => {
-        if (data.fatal) {
-          onError()
+        if (!data.fatal || !hls) return
+        if (data.type === Hls.ErrorTypes.NETWORK_ERROR && networkRetries < MAX_RECOVERY_ATTEMPTS) {
+          networkRetries += 1
+          hls.startLoad()
+          return
         }
+        if (data.type === Hls.ErrorTypes.MEDIA_ERROR && mediaRetries < MAX_RECOVERY_ATTEMPTS) {
+          mediaRetries += 1
+          hls.recoverMediaError()
+          return
+        }
+        onError()
       })
     } else {
       video.src = url
@@ -55,11 +71,17 @@ export function KaraokePlayer({
       setTimeout(() => void videoRef.current?.play().catch(() => undefined), 1000)
     })
     return () => {
+      hlsActiveRef.current = false
       hls?.destroy()
       video.removeAttribute('src')
       video.load()
     }
   }, [url, onError])
+
+  const handleNativeError = useCallback(() => {
+    // Com hls.js ativo o próprio hls decide se o erro é fatal/recuperável
+    if (!hlsActiveRef.current) onError()
+  }, [onError])
 
   // Legendas ASS (CDG e afins chegam como vídeo; ASS chega por now_playing_subtitle_url)
   useEffect(() => {
@@ -122,7 +144,7 @@ export function KaraokePlayer({
       className="h-full w-full bg-black object-contain"
       onCanPlay={onCanPlay}
       onEnded={onEnded}
-      onError={onError}
+      onError={handleNativeError}
     />
   )
 }
