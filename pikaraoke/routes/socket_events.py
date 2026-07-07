@@ -42,19 +42,45 @@ def setup_socket_events(socketio):
 
     @socketio.on("register_splash")
     def register_splash() -> None:
-        """Handle splash screen registration and assign master/slave roles."""
+        """Handle splash screen registration and assign master/slave roles.
+
+        Idempotent: re-registration by the current master (e.g. SPA remount or
+        React StrictMode's double effect invoke) keeps it as master instead of
+        demoting it to slave.
+        """
         global master_splash_id
         sid = request.sid
         splash_connections.add(sid)
         logging.info(f"Splash screen registered: {sid}")
 
-        if master_splash_id is None:
+        if master_splash_id is None or master_splash_id == sid:
             master_splash_id = sid
             socketio.emit("splash_role", "master", room=sid)
             logging.info(f"Master splash screens assigned: {sid}")
         else:
             socketio.emit("splash_role", "slave", room=sid)
             logging.info(f"Slave splash screens assigned: {sid}")
+
+    def _remove_splash(sid: str) -> None:
+        """Remove a splash connection and elect a new master if needed."""
+        global master_splash_id
+        if sid not in splash_connections:
+            return
+        splash_connections.remove(sid)
+        logging.info(f"Splash screen removed: {sid}")
+        if sid == master_splash_id:
+            master_splash_id = None
+            logging.info("Master splash removed, electing new master")
+            if splash_connections:
+                new_master = next(iter(splash_connections))
+                master_splash_id = new_master
+                socketio.emit("splash_role", "master", room=new_master)
+                logging.info(f"New master splash elected: {new_master}")
+
+    @socketio.on("unregister_splash")
+    def unregister_splash() -> None:
+        """Handle a player page leaving without disconnecting the socket (SPA navigation)."""
+        _remove_splash(request.sid)
 
     @socketio.on("playback_position")
     def handle_playback_position(position: float) -> None:
@@ -74,17 +100,4 @@ def setup_socket_events(socketio):
     @socketio.on("disconnect")
     def handle_disconnect() -> None:
         """Handle Socket.IO client disconnection and manage splash role handover."""
-        global master_splash_id
-        sid = request.sid
-        if sid in splash_connections:
-            splash_connections.remove(sid)
-            logging.info(f"Splash screen disconnected: {sid}")
-            if sid == master_splash_id:
-                master_splash_id = None
-                logging.info("Master splash disconnected, electing new master")
-                if splash_connections:
-                    # Elect new master from remaining connections
-                    new_master = next(iter(splash_connections))
-                    master_splash_id = new_master
-                    socketio.emit("splash_role", "master", room=new_master)
-                    logging.info(f"New master splash elected: {new_master}")
+        _remove_splash(request.sid)

@@ -54,3 +54,10 @@ test('cleans up listeners on unmount', () => {
   expect(handlers['connect'] ?? []).toHaveLength(0)
   expect(handlers['splash_role'] ?? []).toHaveLength(0)
 })
+
+test('emits unregister_splash on unmount', () => {
+  const { unmount } = renderHook(() => useSplashRole())
+  emit.mockClear()
+  unmount()
+  expect(emit).toHaveBeenCalledWith('unregister_splash')
+})

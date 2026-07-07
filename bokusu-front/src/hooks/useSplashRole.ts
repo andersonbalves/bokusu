@@ -18,6 +18,7 @@ export function useSplashRole(): SplashRole | null {
     return () => {
       socket.off('connect', register)
       socket.off('splash_role', onRole)
+      if (socket.connected) socket.emit('unregister_splash')
     }
   }, [])
 
