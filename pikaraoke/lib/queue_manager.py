@@ -7,6 +7,7 @@ and fair queue algorithm.
 from __future__ import annotations
 
 import logging
+import os
 import random
 from collections.abc import Callable
 from typing import Any
@@ -104,6 +105,10 @@ class QueueManager:
     ) -> list[bool | str]:
         """Add a song to the queue. Returns [success, message]."""
         title = self._resolve_title(song_path)
+
+        if not os.path.exists(song_path):
+            logging.warning(f"Refusing to enqueue missing file: {song_path}")
+            return [False, _("Song file not found: %s") % title]
 
         if self.is_song_in_queue(song_path):
             logging.warning("Song is already in queue, will not add: " + song_path)

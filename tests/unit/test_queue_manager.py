@@ -11,6 +11,12 @@ from pikaraoke.lib.preference_manager import PreferenceManager
 from pikaraoke.lib.queue_manager import QueueManager
 
 
+@pytest.fixture(autouse=True)
+def songs_exist_by_default(monkeypatch):
+    """Existing tests enqueue fake paths; treat files as present unless a test opts out."""
+    monkeypatch.setattr("pikaraoke.lib.queue_manager.os.path.exists", lambda path: True)
+
+
 def extract_title(path: str, *args) -> str:
     """Extract title from song path for testing."""
     return path.split("/")[-1].split("---")[0]
@@ -124,6 +130,15 @@ class TestQueueManagerEnqueue:
         queue_manager.enqueue("/songs/test---abc.mp4", "User1")
 
         assert len(captured) == 1
+
+    def test_enqueue_rejects_nonexistent_file(self, queue_manager, monkeypatch):
+        """Enqueuing a nonexistent file should fail."""
+        monkeypatch.setattr("pikaraoke.lib.queue_manager.os.path.exists", lambda path: False)
+        success, message = queue_manager.enqueue("/nonexistent/path/song---dQw4w9WgXcQ.mp4", "Guest")
+
+        assert success is False
+        assert "not found" in message.lower() or "não encontrado" in message.lower()
+        assert queue_manager.queue == []
 
 
 class TestQueueManagerFairQueue:
