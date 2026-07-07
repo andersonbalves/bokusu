@@ -313,3 +313,13 @@ class TestResetNowPlayingNotification:
         mock_karaoke.reset_now_playing_notification()
 
         assert mock_karaoke.now_playing_notification is None
+
+
+class TestSendNotification:
+    """Tests for the send_notification method."""
+
+    def test_send_notification_overwrites_pending_notification(self, mock_karaoke):
+        """Test that new notifications overwrite pending ones instead of being dropped."""
+        mock_karaoke.send_notification("first message", "info")
+        mock_karaoke.send_notification("second message", "danger")
+        assert mock_karaoke.now_playing_notification == "second message::is-danger"

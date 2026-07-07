@@ -407,10 +407,6 @@ class Karaoke:
         # Color should be bulma compatible: primary, warning, success, danger
         hide_notifications = self.preferences.get_or_default("hide_notifications")
         if not hide_notifications:
-            # don't allow new messages to clobber existing commands, one message at a time
-            # other commands have a higher priority
-            if self.now_playing_notification is not None:
-                return
             self.now_playing_notification = message + "::is-" + color
             # Emit notification via SocketIO for event-driven architecture
             if self.socketio:
