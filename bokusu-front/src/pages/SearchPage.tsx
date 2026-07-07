@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { Search, FolderOpen } from 'lucide-react'
+import { Search, FolderOpen, ListPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useSearch } from '../hooks/useSearch'
 import { useAutocomplete } from '../hooks/useAutocomplete'
 import { useStartDownload } from '../hooks/useDownloads'
+import { useEnqueue } from '../hooks/useQueue'
 import { SearchResultItem } from '../components/SearchResultItem'
 import { PreviewModal } from '../components/PreviewModal'
 import type { SearchResult } from '../types/api'
@@ -39,6 +40,7 @@ export function SearchPage() {
   const { data: results = [], isFetching } = useSearch(debouncedQuery)
   const { data: suggestions = [] } = useAutocomplete(debouncedQuery)
   const startDownload = useStartDownload()
+  const enqueue = useEnqueue()
 
   const showToast = useCallback((msg: string) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
@@ -99,16 +101,33 @@ export function SearchPage() {
               <FolderOpen size={12} /> {t('search.localSuggestions')}
             </li>
             {suggestions.map((s) => (
-              <li key={s.path}>
+              <li key={s.path} className="flex flex-row items-center">
                 <button
                   type="button"
                   onClick={() => {
                     setQuery(s.fileName)
                     setShowSuggestions(false)
                   }}
-                  className="truncate text-sm py-2 px-3 hover:bg-base-300"
+                  className="flex-1 truncate text-sm py-2 px-3 hover:bg-base-300"
                 >
                   {s.fileName}
+                </button>
+                <button
+                  type="button"
+                  aria-label={t('search.addLocalToQueue')}
+                  className="btn btn-ghost btn-sm btn-circle text-primary"
+                  onClick={() => {
+                    setShowSuggestions(false)
+                    enqueue.mutate(
+                      { song_id: s.path, user: 'Guest' },
+                      {
+                        onSuccess: () => showToast(t('search.added', { title: s.fileName })),
+                        onError: () => showToast(t('search.error')),
+                      }
+                    )
+                  }}
+                >
+                  <ListPlus size={16} />
                 </button>
               </li>
             ))}

@@ -26,7 +26,8 @@
     "addToQueue": "Adicionar à fila",
     "downloadStarted": "Download de \"{{title}}\" iniciado!",
     "localSuggestions": "Sugestões locais",
-    "previewError": "Erro ao carregar prévia"
+    "previewError": "Erro ao carregar prévia",
+    "addLocalToQueue": "Adicionar à fila"
   },
   "admin": {
     "title": "Acesso Administrador",

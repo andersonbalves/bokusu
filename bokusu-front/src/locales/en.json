@@ -26,7 +26,8 @@
     "addToQueue": "Add to queue",
     "downloadStarted": "Download of \"{{title}}\" started!",
     "localSuggestions": "Local suggestions",
-    "previewError": "Error loading preview"
+    "previewError": "Error loading preview",
+    "addLocalToQueue": "Add to queue"
   },
   "admin": {
     "title": "Admin Access",
