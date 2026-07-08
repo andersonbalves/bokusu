@@ -80,18 +80,21 @@ uv run pre-commit run --config code_quality/.pre-commit-config.yaml --all-files
 ## Key Conventions
 
 **YouTube filenames** use exactly 11-character IDs — two supported patterns only:
+
 - `Title---dQw4w9WgXcQ.mp4` (triple dash, PiKaraoke legacy)
 - `Title [dQw4w9WgXcQ].mp4` (brackets, yt-dlp)
 
 **`pikaraoke/templates/index.html` and `pikaraoke/static/assets/`** are build artifacts. Do not edit. Do not commit unless rebuilding is not feasible.
 
 **Two React Router layouts:**
+
 - App/Management layout — controls, admin, queue management
 - Player/TV layout — fullscreen display for the screen facing singers
 
 ## Code Style
 
 ### TypeScript/React
+
 - Strict TypeScript — no `any`
 - Functional components only
 - Zustand for UI state, TanStack Query for server state — never mix
@@ -99,6 +102,7 @@ uv run pre-commit run --config code_quality/.pre-commit-config.yaml --all-files
 - TailwindCSS + DaisyUI utilities; no inline styles
 
 ### Python
+
 - PEP 8, 4 spaces, type hints with modern syntax (`str | None`)
 - Catch specific exceptions; never bare `except:`
 - Use real `EventSystem` and `PreferenceManager` in tests (they're lightweight)

@@ -1,7 +1,6 @@
 """Tests for /api/files."""
 
 from unittest.mock import MagicMock, patch
-import os
 
 
 def test_browse_lists_files(client, fake_karaoke):
@@ -23,7 +22,10 @@ def test_browse_lists_files(client, fake_karaoke):
 
 def test_browse_filters_by_query(client, fake_karaoke):
     fake_karaoke.song_manager = MagicMock()
-    fake_karaoke.song_manager.songs = ["/songs/Queen - Bohemian.mp4", "/songs/Beatles - Yesterday.mp4"]
+    fake_karaoke.song_manager.songs = [
+        "/songs/Queen - Bohemian.mp4",
+        "/songs/Beatles - Yesterday.mp4",
+    ]
     fake_karaoke.song_manager.display_name_from_path.side_effect = lambda x: x.split("/")[-1]
     fake_karaoke.browse_results_per_page = 10
 

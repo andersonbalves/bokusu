@@ -52,10 +52,10 @@ test('renders nothing when idle', () => {
 test('non-admin skip click opens admin modal and does not fire request', () => {
   const openSpy = vi.spyOn(useAppStore.getState(), 'openAdminModal')
   renderWithClient(<MiniPlayer onExpand={() => {}} />)
-  
+
   const fetchMock = vi.mocked(globalThis.fetch)
   fetchMock.mockClear()
-  
+
   fireEvent.click(screen.getByRole('button', { name: /skip|pular/i }))
   expect(openSpy).toHaveBeenCalled()
   expect(fetchMock).not.toHaveBeenCalled()
@@ -64,10 +64,10 @@ test('non-admin skip click opens admin modal and does not fire request', () => {
 test('non-admin play/pause click opens admin modal and does not fire request', () => {
   const openSpy = vi.spyOn(useAppStore.getState(), 'openAdminModal')
   renderWithClient(<MiniPlayer onExpand={() => {}} />)
-  
+
   const fetchMock = vi.mocked(globalThis.fetch)
   fetchMock.mockClear()
-  
+
   fireEvent.click(screen.getByRole('button', { name: /play|tocar|pause|pausar/i }))
   expect(openSpy).toHaveBeenCalled()
   expect(fetchMock).not.toHaveBeenCalled()
@@ -76,10 +76,10 @@ test('non-admin play/pause click opens admin modal and does not fire request', (
 test('admin buttons click fires mutations directly', async () => {
   useAppStore.setState({ isAdmin: true })
   renderWithClient(<MiniPlayer onExpand={() => {}} />)
-  
+
   const fetchMock = vi.mocked(globalThis.fetch)
   fetchMock.mockClear()
-  
+
   // Click skip
   fireEvent.click(screen.getByRole('button', { name: /skip|pular/i }))
   await waitFor(() => {
@@ -91,7 +91,7 @@ test('admin buttons click fires mutations directly', async () => {
       })
     )
   })
-  
+
   // Click play/pause (currently not paused, so it should trigger pause)
   fetchMock.mockClear()
   fireEvent.click(screen.getByRole('button', { name: /play|tocar|pause|pausar/i }))
@@ -108,10 +108,10 @@ test('admin buttons click fires mutations directly', async () => {
 
 test('renders lock overlay only when not admin', () => {
   const { rerender } = renderWithClient(<MiniPlayer onExpand={() => {}} />)
-  
+
   // Under non-admin, lock icons are present in the DOM (we can query them by class or select elements)
   expect(document.querySelector('.lucide-lock')).toBeInTheDocument()
-  
+
   // Change state to admin
   useAppStore.setState({ isAdmin: true })
   rerender(
@@ -119,7 +119,7 @@ test('renders lock overlay only when not admin', () => {
       <MiniPlayer onExpand={() => {}} />
     </QueryClientProvider>
   )
-  
+
   expect(document.querySelector('.lucide-lock')).not.toBeInTheDocument()
 })
 

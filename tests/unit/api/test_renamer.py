@@ -1,13 +1,14 @@
 """Tests for /api/renamer."""
 
 from unittest.mock import MagicMock, patch
-import os
 
 
 def _setup_songs(fake_karaoke):
     fake_karaoke.song_manager = MagicMock()
     fake_karaoke.song_manager.songs = ["/x/Alpha.mp4", "/x/Beta.mp4"]
-    fake_karaoke.song_manager.filename_from_path.side_effect = lambda p: p.rsplit("/", 1)[-1].removesuffix(".mp4")
+    fake_karaoke.song_manager.filename_from_path.side_effect = lambda p: p.rsplit("/", 1)[
+        -1
+    ].removesuffix(".mp4")
 
 
 def test_songs_requires_admin(client):
@@ -58,12 +59,19 @@ def test_only_mismatched_filters(mock_get_correct_name, admin_client, fake_karao
 
 
 def test_rename_requires_admin(client):
-    assert client.post("/api/renamer/rename", json={"old_name": "/x/a.mp4", "new_name": "b"}).status_code == 403
+    assert (
+        client.post(
+            "/api/renamer/rename", json={"old_name": "/x/a.mp4", "new_name": "b"}
+        ).status_code
+        == 403
+    )
 
 
 def test_rename_refuses_queued_song(admin_client, fake_karaoke):
     fake_karaoke.queue_manager.is_song_in_queue.return_value = True
-    resp = admin_client.post("/api/renamer/rename", json={"old_name": "/x/Alpha.mp4", "new_name": "New Alpha"})
+    resp = admin_client.post(
+        "/api/renamer/rename", json={"old_name": "/x/Alpha.mp4", "new_name": "New Alpha"}
+    )
     assert resp.status_code == 409
     assert resp.get_json() == {"error": "Song is in the current queue"}
 
@@ -72,7 +80,9 @@ def test_rename_refuses_queued_song(admin_client, fake_karaoke):
 def test_rename_refuses_missing_file(mock_isfile, admin_client, fake_karaoke):
     mock_isfile.return_value = False
     fake_karaoke.queue_manager.is_song_in_queue.return_value = False
-    resp = admin_client.post("/api/renamer/rename", json={"old_name": "/x/Alpha.mp4", "new_name": "New Alpha"})
+    resp = admin_client.post(
+        "/api/renamer/rename", json={"old_name": "/x/Alpha.mp4", "new_name": "New Alpha"}
+    )
     assert resp.status_code == 404
     assert resp.get_json() == {"error": "Source song file not found"}
 
@@ -83,7 +93,9 @@ def test_rename_delegates(mock_isfile, admin_client, fake_karaoke):
     fake_karaoke.song_manager = MagicMock()
     fake_karaoke.queue_manager.is_song_in_queue.return_value = False
 
-    resp = admin_client.post("/api/renamer/rename", json={"old_name": "/x/Alpha.mp4", "new_name": "New Alpha"})
+    resp = admin_client.post(
+        "/api/renamer/rename", json={"old_name": "/x/Alpha.mp4", "new_name": "New Alpha"}
+    )
     assert resp.status_code == 200
     assert resp.get_json() == {"success": True, "message": "Song renamed"}
     fake_karaoke.song_manager.rename.assert_called_once_with("/x/Alpha.mp4", "New Alpha")

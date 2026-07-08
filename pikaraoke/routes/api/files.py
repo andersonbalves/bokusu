@@ -3,7 +3,7 @@
 import logging
 import os
 
-from flask import jsonify, Response
+from flask import Response, jsonify
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 
@@ -43,13 +43,13 @@ def browse(query: dict) -> Response:
     if query["letter"]:
         letter = query["letter"].lower()
         songs = [
-            s
-            for s in songs
-            if k.song_manager.display_name_from_path(s).lower().startswith(letter)
+            s for s in songs if k.song_manager.display_name_from_path(s).lower().startswith(letter)
         ]
     if query["sort"] == "date":
         # Resolve mtime based on full paths
-        songs = sorted(songs, key=lambda s: os.path.getmtime(s) if os.path.exists(s) else 0, reverse=True)
+        songs = sorted(
+            songs, key=lambda s: os.path.getmtime(s) if os.path.exists(s) else 0, reverse=True
+        )
 
     per_page = k.browse_results_per_page
     page = max(query["page"], 1)

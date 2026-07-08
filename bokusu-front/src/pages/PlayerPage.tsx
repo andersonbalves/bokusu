@@ -111,7 +111,7 @@ function PlayingOverlay({
           </p>
         )}
       </div>
-      
+
       {!hideUrl && (
         <div className="absolute bottom-6 left-6 z-30 flex items-center gap-4">
           <div className="bg-white p-2 rounded-lg shadow-lg">

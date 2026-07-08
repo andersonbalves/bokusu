@@ -37,16 +37,19 @@ Fatos do código real que as tasks assumem:
 - `PlayerLayout` (`src/layouts/PlayerLayout.tsx`) já envolve a rota `/player` com fullscreen preto.
 - O `PlayerPage.tsx` atual só renderiza a splash (modos integration/cinematic) — vira o `IdleScreen` na Task 7.
 
----
+______________________________________________________________________
 
 ### Task 1: Backend — `GET /api/player/score-phrases` + broadcast `restart`
 
 **Files:**
+
 - Modify: `pikaraoke/routes/api/player.py`
 - Test: `tests/unit/api/test_player.py`
 
 **Interfaces:**
+
 - Consumes: `_get_active_score_phrases(k)` de `pikaraoke/routes/splash.py` (retorna `dict[str, list[str]]` com chaves `low`/`mid`/`high`); `broadcast_event(event)` de `pikaraoke/lib/current_app.py`.
+
 - Produces: `GET /api/player/score-phrases` → `200 {"low": [...], "mid": [...], "high": [...]}` (público, sem admin); `POST /api/player/action {"action": "restart"}` passa a broadcastar o evento socket `restart` quando bem-sucedido.
 
 - [ ] **Step 1: Escrever os testes que falham**
@@ -71,7 +74,9 @@ def test_get_score_phrases_custom(client, fake_karaoke):
 
 
 @patch("pikaraoke.routes.api.player.broadcast_event")
-def test_post_player_action_restart_broadcasts_restart(mock_broadcast, admin_client, fake_karaoke):
+def test_post_player_action_restart_broadcasts_restart(
+    mock_broadcast, admin_client, fake_karaoke
+):
     fake_karaoke.restart.return_value = True
     resp = admin_client.post("/api/player/action", json={"action": "restart"})
     assert resp.status_code == 200
@@ -138,17 +143,20 @@ git add pikaraoke/routes/api/player.py tests/unit/api/test_player.py
 git commit -m "feat: score-phrases endpoint and restart broadcast in player API"
 ```
 
----
+______________________________________________________________________
 
 ### Task 2: Tipo `ScorePhrases` + hook `useScorePhrases`
 
 **Files:**
+
 - Modify: `bokusu-front/src/types/api.ts`
 - Create: `bokusu-front/src/hooks/useScorePhrases.ts`
 - Test: `bokusu-front/src/hooks/useScorePhrases.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `apiFetch` (`src/lib/api.ts`), `useSocketEvent` (`src/hooks/useSocketEvent.ts`), endpoint da Task 1.
+
 - Produces: `interface ScorePhrases { low: string[]; mid: string[]; high: string[] }` em `types/api.ts`; `useScorePhrases(): UseQueryResult<ScorePhrases>` — usado pelo `ScoreScreen` (Task 6) e `PlayerPage` (Task 9).
 
 - [ ] **Step 1: Escrever o teste que falha**
@@ -248,16 +256,19 @@ git add bokusu-front/src/types/api.ts bokusu-front/src/hooks/useScorePhrases.ts 
 git commit -m "feat: useScorePhrases hook with socket sync"
 ```
 
----
+______________________________________________________________________
 
 ### Task 3: Hook `useSplashRole` (registro master/slave)
 
 **Files:**
+
 - Create: `bokusu-front/src/hooks/useSplashRole.ts`
 - Test: `bokusu-front/src/hooks/useSplashRole.test.ts`
 
 **Interfaces:**
+
 - Consumes: `socket` de `src/lib/socket.ts`.
+
 - Produces: `type SplashRole = 'master' | 'slave'`; `useSplashRole(): SplashRole | null` — `null` até o servidor responder. Usado pelo `PlayerPage` (Task 9). Emite `register_splash` a cada `connect` (cobre reconexões) e imediatamente se já conectado.
 
 - [ ] **Step 1: Escrever o teste que falha**
@@ -371,15 +382,17 @@ git add bokusu-front/src/hooks/useSplashRole.ts bokusu-front/src/hooks/useSplash
 git commit -m "feat: useSplashRole hook for master/slave splash election"
 ```
 
----
+______________________________________________________________________
 
 ### Task 4: Hook `usePlayerStateMachine`
 
 **Files:**
+
 - Create: `bokusu-front/src/hooks/usePlayerStateMachine.ts`
 - Test: `bokusu-front/src/hooks/usePlayerStateMachine.test.ts`
 
 **Interfaces:**
+
 - Consumes: `socket` de `src/lib/socket.ts`.
 - Produces:
 
@@ -670,11 +683,12 @@ git add bokusu-front/src/hooks/usePlayerStateMachine.ts bokusu-front/src/hooks/u
 git commit -m "feat: player state machine hook driven by now_playing diffs"
 ```
 
----
+______________________________________________________________________
 
 ### Task 5: Dependências + `<KaraokePlayer />`
 
 **Files:**
+
 - Modify: `bokusu-front/package.json` (via npm install)
 - Create: `bokusu-front/src/types/libass-wasm.d.ts`
 - Create: `bokusu-front/src/assets/fonts/Arial.ttf`, `bokusu-front/src/assets/fonts/DroidSansFallback.ttf` (cópias)
@@ -682,6 +696,7 @@ git commit -m "feat: player state machine hook driven by now_playing diffs"
 - Test: `bokusu-front/src/components/player/KaraokePlayer.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useSocketEvent`, `socket`; hls.js; libass-wasm.
 - Produces:
 
@@ -995,19 +1010,23 @@ git add bokusu-front/package.json bokusu-front/package-lock.json bokusu-front/sr
 git commit -m "feat: KaraokePlayer component with hls.js and ASS subtitles"
 ```
 
----
+______________________________________________________________________
 
 ### Task 6: Fireworks (port TS) + `<ScoreScreen />`
 
 **Files:**
+
 - Create: `bokusu-front/src/lib/fireworks.ts`
 - Create: `bokusu-front/src/assets/sounds/applause-l.mp3`, `applause-m.mp3`, `applause-h.mp3`, `score-drums.mp3` (cópias)
 - Create: `bokusu-front/src/components/player/ScoreScreen.tsx`
 - Test: `bokusu-front/src/components/player/ScoreScreen.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `ScorePhrases` (Task 2).
+
 - Produces:
+
   - `launchFireworkShow(canvas: HTMLCanvasElement, score: number, durationMs?: number): () => void` — inicia o show, retorna função de cleanup.
   - `computeScore(random?: number): number` — nota 0–99 com viés para cima (paridade com `score.js`: `Math.pow(r, 1/2) * 99`).
   - `pickScoreAssets(score: number, phrases: ScorePhrases): { applause: string; phrase: string }` — cortes: `<30` low, `<60` mid, resto high.
@@ -1342,11 +1361,12 @@ git add bokusu-front/src/lib/fireworks.ts bokusu-front/src/assets/sounds bokusu-
 git commit -m "feat: score screen with fireworks port and bundled applause audio"
 ```
 
----
+______________________________________________________________________
 
 ### Task 7: IDLE completo — `IdleScreen`, relógio, screensaver, mídia de fundo
 
 **Files:**
+
 - Create: `bokusu-front/src/lib/url.ts` (helper `extractHost` movido do PlayerPage)
 - Create: `bokusu-front/src/components/player/SplashClock.tsx`
 - Create: `bokusu-front/src/components/player/Screensaver.tsx`
@@ -1355,6 +1375,7 @@ git commit -m "feat: score screen with fireworks port and bundled applause audio
 - Test: `bokusu-front/src/components/player/IdleScreen.test.tsx`, `bokusu-front/src/components/player/BackgroundMedia.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `apiFetch`, `useQuery`, `QueueItem`; `QRCodeSVG` de `qrcode.react` (já instalado); chaves i18n `player.scanToSing`/`player.upNext` (já existem).
 - Produces:
 
@@ -1793,16 +1814,19 @@ git add bokusu-front/src/lib/url.ts bokusu-front/src/components/player/SplashClo
 git commit -m "feat: idle screen with clock, screensaver and background media"
 ```
 
----
+______________________________________________________________________
 
 ### Task 8: `<NotificationBanner />` (overlay de notificação da TV)
 
 **Files:**
+
 - Create: `bokusu-front/src/components/player/NotificationBanner.tsx`
 - Test: `bokusu-front/src/components/player/NotificationBanner.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useSocketEvent`, `socket`. Payload `notification`: string `"mensagem::is-<cor>"`.
+
 - Produces: `<NotificationBanner isMaster={boolean} hideNotifications={boolean} />`. Mostra banner com severidade; master emite `clear_notification` ao receber (paridade com splash.js); auto-dismiss em 8s; `hideNotifications` suprime a renderização (mas o master ainda limpa).
 
 - [ ] **Step 1: Escrever os testes que falham**
@@ -1936,18 +1960,21 @@ git add bokusu-front/src/components/player/NotificationBanner.tsx bokusu-front/s
 git commit -m "feat: TV notification banner overlay"
 ```
 
----
+______________________________________________________________________
 
 ### Task 9: Integração no `PlayerPage`
 
 **Files:**
+
 - Modify: `bokusu-front/src/pages/PlayerPage.tsx` (reescrita: splash sai para `IdleScreen`, entra a máquina de estados)
 - Modify: `bokusu-front/src/pages/PlayerPage.test.tsx` (reescrita)
 - Modify: `bokusu-front/src/locales/pt-BR.json`, `bokusu-front/src/locales/en.json`
 - Delete: testes de modos integration/cinematic do `PlayerPage.test.tsx` antigo (já portados ao `IdleScreen.test.tsx` na Task 7)
 
 **Interfaces:**
+
 - Consumes: tudo das Tasks 2–8: `useNowPlaying`, `usePreferences`, `useQueue`, `useScorePhrases`, `useSplashRole`, `usePlayerStateMachine`, `KaraokePlayer`, `ScoreScreen`, `IdleScreen`, `NotificationBanner`.
+
 - Produces: `PlayerPage({ appUrl?: string })` — página completa da TV na rota `/player`.
 
 - [ ] **Step 1: Escrever os testes que falham**
@@ -2194,15 +2221,18 @@ git add bokusu-front/src/pages/PlayerPage.tsx bokusu-front/src/pages/PlayerPage.
 git commit -m "feat: TV player page with full playback state machine"
 ```
 
----
+______________________________________________________________________
 
 ### Task 10: Purge do legado
 
 **Pré-condição:** paridade validada em TV real — checklist de verificação manual da spec (seção "Erros e testes") executado e aprovado pelo usuário. NÃO executar esta task na mesma sessão sem essa confirmação explícita.
 
 **Files:**
+
 - Delete: `pikaraoke/templates/{base,batch-song-renamer,edit,files,home,info,queue,search,splash}.html`
+
 - Delete: `pikaraoke/static/`: `bulma.min.css`, `bulma-dark.css`, `custom.css`, `score.css`, `score.js`, `screensaver.css`, `screensaver.js`, `fireworks.js`, `hls-1.6.15.min.js`, `jquery-3.7.1.min.js`, `js.cookie-3.0.5.min.js`, `selectize-0.12.6.min.js`, `selectize.min.css`, `socket.io-4.8.3.min.js`, `spa-navigation.js`, `js/` (inteiro), `fontello/`, `fonts/`, `sounds/`, `images/ui-icons_*.png`
+
 - Keep: `static/assets/`, `favicon.svg`, `icons.svg`, `icons/`, `images/logo.png`, `images/dolphly.png`, `music/`, `video/`, `templates/index.html`
 
 - [ ] **Step 1: Greps de pré-condição**
@@ -2265,7 +2295,7 @@ git add -A
 git commit -m "chore: purge legacy Jinja templates and static assets"
 ```
 
----
+______________________________________________________________________
 
 ## Test plan do PR (obrigatório no corpo do PR)
 

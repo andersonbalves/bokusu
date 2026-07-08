@@ -3,7 +3,7 @@
 import logging
 import os
 
-from flask import jsonify, Response
+from flask import Response, jsonify
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 

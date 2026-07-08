@@ -68,7 +68,9 @@ def test_delete_queue_all_admin(admin_client, fake_karaoke):
 
 
 def test_reorder_queue_requires_admin(client):
-    assert client.put("/api/queue/reorder", json={"old_index": 0, "new_index": 1}).status_code == 403
+    assert (
+        client.put("/api/queue/reorder", json={"old_index": 0, "new_index": 1}).status_code == 403
+    )
 
 
 def test_reorder_queue_admin_success(admin_client, fake_karaoke):
@@ -87,7 +89,10 @@ def test_reorder_queue_admin_failure(admin_client, fake_karaoke):
 
 
 def test_move_queue_item_requires_admin(client):
-    assert client.patch("/api/queue/item", json={"song": "/x/a.mp4", "action": "top"}).status_code == 403
+    assert (
+        client.patch("/api/queue/item", json={"song": "/x/a.mp4", "action": "top"}).status_code
+        == 403
+    )
 
 
 def test_move_queue_item_admin_success(admin_client, fake_karaoke):

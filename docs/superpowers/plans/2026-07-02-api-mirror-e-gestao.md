@@ -40,6 +40,7 @@ Fase 4:                 T21 settings prefs ∥ T22 settings sistema ∥ T23 pág
 ```
 
 Regras para o dispatcher:
+
 - Tasks na mesma lane separadas por `│` ou `∥` são independentes entre si → um subagent por task, simultâneos.
 - `→` indica dependência dura (aguardar conclusão).
 - Lane Front da Fase 1 só depende de T6 internamente; NÃO espera a Lane Backend (contratos estão fixados neste plano).
@@ -56,11 +57,11 @@ Regras para o dispatcher:
 | `DELETE /api/preferences` | — | `{"success": bool, "message": str}` | sim |
 | `GET /api/player` | — | payload de `k.get_now_playing()` (ver T4) | não |
 | `GET /api/player/score-phrases` | — | `{"low": [str], "mid": [str], "high": [str]}` | não |
-| `POST /api/player/skip` | — | `{"success": bool}` | não* |
-| `POST /api/player/pause` | — | `{"success": bool}` | não* |
-| `POST /api/player/restart` | — | `{"success": bool}` | não* |
-| `PUT /api/player/volume` | `{"volume": float 0..1}` | `{"success": bool}` | não* |
-| `PUT /api/player/transpose` | `{"semitones": int}` | `{"success": bool}` | não* |
+| `POST /api/player/skip` | — | `{"success": bool}` | não\* |
+| `POST /api/player/pause` | — | `{"success": bool}` | não\* |
+| `POST /api/player/restart` | — | `{"success": bool}` | não\* |
+| `PUT /api/player/volume` | `{"volume": float 0..1}` | `{"success": bool}` | não\* |
+| `PUT /api/player/transpose` | `{"semitones": int}` | `{"success": bool}` | não\* |
 | `GET /api/queue` | — | `{"queue": [{"user","file","title","semitones"}]}` | não |
 | `POST /api/queue` | `{"song": str, "user": str}` | `{"success": bool, "message": str}` | não |
 | `PUT /api/queue/reorder` | `{"old_index": int, "new_index": int}` | `{"success": bool}` | sim |
@@ -83,13 +84,14 @@ Regras para o dispatcher:
 | `GET /api/system/library-stats` | — | `{"song_count": int}` | sim |
 | `POST /api/system/update-ytdl` | — | `{"status": "started"}` | sim |
 | `POST /api/system/sync-library` | — | `{"status": "started"\|"already_syncing"}` | sim |
-| `POST /api/system/quit` \| `/shutdown` \| `/reboot` \| `/expand-fs` | — | `{"status": "started"}` | sim |
+| `POST /api/system/quit` | `/shutdown` | `/reboot` | `/expand-fs` | — | `{"status": "started"}` | sim |
 
 \* Controles de player não são admin-enforced no legado; espelhamos o comportamento (gate fica na UI, como hoje).
 
 ## File Structure
 
 **Backend (tudo novo exceto 2 modificações):**
+
 ```
 pikaraoke/routes/api/__init__.py     # lista api_blueprints
 pikaraoke/routes/api/_utils.py       # decorator require_admin
@@ -105,6 +107,7 @@ tests/unit/api/test_<módulo>.py      # um por módulo
 ```
 
 **Frontend:**
+
 ```
 src/lib/api.ts                       # MODIFICAR: ApiError tipado
 src/lib/i18n.ts + src/locales/{pt-BR,en}.json
@@ -119,17 +122,20 @@ src/layouts/AppLayout.tsx            # MODIFICAR: MiniPlayer + ToastHost
 src/App.tsx                          # MODIFICAR: rotas /library, /library/renamer
 ```
 
----
+______________________________________________________________________
 
 ### Task 1: Scaffold do package `/api` + fixture de testes
 
 **Files:**
+
 - Create: `pikaraoke/routes/api/__init__.py`, `pikaraoke/routes/api/_utils.py`
 - Modify: `pikaraoke/app.py` (após o loop de `_internal_blueprints`)
 - Create: `tests/unit/api/__init__.py`, `tests/unit/api/conftest.py`, `tests/unit/api/test_scaffold.py`
 
 **Interfaces:**
+
 - Produces: `require_admin` (decorator Flask que retorna `{"error": "Unauthorized"}, 403` se `is_admin()` falso); fixtures pytest `app`, `client`, `admin_client`, `fake_karaoke` (MagicMock com specs reais); lista `api_blueprints` em `pikaraoke.routes.api`.
+
 - Todos os módulos T2–T5 e T14–T17 adicionam seu blueprint em `api_blueprints`.
 
 - [ ] **Step 1: Escrever teste que falha**
@@ -281,17 +287,20 @@ git add pikaraoke/routes/api tests/unit/api pikaraoke/app.py
 git commit -m "feat: scaffold additive /api blueprint package with admin guard"
 ```
 
----
+______________________________________________________________________
 
 ### Task 2: `/api/auth` (Lane Backend — paralela com T3, T4, T5)
 
 **Files:**
+
 - Create: `pikaraoke/routes/api/auth.py`
 - Modify: `pikaraoke/routes/api/__init__.py` (registrar blueprint)
 - Test: `tests/unit/api/test_auth.py`
 
 **Interfaces:**
+
 - Consumes: `get_admin_password` de `pikaraoke.lib.current_app`.
+
 - Produces: `POST /api/auth {"password"}` → 200 `{"isAdmin": true}` + cookie `admin` (90 dias, mesmo valor do legado) ou 403 `{"error": "Incorrect admin password"}`; `GET /api/auth` → `{"isAdmin": bool}`.
 
 - [ ] **Step 1: Teste que falha**
@@ -310,7 +319,9 @@ def test_post_auth_correct_password_sets_cookie(client):
     resp = client.post("/api/auth", json={"password": "secret"})
     assert resp.status_code == 200
     assert resp.get_json() == {"isAdmin": True}
-    cookie = next(h for h in resp.headers.getlist("Set-Cookie") if h.startswith("admin="))
+    cookie = next(
+        h for h in resp.headers.getlist("Set-Cookie") if h.startswith("admin=")
+    )
     assert "admin=secret" in cookie
 
 
@@ -386,17 +397,20 @@ git add pikaraoke/routes/api tests/unit/api/test_auth.py
 git commit -m "feat: add /api/auth login and status endpoints"
 ```
 
----
+______________________________________________________________________
 
 ### Task 3: `/api/preferences` + `splash_display_mode` (Lane Backend — paralela)
 
 **Files:**
+
 - Create: `pikaraoke/routes/api/preferences.py`
 - Modify: `pikaraoke/lib/preference_manager.py` (uma linha em DEFAULTS), `pikaraoke/routes/api/__init__.py`
 - Test: `tests/unit/api/test_preferences.py`
 
 **Interfaces:**
+
 - Consumes: `require_admin`; `k.preferences` (PreferenceManager real na fixture); `broadcast_event`; `_get_active_score_phrases` de `pikaraoke.routes.splash`.
+
 - Produces: `GET /api/preferences` → `{"preferences": {...}}` com TODAS as chaves de `PreferenceManager.DEFAULTS` (valores efetivos via `get_or_default`); `PUT /api/preferences/<key>` e `DELETE /api/preferences` conforme tabela de contratos. Broadcasts: `preferences_update {"key","value"}`, `preferences_reset`, e `score_phrases_update` quando a chave for de frases de score (mesma regra do legado).
 
 - [ ] **Step 1: Teste que falha**
@@ -488,7 +502,9 @@ class PreferenceValueBody(Schema):
 def get_preferences():
     """Return every preference with its effective value."""
     k = get_karaoke_instance()
-    prefs = {key: k.preferences.get_or_default(key) for key in PreferenceManager.DEFAULTS}
+    prefs = {
+        key: k.preferences.get_or_default(key) for key in PreferenceManager.DEFAULTS
+    }
     return jsonify({"preferences": prefs})
 
 
@@ -540,17 +556,20 @@ git add pikaraoke/routes/api pikaraoke/lib/preference_manager.py tests/unit/api/
 git commit -m "feat: add /api/preferences endpoints and splash_display_mode pref"
 ```
 
----
+______________________________________________________________________
 
 ### Task 4: `/api/player` (Lane Backend — paralela)
 
 **Files:**
+
 - Create: `pikaraoke/routes/api/player.py`
 - Modify: `pikaraoke/routes/api/__init__.py`
 - Test: `tests/unit/api/test_player.py`
 
 **Interfaces:**
+
 - Consumes: `k.get_now_playing()` (dict com `now_playing, now_playing_user, now_playing_duration, now_playing_transpose, now_playing_url, now_playing_subtitle_url, now_playing_position, is_paused, up_next, next_user, volume`); `k.playback_controller.skip()/pause()`; `k.restart()`; `k.volume_change(float)`; `k.transpose_current(int)`; `_get_active_score_phrases`.
+
 - Produces: endpoints da tabela de contratos. O payload de `GET /api/player` é o dict de `k.get_now_playing()` sem transformação (o front tipa como `NowPlaying`, T9).
 
 - [ ] **Step 1: Teste que falha**
@@ -692,17 +711,20 @@ git add pikaraoke/routes/api tests/unit/api/test_player.py
 git commit -m "feat: add /api/player playback control endpoints"
 ```
 
----
+______________________________________________________________________
 
 ### Task 5: `/api/queue` (Lane Backend — paralela)
 
 **Files:**
+
 - Create: `pikaraoke/routes/api/queue.py`
 - Modify: `pikaraoke/routes/api/__init__.py`
 - Test: `tests/unit/api/test_queue.py`
 
 **Interfaces:**
+
 - Consumes: `k.queue_manager.queue` (list de `{"user","file","title","semitones"}`); `.enqueue(song_path, user)` → `[success, message]`; `.reorder(old, new)`; `.queue_edit(song, "up"|"down"|"delete")`; `.move_to_top(song)`; `.move_to_bottom(song)`; `.queue_clear()`; `.queue_add_random(amount)`; `broadcast_event`.
+
 - Produces: endpoints da tabela. Broadcast `queue_update` após mutações que o domínio não emite sozinho via socket (o `QueueManager` emite eventos internos; o espelho re-broadcasta `queue_update` como o legado faz em `/enqueue`; para `clear`, broadcast extra `skip` como o legado).
 
 - [ ] **Step 1: Teste que falha**
@@ -732,7 +754,10 @@ def test_post_queue_enqueues(client, fake_karaoke):
 
 def test_reorder_requires_admin(client):
     assert (
-        client.put("/api/queue/reorder", json={"old_index": 0, "new_index": 1}).status_code == 403
+        client.put(
+            "/api/queue/reorder", json={"old_index": 0, "new_index": 1}
+        ).status_code
+        == 403
     )
 
 
@@ -745,7 +770,9 @@ def test_reorder_delegates(admin_client, fake_karaoke):
 
 def test_patch_item_top(admin_client, fake_karaoke):
     fake_karaoke.queue_manager.move_to_top.return_value = True
-    resp = admin_client.patch("/api/queue/item", json={"song": "/x/a.mp4", "action": "top"})
+    resp = admin_client.patch(
+        "/api/queue/item", json={"song": "/x/a.mp4", "action": "top"}
+    )
     assert resp.get_json() == {"success": True}
 
 
@@ -840,7 +867,9 @@ def enqueue(body):
 def reorder(body):
     """Move a queue item from old_index to new_index."""
     k = get_karaoke_instance()
-    return jsonify({"success": k.queue_manager.reorder(body["old_index"], body["new_index"])})
+    return jsonify(
+        {"success": k.queue_manager.reorder(body["old_index"], body["new_index"])}
+    )
 
 
 @api_queue_bp.route("/queue/item", methods=["PATCH"])
@@ -903,15 +932,17 @@ git add pikaraoke/routes/api tests/unit/api/test_queue.py
 git commit -m "feat: add /api/queue endpoints"
 ```
 
----
+______________________________________________________________________
 
 ### Task 6: `apiFetch` tipado com `ApiError` (Lane Front — início; paralela à Lane Backend)
 
 **Files:**
+
 - Modify: `bokusu-front/src/lib/api.ts`
 - Test: `bokusu-front/src/lib/api.test.ts` (adicionar casos)
 
 **Interfaces:**
+
 - Produces: `apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T>`; `class ApiError extends Error { status: number }` — mensagem vem de `{"error": "..."}` do corpo quando presente. Todos os hooks das tasks seguintes usam esses dois símbolos.
 
 - [ ] **Step 1: Testes que falham (adicionar ao arquivo existente)**
@@ -1005,17 +1036,20 @@ git add bokusu-front/src/lib
 git commit -m "feat: typed apiFetch with ApiError carrying server messages"
 ```
 
----
+______________________________________________________________________
 
 ### Task 7: Auth real no front (`/api/auth`) — depende de T6
 
 **Files:**
+
 - Modify: `bokusu-front/src/components/AdminModal.tsx`, `bokusu-front/src/App.tsx` (hidratação no boot), `bokusu-front/src/types/api.ts`
 - Test: `bokusu-front/src/components/AdminModal.test.tsx` (ajustar), novo `bokusu-front/src/hooks/useAuthStatus.test.tsx`
 - Create: `bokusu-front/src/hooks/useAuthStatus.ts`
 
 **Interfaces:**
+
 - Consumes: `apiFetch`, `ApiError` (T6); `useAppStore` (`isAdmin`, `setIsAdmin`).
+
 - Produces: `useAuthStatus(): void` — hook chamado uma vez no `App` que faz `GET /api/auth` e chama `setIsAdmin(resp.isAdmin)`; `AdminModal` envia `POST /api/auth {"password"}` e trata 403 como "senha incorreta".
 
 - [ ] **Step 1: Testes que falham**
@@ -1106,18 +1140,22 @@ git add bokusu-front/src
 git commit -m "feat: hydrate admin state from /api/auth and wire AdminModal to real login"
 ```
 
----
+______________________________________________________________________
 
 ### Task 8: `usePreferences` (Lane Front — paralela com T9, T10 após T7)
 
 **Files:**
+
 - Create: `bokusu-front/src/hooks/usePreferences.ts`
 - Modify: `bokusu-front/src/types/api.ts`, `bokusu-front/src/store/useAppStore.ts` (remover `playerMode` local)
 - Test: `bokusu-front/src/hooks/usePreferences.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `apiFetch` (T6), `useSocketEvent` (existente), `queryClient`.
+
 - Produces:
+
   ```typescript
   interface Preferences {
     splash_display_mode: 'integration' | 'cinematic'
@@ -1133,6 +1171,7 @@ git commit -m "feat: hydrate admin state from /api/auth and wire AdminModal to r
   usePreferences(): UseQueryResult<Preferences>
   useSetPreference(): UseMutationResult  // mutate({ key, value }) — otimista com rollback
   ```
+
 - `SettingsPage` (T21) e a spec da TV consomem exatamente esses nomes.
 
 - [ ] **Step 1: Teste que falha**
@@ -1254,17 +1293,20 @@ git add bokusu-front/src
 git commit -m "feat: usePreferences with socket sync and optimistic writes; TV mode moves to backend pref"
 ```
 
----
+______________________________________________________________________
 
 ### Task 9: `useNowPlaying` + hooks de fila/busca nos contratos reais (paralela com T8, T10)
 
 **Files:**
+
 - Create: `bokusu-front/src/hooks/useNowPlaying.ts`, `bokusu-front/src/hooks/usePlayerControls.ts`
 - Modify: `bokusu-front/src/hooks/useQueue.ts`, `bokusu-front/src/hooks/useSearch.ts`, `bokusu-front/src/types/api.ts`, `bokusu-front/src/pages/QueuePage.tsx`, `bokusu-front/src/components/{QueueItem,NowPlayingCard,SearchResultItem}.tsx` (props renomeadas)
 - Test: `bokusu-front/src/hooks/useNowPlaying.test.tsx` + ajustar `useQueue.test.tsx`/`useSearch.test.tsx`
 
 **Interfaces:**
+
 - Produces:
+
   ```typescript
   interface QueueItem { user: string; file: string; title: string; semitones: number }
   interface NowPlaying {
@@ -1281,6 +1323,7 @@ git commit -m "feat: usePreferences with socket sync and optimistic writes; TV m
   usePlayerControls(): { skip; pause; restart; setVolume(v: number); setTranspose(n: number) }  // mutations POST/PUT /api/player/*
   useSearch(query: string): UseQueryResult<SearchResult[]>  // GET /api/search?q=
   ```
+
 - T12/T13 (mini-player/drawer) consomem `useNowPlaying` + `usePlayerControls`; T18/T19 consomem `useQueue`.
 
 - [ ] **Step 1: Testes que falham**
@@ -1443,17 +1486,20 @@ git add bokusu-front/src
 git commit -m "feat: real API contracts for queue, search, now playing and player controls"
 ```
 
----
+______________________________________________________________________
 
 ### Task 10: Toasts globais (socket `notification` + `sync_*`) — paralela com T8, T9
 
 **Files:**
+
 - Create: `bokusu-front/src/components/ToastHost.tsx`
 - Modify: `bokusu-front/src/store/useAppStore.ts`, `bokusu-front/src/layouts/AppLayout.tsx`
 - Test: `bokusu-front/src/components/ToastHost.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useSocketEvent`.
+
 - Produces: no store — `toasts: Toast[]`, `pushToast(message: string, severity: 'info' | 'success' | 'danger')`, `dismissToast(id: number)` com `Toast = { id: number; message: string; severity }`; auto-dismiss após 4s. Qualquer task posterior usa `useAppStore.getState().pushToast(...)` para feedback.
 
 - [ ] **Step 1: Teste que falha**
@@ -1558,16 +1604,18 @@ git add bokusu-front/src
 git commit -m "feat: global toast host wired to server notification and sync events"
 ```
 
----
+______________________________________________________________________
 
 ### Task 11: i18n (react-i18next) — paralela com toda a Fase 1
 
 **Files:**
+
 - Create: `bokusu-front/src/lib/i18n.ts`, `bokusu-front/src/locales/pt-BR.json`, `bokusu-front/src/locales/en.json`
 - Modify: `bokusu-front/src/main.tsx` (import side-effect), `bokusu-front/package.json`, e TODOS os componentes/páginas existentes com strings hardcoded (`AppLayout`, `QueuePage`, `SearchPage`, `SettingsPage`, `AdminModal`, `NowPlayingCard`, `QueueItem`, `SearchResultItem`, `PlayerPage`)
 - Test: `bokusu-front/src/lib/i18n.test.ts`
 
 **Interfaces:**
+
 - Produces: instância i18next inicializada com `resources: { 'pt-BR', en }`, `fallbackLng: 'en'`, detecção por `navigator.language` com override persistido em `localStorage('bokusu-lang')`. Componentes usam `useTranslation()` → `t('queue.title')` etc. Todas as tasks seguintes escrevem strings novas nos DOIS arquivos de locale.
 
 - [ ] **Step 1: Instalar dependências**
@@ -1633,7 +1681,7 @@ git add bokusu-front
 git commit -m "feat: i18n with react-i18next, pt-BR and en locales"
 ```
 
----
+______________________________________________________________________
 
 ## ═══ CHECKPOINT A — Code review estratégico ═══
 
@@ -1643,17 +1691,20 @@ Após T1–T11 concluídas (não antes):
 - [ ] Dispatch de UM subagent revisor cobrindo o diff acumulado desde o início do plano. Foco: consistência dos contratos entre backend e front, admin enforcement correto, ausência de `any`, rollback das mutações otimistas, imports circulares no package api (`routes/splash` importado por `preferences`/`player`).
 - [ ] Corrigir apontamentos antes de iniciar a Fase 2.
 
----
+______________________________________________________________________
 
 ### Task 12: `<MiniPlayer />` (Fase 2 — serial após Checkpoint A)
 
 **Files:**
+
 - Create: `bokusu-front/src/components/MiniPlayer.tsx`
 - Modify: `bokusu-front/src/layouts/AppLayout.tsx`
 - Test: `bokusu-front/src/components/MiniPlayer.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useNowPlaying`, `usePlayerControls` (T9); `useAppStore` (`isAdmin`, `openAdminModal`); i18n (T11).
+
 - Produces: `<MiniPlayer onExpand={() => void} />` — T13 passa o handler que abre o drawer.
 
 - [ ] **Step 1: Testes que falham**
@@ -1795,17 +1846,20 @@ git add bokusu-front/src
 git commit -m "feat: global mini-player with JIT-gated play/pause and skip"
 ```
 
----
+______________________________________________________________________
 
 ### Task 13: `<RemoteDrawer />` — depende de T12
 
 **Files:**
+
 - Create: `bokusu-front/src/components/RemoteDrawer.tsx`
 - Modify: `bokusu-front/src/layouts/AppLayout.tsx` (conectar `drawerOpen`)
 - Test: `bokusu-front/src/components/RemoteDrawer.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `useNowPlaying`, `usePlayerControls` (T9); `useAppStore`; i18n.
+
 - Produces: `<RemoteDrawer open={boolean} onClose={() => void} />`.
 
 - [ ] **Step 1: Testes que falham**
@@ -1987,17 +2041,20 @@ git add bokusu-front/src
 git commit -m "feat: expanded remote drawer with volume, transpose and restart"
 ```
 
----
+______________________________________________________________________
 
 ### Task 14: `/api/search` + `/api/downloads` (Fase 3, Lane Backend — paralela com T15–T17)
 
 **Files:**
+
 - Create: `pikaraoke/routes/api/search.py`, `pikaraoke/routes/api/downloads.py`
 - Modify: `pikaraoke/routes/api/__init__.py`
 - Test: `tests/unit/api/test_search.py`, `tests/unit/api/test_downloads.py`
 
 **Interfaces:**
+
 - Consumes: `get_search_results`, `get_stream_url` de `pikaraoke.lib.youtube_dl` (mesmos imports de `routes/search.py`); `k.song_manager.songs`, `.display_name_from_path`; `k.download_manager.queue_download(song, queue, user, title)`, `.get_downloads_status()`, `.remove_error(id)`.
+
 - Produces: endpoints da tabela de contratos.
 
 - [ ] **Step 1: Testes que falham**
@@ -2026,7 +2083,9 @@ def test_search_non_karaoke_skips_suffix(client):
 
 def test_autocomplete_matches_local_songs(client, fake_karaoke):
     fake_karaoke.song_manager.songs = ["/x/Queen - Bohemian.mp4", "/x/Other.mp4"]
-    fake_karaoke.song_manager.display_name_from_path.side_effect = lambda p: p.split("/")[-1]
+    fake_karaoke.song_manager.display_name_from_path.side_effect = lambda p: p.split(
+        "/"
+    )[-1]
     data = client.get("/api/search/autocomplete?q=queen").get_json()
     assert len(data) == 1
     assert data[0]["path"] == "/x/Queen - Bohemian.mp4"
@@ -2208,17 +2267,20 @@ git add pikaraoke/routes/api tests/unit/api
 git commit -m "feat: add /api/search and /api/downloads endpoints"
 ```
 
----
+______________________________________________________________________
 
 ### Task 15: `/api/files` (Fase 3, Lane Backend — paralela)
 
 **Files:**
+
 - Create: `pikaraoke/routes/api/files.py`
 - Modify: `pikaraoke/routes/api/__init__.py`
 - Test: `tests/unit/api/test_files.py`
 
 **Interfaces:**
+
 - Consumes: `k.song_manager.songs`, `.display_name_from_path`, `.delete(path)`, `.rename(old, new)`, `.download_path`; `k.queue_manager.is_song_in_queue`; `youtube_id_suffix` de `pikaraoke.lib.metadata_parser`; `k.browse_results_per_page`.
+
 - Produces: endpoints da tabela. Regras espelhadas do legado: não deletar/renomear música na fila; rename preserva sufixo de ID do YouTube e extensão; rename falha se destino já existe.
 
 - [ ] **Step 1: Testes que falham**
@@ -2230,9 +2292,9 @@ git commit -m "feat: add /api/search and /api/downloads endpoints"
 
 def _setup_songs(fake_karaoke):
     fake_karaoke.song_manager.songs = ["/x/Alpha.mp4", "/x/Beta.mp4"]
-    fake_karaoke.song_manager.display_name_from_path.side_effect = (
-        lambda p: p.rsplit("/", 1)[-1].removesuffix(".mp4")
-    )
+    fake_karaoke.song_manager.display_name_from_path.side_effect = lambda p: p.rsplit(
+        "/", 1
+    )[-1].removesuffix(".mp4")
     fake_karaoke.browse_results_per_page = 100
 
 
@@ -2276,7 +2338,10 @@ def test_rename_delegates(admin_client, fake_karaoke, tmp_path):
     fake_karaoke.song_manager.download_path = str(tmp_path)
     resp = admin_client.patch(
         "/api/files",
-        json={"old_file_name": "/x/Alpha---dQw4w9WgXcQ.mp4", "new_file_name": "Alpha Nova"},
+        json={
+            "old_file_name": "/x/Alpha---dQw4w9WgXcQ.mp4",
+            "new_file_name": "Alpha Nova",
+        },
     )
     assert resp.get_json()["success"] is True
     fake_karaoke.song_manager.rename.assert_called_once()
@@ -2336,7 +2401,9 @@ def browse(query):
     if query["letter"]:
         letter = query["letter"].lower()
         songs = [
-            s for s in songs if k.song_manager.display_name_from_path(s).lower().startswith(letter)
+            s
+            for s in songs
+            if k.song_manager.display_name_from_path(s).lower().startswith(letter)
         ]
     if query["sort"] == "date":
         songs = sorted(songs, key=os.path.getmtime, reverse=True)
@@ -2410,17 +2477,20 @@ git add pikaraoke/routes/api tests/unit/api/test_files.py
 git commit -m "feat: add /api/files browse, rename and delete endpoints"
 ```
 
----
+______________________________________________________________________
 
 ### Task 16: `/api/renamer` (Fase 3, Lane Backend — paralela)
 
 **Files:**
+
 - Create: `pikaraoke/routes/api/renamer.py`
 - Modify: `pikaraoke/routes/api/__init__.py`
 - Test: `tests/unit/api/test_renamer.py`
 
 **Interfaces:**
+
 - Consumes: `get_song_correct_name` de `pikaraoke.lib.metadata_parser`; `_names_match` e `RESULTS_PER_PAGE` de `pikaraoke.routes.batch_song_renamer` (reuso direto — helpers puros); `k.song_manager.filename_from_path`, `.rename`; `k.queue_manager.is_song_in_queue`.
+
 - Produces: `GET /api/renamer/songs?page=&only_mismatched=` → `{"songs": [{"file","currentName","suggestedName","isEqual"}], "total", "page"}` (JSON puro — sem os fragmentos HTML do legado); `POST /api/renamer/rename {"old_name","new_name"}`.
 
 - [ ] **Step 1: Testes que falham**
@@ -2434,9 +2504,9 @@ from unittest.mock import patch
 
 def _setup(fake_karaoke):
     fake_karaoke.song_manager.songs = ["/x/bad_name_720p.mp4", "/x/Good Name.mp4"]
-    fake_karaoke.song_manager.filename_from_path.side_effect = (
-        lambda p: p.rsplit("/", 1)[-1].removesuffix(".mp4")
-    )
+    fake_karaoke.song_manager.filename_from_path.side_effect = lambda p: p.rsplit(
+        "/", 1
+    )[-1].removesuffix(".mp4")
 
 
 def test_songs_requires_admin(client):
@@ -2573,17 +2643,20 @@ git add pikaraoke/routes/api tests/unit/api/test_renamer.py
 git commit -m "feat: add /api/renamer endpoints with pure JSON contracts"
 ```
 
----
+______________________________________________________________________
 
 ### Task 17: `/api/system` (Fase 3, Lane Backend — paralela)
 
 **Files:**
+
 - Create: `pikaraoke/routes/api/system.py`
 - Modify: `pikaraoke/routes/api/__init__.py`
 - Test: `tests/unit/api/test_system.py`
 
 **Interfaces:**
+
 - Consumes: `psutil` (mesmo uso de `routes/info.py`); `upgrade_youtubedl` de `pikaraoke.lib.youtube_dl`; `delayed_halt` de `pikaraoke.lib.current_app`; `k.sync_library()`; `k.youtubedl_version`; `pikaraoke.version.VERSION`; `threading`.
+
 - Produces: endpoints da tabela. Ações destrutivas rodam em `threading.Thread` (como o legado) e retornam imediatamente `{"status": "started"}`.
 
 - [ ] **Step 1: Testes que falham**
@@ -2602,7 +2675,13 @@ def test_info_requires_admin(client):
 def test_info_returns_stats(admin_client, fake_karaoke):
     fake_karaoke.youtubedl_version = "2026.01.01"
     data = admin_client.get("/api/system/info").get_json()
-    assert set(data) == {"cpu", "memory", "disk", "youtubedlVersion", "pikaraokeVersion"}
+    assert set(data) == {
+        "cpu",
+        "memory",
+        "disk",
+        "youtubedlVersion",
+        "pikaraokeVersion",
+    }
 
 
 def test_library_stats(admin_client, fake_karaoke):
@@ -2612,7 +2691,9 @@ def test_library_stats(admin_client, fake_karaoke):
 
 def test_sync_library(admin_client, fake_karaoke):
     fake_karaoke.sync_library.return_value = True
-    assert admin_client.post("/api/system/sync-library").get_json() == {"status": "started"}
+    assert admin_client.post("/api/system/sync-library").get_json() == {
+        "status": "started"
+    }
     fake_karaoke.sync_library.return_value = False
     assert admin_client.post("/api/system/sync-library").get_json() == {
         "status": "already_syncing"
@@ -2748,16 +2829,19 @@ git add pikaraoke/routes/api tests/unit/api/test_system.py
 git commit -m "feat: add /api/system info, stats and admin action endpoints"
 ```
 
----
+______________________________________________________________________
 
 ### Task 18: Fila — drag and drop (Fase 3, Lane Front)
 
 **Files:**
+
 - Modify: `bokusu-front/src/pages/QueuePage.tsx`, `bokusu-front/src/components/QueueItem.tsx`, `bokusu-front/src/hooks/useQueue.ts` (adicionar `useReorderQueue`), `bokusu-front/package.json`
 - Test: `bokusu-front/src/hooks/useQueue.test.tsx` (casos novos)
 
 **Interfaces:**
+
 - Consumes: `useQueue` (T9); `useAppStore` (`isAdmin`, `openAdminModal`); `@dnd-kit/core` + `@dnd-kit/sortable`.
+
 - Produces: `useReorderQueue(): UseMutationResult` — `mutate({ oldIndex, newIndex })`, otimista com rollback; T19 reusa o mesmo `QueueItem` estendido.
 
 - [ ] **Step 1: Instalar dependências**
@@ -2846,18 +2930,22 @@ git add bokusu-front
 git commit -m "feat: queue drag-and-drop reorder with optimistic updates"
 ```
 
----
+______________________________________________________________________
 
 ### Task 19: Fila — menu contextual, limpar, aleatórias, estados de download (depende de T18; paralela com T20)
 
 **Files:**
+
 - Create: `bokusu-front/src/components/QueueActionsMenu.tsx`, `bokusu-front/src/components/DownloadErrorsCard.tsx`, `bokusu-front/src/components/ConfirmModal.tsx`, `bokusu-front/src/hooks/useDownloads.ts`
 - Modify: `bokusu-front/src/pages/QueuePage.tsx`, `bokusu-front/src/components/QueueItem.tsx`, `bokusu-front/src/hooks/useQueue.ts` (mutações item/clear/random), `bokusu-front/src/types/api.ts` (adicionar `DownloadsStatus`)
 - Test: `bokusu-front/src/components/QueueActionsMenu.test.tsx`, `bokusu-front/src/hooks/useDownloads.test.tsx`
 
 **Interfaces:**
+
 - Consumes: contratos `PATCH/DELETE /api/queue/item`, `DELETE /api/queue`, `POST /api/queue/random`, `GET /api/downloads`, `DELETE /api/downloads/errors/<id>`; `useSocketEvent` (`download_started`, `download_stopped`); `pushToast` (T10); `ConfirmModal` (criado aqui, reusado em T22/T23).
+
 - Produces:
+
   ```typescript
   useQueueItemAction(): UseMutationResult   // mutate({ song, action: 'top'|'up'|'down' }) e deleteItem(song)
   useClearQueue(): UseMutationResult
@@ -3132,18 +3220,22 @@ git add bokusu-front/src
 git commit -m "feat: queue context menu, clear, random add and download states"
 ```
 
----
+______________________________________________________________________
 
 ### Task 20: Busca completa — autocomplete, preview, download direto, badges (paralela com T18/T19)
 
 **Files:**
+
 - Create: `bokusu-front/src/components/PreviewModal.tsx`, `bokusu-front/src/hooks/useAutocomplete.ts`
 - Modify: `bokusu-front/src/pages/SearchPage.tsx`, `bokusu-front/src/components/SearchResultItem.tsx`, `bokusu-front/src/hooks/useSearch.ts`
 - Test: `bokusu-front/src/hooks/useAutocomplete.test.tsx`, `bokusu-front/src/components/PreviewModal.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `GET /api/search/autocomplete`, `GET /api/search/preview`, `POST /api/downloads`; debounce existente do SearchPage; `pushToast`.
+
 - Produces:
+
   ```typescript
   useAutocomplete(query: string): UseQueryResult<{ path: string; fileName: string }[]>
   useStartDownload(): UseMutationResult  // mutate({ songUrl, singer, title, queue })
@@ -3310,7 +3402,7 @@ git add bokusu-front/src
 git commit -m "feat: search autocomplete, video preview and direct download"
 ```
 
----
+______________________________________________________________________
 
 ## ═══ CHECKPOINT B — Code review estratégico ═══
 
@@ -3321,17 +3413,20 @@ Após T12–T20 concluídas:
 - [ ] UM subagent revisor no diff desde o Checkpoint A. Foco: acessibilidade do DnD, condições de corrida das mutações otimistas vs invalidação por socket, vazamento de listeners, i18n completo (nenhuma string hardcoded nova).
 - [ ] Corrigir apontamentos antes da Fase 4.
 
----
+______________________________________________________________________
 
 ### Task 21: Settings — Preferências do Servidor (Fase 4 — paralela com T22–T24)
 
 **Files:**
+
 - Create: `bokusu-front/src/components/settings/ServerPreferences.tsx`
 - Modify: `bokusu-front/src/pages/SettingsPage.tsx`
 - Test: `bokusu-front/src/components/settings/ServerPreferences.test.tsx`
 
 **Interfaces:**
+
 - Consumes: `usePreferences`, `useSetPreference` (T8); `useAppStore.isAdmin`; `ConfirmModal` (T19); i18n.
+
 - Produces: seção admin-only em Settings com os grupos: Player (`volume` slider 0–1, `avsync` number, `normalize_audio`, `complete_transcode_before_play` toggles, `buffer_size` number, `high_quality` toggle), Splash (`splash_display_mode` radio integração/cinemático — substitui o radio local atual, `splash_delay`, `screensaver_timeout` numbers, `hide_url`, `hide_overlay`, `hide_notifications`, `show_splash_clock`, `disable_bg_music`, `disable_bg_video` toggles, `bg_music_volume` slider), Fila (`limit_user_songs_by` number, `enable_fair_queue` toggle), Score (`disable_score` toggle, `low/mid/high_score_phrases` textareas), Avançado (`cdg_pixel_scaling`, `enable_title_tidy` toggles, `browse_results_per_page` number). Botão "Restaurar padrões" → `DELETE /api/preferences` com `ConfirmModal`.
 
 - [ ] **Step 1: Teste que falha**
@@ -3388,18 +3483,22 @@ git add bokusu-front/src
 git commit -m "feat: server preferences forms in settings"
 ```
 
----
+______________________________________________________________________
 
 ### Task 22: Settings — Sistema (paralela)
 
 **Files:**
+
 - Create: `bokusu-front/src/components/settings/SystemPanel.tsx`, `bokusu-front/src/hooks/useSystem.ts`
 - Modify: `bokusu-front/src/pages/SettingsPage.tsx`
 - Test: `bokusu-front/src/hooks/useSystem.test.tsx`
 
 **Interfaces:**
+
 - Consumes: contratos `/api/system/*`; `ConfirmModal`; `pushToast`; i18n.
+
 - Produces:
+
   ```typescript
   useSystemInfo(): UseQueryResult<{ cpu: string; memory: string; disk: string; youtubedlVersion: string; pikaraokeVersion: string }>  // refetchInterval 10s, enabled só com isAdmin
   useLibraryStats(): UseQueryResult<{ song_count: number }>
@@ -3505,23 +3604,28 @@ git add bokusu-front/src
 git commit -m "feat: system panel with stats and admin actions in settings"
 ```
 
----
+______________________________________________________________________
 
 ### Task 23: Página `/library` (paralela)
 
 **Files:**
+
 - Create: `bokusu-front/src/pages/LibraryPage.tsx`, `bokusu-front/src/hooks/useLibrary.ts`, `bokusu-front/src/components/EditMetadataModal.tsx`
 - Modify: `bokusu-front/src/App.tsx` (rota), `bokusu-front/src/pages/SettingsPage.tsx` (link "Gerenciar Biblioteca")
 - Test: `bokusu-front/src/hooks/useLibrary.test.tsx`
 
 **Interfaces:**
+
 - Consumes: contratos `/api/files/*`; `useEnqueue` (T9); `ConfirmModal`; `pushToast`.
+
 - Produces:
+
   ```typescript
   useLibrary(params: { q: string; page: number }): UseQueryResult<{ files: { path: string; displayName: string }[]; total: number; page: number; perPage: number }>
   useRenameFile(): UseMutationResult   // mutate({ oldFileName, newFileName })
   useDeleteFile(): UseMutationResult   // mutate(path)
   ```
+
 - Rota `/library` dentro do `AppLayout`, protegida: se `!isAdmin`, redirect para `/settings`.
 
 - [ ] **Step 1: Teste que falha**
@@ -3643,18 +3747,22 @@ git add bokusu-front/src
 git commit -m "feat: library management page with search, edit and delete"
 ```
 
----
+______________________________________________________________________
 
 ### Task 24: Página `/library/renamer` + idioma (paralela)
 
 **Files:**
+
 - Create: `bokusu-front/src/pages/RenamerPage.tsx`, `bokusu-front/src/hooks/useRenamer.ts`, `bokusu-front/src/components/settings/LanguageSection.tsx`
 - Modify: `bokusu-front/src/App.tsx` (rota), `bokusu-front/src/pages/SettingsPage.tsx` (link + LanguageSection)
 - Test: `bokusu-front/src/hooks/useRenamer.test.tsx`
 
 **Interfaces:**
+
 - Consumes: contratos `/api/renamer/*`; `setLanguage` de `lib/i18n` (T11); `useSetPreference` (`preferred_language` não está em DEFAULTS — o idioma da TV segue o flask-babel; a LanguageSection controla APENAS o idioma do app de gestão via i18next/localStorage).
+
 - Produces:
+
   ```typescript
   useRenamerSongs(params: { page: number; onlyMismatched: boolean }): UseQueryResult<{ songs: { file: string; currentName: string; suggestedName: string; isEqual: boolean }[]; total: number; page: number }>
   useApplyRename(): UseMutationResult  // mutate({ oldName, newName })
@@ -3761,7 +3869,7 @@ git add bokusu-front/src
 git commit -m "feat: batch renamer page and app language selector"
 ```
 
----
+______________________________________________________________________
 
 ## ═══ CHECKPOINT C — Review final + verificação ═══
 

@@ -1,6 +1,6 @@
 """Download queue endpoints for the /api mirror."""
 
-from flask import jsonify, Response
+from flask import Response, jsonify
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 

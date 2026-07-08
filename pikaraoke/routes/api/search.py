@@ -1,6 +1,6 @@
 """Search endpoints for the /api mirror."""
 
-from flask import jsonify, Response
+from flask import Response, jsonify
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 
@@ -39,11 +39,7 @@ def api_search(args: dict) -> tuple[Response, int] | Response:
     results = []
     for item in raw_results:
         if len(item) >= 3:
-            results.append({
-                "title": item[0],
-                "url": item[1],
-                "id": item[2]
-            })
+            results.append({"title": item[0], "url": item[1], "id": item[2]})
     return jsonify(results)
 
 

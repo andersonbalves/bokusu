@@ -10,6 +10,7 @@ from pikaraoke.lib.preference_manager import PreferenceManager
 
 _ = flask_babel.gettext
 
+
 def _default_score_phrases() -> dict[str, list[str]]:
     """Translated built-in phrases, used when the user has not set custom ones."""
     return {
@@ -36,10 +37,12 @@ def _default_score_phrases() -> dict[str, list[str]]:
         ],
     }
 
+
 def _parse_stored_phrases(stored: str) -> list[str]:
     """Split a stored phrase string on '|' (preferred) or '\\n' (legacy)."""
     sep = "|" if "|" in stored else "\n"
     return [p.strip() for p in stored.split(sep) if p.strip()]
+
 
 def _get_active_score_phrases(k) -> dict[str, list[str]]:
     """Custom phrases if configured; translated built-in defaults otherwise."""
@@ -49,6 +52,7 @@ def _get_active_score_phrases(k) -> dict[str, list[str]]:
         stored = getattr(k, f"{tier}_score_phrases")
         result[tier] = (_parse_stored_phrases(stored) if stored else []) or defaults[tier]
     return result
+
 
 _SCORE_PHRASE_KEYS = {"low_score_phrases", "mid_score_phrases", "high_score_phrases"}
 

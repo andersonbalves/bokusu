@@ -31,6 +31,7 @@ def test_search_non_karaoke_skips_suffix(mock_get_results, client):
 
 def test_autocomplete_matches_local_songs(client, fake_karaoke):
     from unittest.mock import MagicMock
+
     fake_karaoke.song_manager = MagicMock()
     fake_karaoke.song_manager.songs = [
         "/songs/Queen - Bohemian Rhapsody [fJ9rUzIMcZQ].mp4",

@@ -32,4 +32,3 @@ export function NowPlayingCard({ nowPlaying, onSkip, canSkip }: NowPlayingCardPr
     </div>
   )
 }
-

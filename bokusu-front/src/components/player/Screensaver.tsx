@@ -28,7 +28,7 @@ export function Screensaver({ appUrl, hideUrl }: ScreensaverProps) {
       if (!running) return
       if (lastTime === 0) lastTime = time
       const delta = time - lastTime
-      
+
       if (delta >= 1000 / FPS) {
         lastTime = time
         if (!box.parentElement) return

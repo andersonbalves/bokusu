@@ -128,7 +128,9 @@ class TestQueueManagerEnqueue:
     def test_enqueue_rejects_nonexistent_file(self, queue_manager, monkeypatch):
         """Enqueuing a nonexistent file should fail."""
         monkeypatch.setattr("pikaraoke.lib.queue_manager.path_exists", lambda path: False)
-        success, message = queue_manager.enqueue("/nonexistent/path/song---dQw4w9WgXcQ.mp4", "Guest")
+        success, message = queue_manager.enqueue(
+            "/nonexistent/path/song---dQw4w9WgXcQ.mp4", "Guest"
+        )
 
         assert success is False
         assert "not found" in message.lower() or "não encontrado" in message.lower()
