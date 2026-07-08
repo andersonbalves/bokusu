@@ -7,9 +7,9 @@ and fair queue algorithm.
 from __future__ import annotations
 
 import logging
-import os
 import random
 from collections.abc import Callable
+from os.path import exists as path_exists
 from typing import Any
 
 from flask_babel import _
@@ -106,7 +106,7 @@ class QueueManager:
         """Add a song to the queue. Returns [success, message]."""
         title = self._resolve_title(song_path)
 
-        if not os.path.exists(song_path):
+        if not path_exists(song_path):
             logging.warning(f"Refusing to enqueue missing file: {song_path}")
             return [False, _("Song file not found: %s") % title]
 
