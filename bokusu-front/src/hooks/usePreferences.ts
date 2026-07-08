@@ -26,7 +26,7 @@ export function usePreferences() {
 }
 
 export type SetPreferenceVariables = {
-  [K in keyof Preferences]: { key: K; value: Preferences[K] }
+  [K in keyof Preferences]-?: { key: K; value: Preferences[K] }
 }[keyof Preferences]
 
 export function useSetPreference() {

@@ -22,7 +22,7 @@ export function useSystemInfo() {
   const isAdmin = useAppStore((s) => s.isAdmin)
   return useQuery({
     queryKey: ['systemInfo'],
-    enabled: isAdmin,
+    enabled: isAdmin === true,
     refetchInterval: 10000,
     queryFn: () => apiFetch<SystemInfo>('/api/system/info'),
   })
@@ -32,7 +32,7 @@ export function useLibraryStats() {
   const isAdmin = useAppStore((s) => s.isAdmin)
   return useQuery({
     queryKey: ['libraryStats'],
-    enabled: isAdmin,
+    enabled: isAdmin === true,
     queryFn: () => apiFetch<{ song_count: number }>('/api/system/library-stats'),
   })
 }

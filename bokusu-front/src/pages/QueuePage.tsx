@@ -33,7 +33,9 @@ export function QueuePage() {
   const reorderQueue = useReorderQueue()
   const clearQueue = useClearQueue()
   const addRandom = useAddRandom()
-  const { isAdmin, openAdminModal } = useAppStore()
+  const { isAdmin: adminStatus, openAdminModal } = useAppStore()
+  // null = checagem de auth pendente; trata como não-admin na UI
+  const isAdmin = adminStatus === true
 
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false)
   const [randomModalOpen, setRandomModalOpen] = useState(false)
