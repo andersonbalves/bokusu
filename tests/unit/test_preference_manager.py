@@ -334,7 +334,7 @@ def test_preference_manager_get_or_default_returns_default(temp_config_file):
     assert result == 0.85
 
     result = prefs.get_or_default("high_quality")
-    assert result is False
+    assert result is True
 
     result = prefs.get_or_default("splash_delay")
     assert result == 2
@@ -625,7 +625,7 @@ def test_reset_all_restores_defaults(temp_config_file):
     # Verify target attributes are reset to defaults
     assert target.volume == 0.85  # Default
     assert target.splash_delay == 2  # Default
-    assert target.high_quality is False  # Default
+    assert target.high_quality is True  # Default
 
 
 def test_reset_all_without_target(temp_config_file):

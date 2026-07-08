@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 
@@ -89,11 +90,14 @@ def upgrade_youtubedl() -> str:
 
     upgrade_success = False
     if "pip" in output.lower():
-        pip_cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "yt-dlp"]
-
-        # Outside a venv, pip requires --break-system-packages on modern Python
-        if sys.prefix == sys.base_prefix:
-            pip_cmd.append("--break-system-packages")
+        # Prefer uv pip (project uses uv), fall back to plain pip
+        if shutil.which("uv"):
+            pip_cmd = ["uv", "pip", "install", "--upgrade", "yt-dlp"]
+        else:
+            pip_cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "yt-dlp"]
+            # Outside a venv, pip requires --break-system-packages on modern Python
+            if sys.prefix == sys.base_prefix:
+                pip_cmd.append("--break-system-packages")
 
         try:
             logging.info(f"yt-dlp is outdated! Attempting upgrade via {pip_cmd}...")
@@ -113,16 +117,16 @@ def upgrade_youtubedl() -> str:
 def build_ytdl_download_command(
     video_url: str,
     download_path: str,
-    high_quality: bool = False,
     youtubedl_proxy: str | None = None,
     additional_args: str | None = None,
 ) -> list[str]:
     """Build the yt-dlp command line for downloading a video.
 
+    Always downloads the best available quality in mp4 container.
+
     Args:
         video_url: URL of the video to download.
         download_path: Directory path where videos will be saved.
-        high_quality: If True, download up to 1080p; otherwise download mp4.
         youtubedl_proxy: Optional proxy server URL.
         additional_args: Optional additional command-line arguments as a string.
 
@@ -130,14 +134,11 @@ def build_ytdl_download_command(
         List of command-line arguments for subprocess execution.
     """
     dl_path = os.path.join(download_path, "%(title)s---%(id)s.%(ext)s")
-    file_quality = (
-        "bestvideo[ext!=webm][height<=1080]+bestaudio[ext!=webm]/best[ext!=webm]"
-        if high_quality
-        else "mp4"
-    )
     args = [
         "-f",
-        file_quality,
+        "bestvideo[ext!=webm]+bestaudio[ext!=webm]/best[ext!=webm]",
+        "--merge-output-format",
+        "mp4",
         "-o",
         dl_path,
         "-S",

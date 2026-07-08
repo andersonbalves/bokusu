@@ -24,7 +24,7 @@ class PreferenceManager:
     DEFAULTS: ClassVar[dict[str, Any]] = {
         "hide_url": False,
         "hide_notifications": False,
-        "high_quality": False,
+        "high_quality": True,
         "splash_delay": 2,
         "volume": 0.85,
         "normalize_audio": False,
