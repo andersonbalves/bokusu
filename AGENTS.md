@@ -83,7 +83,7 @@ cd bokusu-front && npm run build
 uv run pytest
 
 # Code quality
-uv run pre-commit run --config code_quality/.pre-commit-config.yaml --all-files
+uv run pre-commit run --all-files
 ```
 
 ## Key Conventions
