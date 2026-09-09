@@ -76,6 +76,9 @@ def delete_file(query: dict) -> tuple[Response, int] | Response:
     """Delete a library file unless it is queued."""
     k = get_karaoke_instance()
     song = query["song"]
+    if not k.song_manager.is_path_in_library(song):
+        return jsonify({"error": "Path is outside the song library"}), 400
+
     if k.queue_manager.is_song_in_queue(song):
         return jsonify({"error": "Song is in the current queue"}), 409
 
@@ -98,6 +101,14 @@ def rename_file(body: dict) -> tuple[Response, int] | Response:
     """Rename a library file, preserving the YouTube id suffix."""
     k = get_karaoke_instance()
     old_name = body["old_file_name"]
+    if not k.song_manager.is_path_in_library(old_name):
+        return jsonify({"error": "Path is outside the song library"}), 400
+    if (
+        os.path.basename(body["new_file_name"]) != body["new_file_name"]
+        or body["new_file_name"] in (".", "..")
+    ):
+        return jsonify({"error": "Invalid file name"}), 400
+
     if k.queue_manager.is_song_in_queue(old_name):
         return jsonify({"error": "Song is in the current queue"}), 409
 

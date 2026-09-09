@@ -66,6 +66,14 @@ def renamer_rename(body: dict) -> tuple[Response, int] | Response:
     """Apply a single rename suggestion."""
     k = get_karaoke_instance()
     old_name = body["old_name"]
+    if not k.song_manager.is_path_in_library(old_name):
+        return jsonify({"error": "Path is outside the song library"}), 400
+    if (
+        os.path.basename(body["new_name"]) != body["new_name"]
+        or body["new_name"] in (".", "..")
+    ):
+        return jsonify({"error": "Invalid file name"}), 400
+
     if k.queue_manager.is_song_in_queue(old_name):
         return jsonify({"error": "Song is in the current queue"}), 409
 

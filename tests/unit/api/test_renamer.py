@@ -68,6 +68,7 @@ def test_rename_requires_admin(client):
 
 
 def test_rename_refuses_queued_song(admin_client, fake_karaoke):
+    fake_karaoke.song_manager = MagicMock()
     fake_karaoke.queue_manager.is_song_in_queue.return_value = True
     resp = admin_client.post(
         "/api/renamer/rename", json={"old_name": "/x/Alpha.mp4", "new_name": "New Alpha"}
@@ -79,12 +80,24 @@ def test_rename_refuses_queued_song(admin_client, fake_karaoke):
 @patch("pikaraoke.routes.api.renamer.os.path.isfile")
 def test_rename_refuses_missing_file(mock_isfile, admin_client, fake_karaoke):
     mock_isfile.return_value = False
+    fake_karaoke.song_manager = MagicMock()
     fake_karaoke.queue_manager.is_song_in_queue.return_value = False
     resp = admin_client.post(
         "/api/renamer/rename", json={"old_name": "/x/Alpha.mp4", "new_name": "New Alpha"}
     )
     assert resp.status_code == 404
     assert resp.get_json() == {"error": "Source song file not found"}
+
+
+def test_rename_rejects_path_outside_library(admin_client, fake_karaoke):
+    fake_karaoke.song_manager = MagicMock()
+    fake_karaoke.song_manager.is_path_in_library.return_value = False
+    fake_karaoke.queue_manager.is_song_in_queue.return_value = False
+
+    resp = admin_client.post(
+        "/api/renamer/rename", json={"old_name": "/etc/passwd", "new_name": "x"}
+    )
+    assert resp.status_code == 400
 
 
 @patch("pikaraoke.routes.api.renamer.os.path.isfile")

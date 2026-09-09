@@ -43,6 +43,7 @@ def test_delete_requires_admin(client):
 
 
 def test_delete_refuses_queued_song(admin_client, fake_karaoke):
+    fake_karaoke.song_manager = MagicMock()
     fake_karaoke.queue_manager.is_song_in_queue.return_value = True
     resp = admin_client.delete("/api/files?song=test.mp4")
     assert resp.status_code == 409
@@ -63,12 +64,22 @@ def test_delete_removes_song(mock_isfile, admin_client, fake_karaoke):
 
 @patch("pikaraoke.routes.api.files.os.path.isfile")
 def test_delete_non_existent_file(mock_isfile, admin_client, fake_karaoke):
-    mock_isfile.return_value = False
+    mock_isfile.return_value = False  # Source doesn't exist
+    fake_karaoke.song_manager = MagicMock()
     fake_karaoke.queue_manager.is_song_in_queue.return_value = False
 
     resp = admin_client.delete("/api/files?song=missing.mp4")
     assert resp.status_code == 404
     assert resp.get_json() == {"error": "Song file not found"}
+
+
+def test_delete_rejects_path_outside_library(admin_client, fake_karaoke):
+    fake_karaoke.song_manager = MagicMock()
+    fake_karaoke.song_manager.is_path_in_library.return_value = False
+    fake_karaoke.queue_manager.is_song_in_queue.return_value = False
+
+    resp = admin_client.delete("/api/files?song=/etc/passwd")
+    assert resp.status_code == 400
 
 
 def test_rename_requires_admin(client):
@@ -104,6 +115,7 @@ def test_rename_delegates(mock_youtube_id_suffix, mock_isfile, admin_client, fak
 
 @patch("pikaraoke.routes.api.files.os.path.isfile")
 def test_rename_non_existent_source(mock_isfile, admin_client, fake_karaoke):
+    fake_karaoke.song_manager = MagicMock()
     fake_karaoke.queue_manager.is_song_in_queue.return_value = False
     mock_isfile.return_value = False  # Source doesn't exist
 
@@ -154,3 +166,18 @@ def test_rename_noop_casing(mock_youtube_id_suffix, mock_isfile, admin_client, f
     assert resp.get_json() == {"success": True, "message": "Song renamed"}
     # No rename should be performed if path is completely identical
     fake_karaoke.song_manager.rename.assert_not_called()
+
+
+@patch("pikaraoke.routes.api.files.os.path.isfile")
+def test_rename_rejects_new_name_with_traversal(mock_isfile, admin_client, fake_karaoke):
+    fake_karaoke.song_manager = MagicMock()
+    fake_karaoke.song_manager.download_path = "/fake/path"
+    fake_karaoke.queue_manager.is_song_in_queue.return_value = False
+    old = "/fake/path/Song [abc12345678].mp4"
+    mock_isfile.side_effect = lambda path: path == old
+
+    resp = admin_client.patch(
+        "/api/files",
+        json={"old_file_name": old, "new_file_name": "../../evil"},
+    )
+    assert resp.status_code == 400

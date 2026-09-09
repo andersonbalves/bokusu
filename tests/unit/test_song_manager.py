@@ -213,3 +213,23 @@ class TestDBCoordination:
         sm.register_download(_native(song))
         assert _native(song) in sm.songs
         mock_db.insert_songs.assert_called_once()
+
+
+class TestIsPathInLibrary:
+    def test_inside_library(self, tmp_path, mock_db):
+        song = tmp_path / "a.mp4"
+        song.write_text("x")
+        sm = SongManager(str(tmp_path), db=mock_db)
+        assert sm.is_path_in_library(str(song))
+
+    def test_dotdot_resolves_back_inside(self, tmp_path, mock_db):
+        sm = SongManager(str(tmp_path), db=mock_db)
+        assert sm.is_path_in_library(str(tmp_path / "sub" / ".." / "a.mp4"))
+
+    def test_absolute_path_outside(self, tmp_path, mock_db):
+        sm = SongManager(str(tmp_path), db=mock_db)
+        assert not sm.is_path_in_library("/etc/passwd")
+
+    def test_dotdot_escape(self, tmp_path, mock_db):
+        sm = SongManager(str(tmp_path), db=mock_db)
+        assert not sm.is_path_in_library(str(tmp_path / ".." / "escape.mp4"))
