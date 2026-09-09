@@ -1,9 +1,10 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Search, FolderOpen, ListPlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useSearch, useSearchAutocomplete } from '../hooks/useSearch'
 import { useStartDownload } from '../hooks/useDownloads'
 import { useEnqueue } from '../hooks/useQueue'
+import { useAppStore } from '../store/useAppStore'
 import { SearchResultItem } from '../components/SearchResultItem'
 import { PreviewModal } from '../components/PreviewModal'
 import type { SearchResult } from '../types/api'
@@ -15,8 +16,6 @@ export function SearchPage() {
   const [addingId, setAddingId] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [toastMessage, setToastMessage] = useState<string | null>(null)
-  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -40,12 +39,7 @@ export function SearchPage() {
   const { data: suggestions = [] } = useSearchAutocomplete(debouncedQuery)
   const startDownload = useStartDownload()
   const enqueue = useEnqueue()
-
-  const showToast = useCallback((msg: string) => {
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
-    setToastMessage(msg)
-    toastTimerRef.current = setTimeout(() => setToastMessage(null), 2500)
-  }, [])
+  const pushToast = useAppStore((s) => s.pushToast)
 
   const handleAdd = (result: SearchResult, queue: boolean) => {
     setAddingId(result.id)
@@ -58,15 +52,16 @@ export function SearchPage() {
       },
       {
         onSuccess: () => {
-          showToast(
+          pushToast(
             queue
               ? t('search.added', { title: result.title })
-              : t('search.downloadStarted', { title: result.title })
+              : t('search.downloadStarted', { title: result.title }),
+            'success'
           )
           setAddingId(null)
         },
         onError: () => {
-          showToast(t('search.error'))
+          pushToast(t('search.error'), 'danger')
           setAddingId(null)
         },
       }
@@ -120,8 +115,9 @@ export function SearchPage() {
                     enqueue.mutate(
                       { song_id: s.path, user: 'Guest' },
                       {
-                        onSuccess: () => showToast(t('search.added', { title: s.fileName })),
-                        onError: () => showToast(t('search.error')),
+                        onSuccess: () =>
+                          pushToast(t('search.added', { title: s.fileName }), 'success'),
+                        onError: () => pushToast(t('search.error'), 'danger'),
                       }
                     )
                   }}
@@ -155,15 +151,6 @@ export function SearchPage() {
 
       {/* Preview Modal */}
       <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} />
-
-      {/* Toast — above bottom nav on mobile */}
-      {toastMessage && (
-        <div className="toast toast-center toast-bottom z-50 pb-20 lg:pb-4">
-          <div className="alert alert-success shadow-lg">
-            <span>{toastMessage}</span>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
