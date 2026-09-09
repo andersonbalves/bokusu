@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Context for AI agents working on Bokusu.
+Context for AI agents working on Bokusu. **This file is the single source of truth** — `CLAUDE.md` just points here.
 
 ## Project
 
@@ -27,6 +27,10 @@ bokusu/
     ├── templates/index.html   # AUTO-GENERATED — never edit manually
     └── static/assets/         # AUTO-GENERATED — JS/CSS from Vite build
 ```
+
+**Boundary:** Flask owns data, queues, downloads, SQLite, media files. React owns all UI. They communicate via REST (TanStack Query) and WebSocket events (Flask-SocketIO).
+
+Jinja templates (except `index.html`) are progressively obsoleted by the SPA.
 
 ## Frontend Stack
 
@@ -58,22 +62,27 @@ bokusu/
 - **Communication:** REST (JSON) for queries/mutations; Socket.IO events for real-time push (queue changes, playback state, download progress)
 - TanStack Query invalidates on relevant Socket.IO events — do not poll
 
+## Core Principles
+
+**Single-owner maintainability:** Code clarity over documentation. Simplicity over flexibility. One source of truth.
+
 ## Dev Commands
 
 ```bash
-# Start Flask backend
-uv run python pikaraoke/app.py
+# Backend (Flask)
+uv run pikaraoke                       # produção local (abre browser kiosk na TV)
+uv run pikaraoke --hide-splash-screen  # desenvolvimento/testes (sem browser automático)
 
-# Start Vite frontend (hot-reload, separate port — proxies API to Flask)
+# Frontend dev server (hot-reload, separate port — proxies API to Flask)
 cd bokusu-front && npm run dev
 
-# Build frontend (injects into Flask static dirs — required before distributing)
+# Frontend build (outputs into Flask static dirs — required before distributing)
 cd bokusu-front && npm run build
 
 # Run Python tests
 uv run pytest
 
-# Run all linters
+# Code quality
 uv run pre-commit run --config code_quality/.pre-commit-config.yaml --all-files
 ```
 
@@ -95,18 +104,82 @@ uv run pre-commit run --config code_quality/.pre-commit-config.yaml --all-files
 
 ### TypeScript/React
 
-- Strict TypeScript — no `any`
-- Functional components only
-- Zustand for UI state, TanStack Query for server state — never mix
-- PascalCase components, `use` prefix for hooks, camelCase store slices
-- TailwindCSS + DaisyUI utilities; no inline styles
+- Strict TypeScript — no `any`, no type assertions without justification
+- React functional components only; no class components
+- Zustand for global UI state; TanStack Query for server state — never mix the two
+- Component files: PascalCase. Hooks: `use` prefix. Store slices: camelCase
+- TailwindCSS + DaisyUI utility classes; no inline styles
 
 ### Python
 
-- PEP 8, 4 spaces, type hints with modern syntax (`str | None`)
-- Catch specific exceptions; never bare `except:`
-- Use real `EventSystem` and `PreferenceManager` in tests (they're lightweight)
+- PEP 8, 4 spaces, meaningful names
+- Type hints required: modern syntax (`str | None`) — Python 3.10+ is the minimum, no `from __future__ import annotations` needed
+- Concise docstrings for public APIs — explain "why", not "how"
+- No emoji or unicode emoji substitutes
+
+## Error Handling
+
+- Catch specific exceptions, never bare `except:`
+- Log errors, never swallow silently
+- Use context managers for resources
+
+## Testing
+
+- pytest with mocked external I/O and subprocess operations only
+- Test business logic and integration points
+- Skip trivial getters/setters
+- Use real `EventSystem` and `PreferenceManager` instances (they're lightweight)
+
+## Code Quality
+
+Tools: Black (100 char), isort, pycln, pylint, mdformat.
+
+Never commit to `main` directly.
+
+## Refactoring
+
+**Refactor iteratively as you work.** When touching code:
+
+- Extract classes when a module has multiple responsibilities (like `Browser` was extracted from utilities)
+- Extract functions when logic is repeated or a function exceeds ~50 lines
+- Rename unclear variables/functions immediately
+- Delete dead code - never comment it out. When new code supersedes existing methods, remove the old methods and their tests in the same commit
+- Update related code consistently (no half-migrations)
+
+**When to refactor:**
+
+- Code you're modifying is hard to understand
+- You're adding a third similar pattern (rule of three)
+- A function/class is doing too many things
+
+**When NOT to refactor:**
+
+- Unrelated code "while you're in the area"
+- Working code that you're not modifying
+- To add flexibility you don't need yet
 
 ## PR Requirements
 
-Every PR must include a test plan: minimal checklist targeting only the changes made.
+Every PR must include a test plan: a minimal checklist targeting only the changes made, enabling quick manual verification.
+
+## What NOT to Do
+
+- Add unrequested features
+- Add error handling for impossible states
+- Create abstractions for single uses
+- Write speculative "future-proofing" code
+- Commit debug prints or commented code
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues (`andersonbalves/bokusu`, via `gh` CLI). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary, label string = role name. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at repo root. See `docs/agents/domain.md`.
