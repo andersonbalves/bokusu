@@ -39,7 +39,19 @@ def _get_persisted_secret_key() -> str:
         with os.fdopen(fd, "w") as f:
             f.write(os.urandom(24).hex())
     with open(path) as f:
-        return f.read()
+        key = f.read()
+    # A racing loser may read the file between the winner's create and flush,
+    # getting an empty string. A silent empty secret would invalidate all
+    # cookies mysteriously, so retry briefly, then fail loud.
+    for _ in range(3):
+        if key:
+            return key
+        time.sleep(0.05)
+        with open(path) as f:
+            key = f.read()
+    if not key:
+        raise RuntimeError(f"Secret key file {path} was empty after retries")
+    return key
 
 
 def _admin_serializer(app: Flask) -> URLSafeTimedSerializer:

@@ -12,6 +12,8 @@ export default defineConfig(({ command }) => ({
     {
       name: 'flask-integration',
       buildStart() {
+        // vitest loads this config; deleting Flask build artifacts on every test run is destructive
+        if (process.env.VITEST || process.env.NODE_ENV === 'test') return
         const assetsDir = path.resolve(__dirname, '../pikaraoke/static/assets')
         if (fs.existsSync(assetsDir)) {
           fs.rmSync(assetsDir, { recursive: true, force: true })

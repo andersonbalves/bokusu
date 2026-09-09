@@ -171,8 +171,9 @@ def auth(form):
     next_url = form["next"]
 
     # Validate next_url to prevent open redirect vulnerabilities
-    # (also reject protocol-relative URLs like "//evil.com")
-    if not next_url.startswith("/") or next_url.startswith("//"):
+    # (also reject protocol-relative URLs like "//evil.com" and "/\evil.com",
+    # which some browsers normalize to "//evil.com")
+    if not next_url.startswith("/") or next_url.startswith("//") or next_url.startswith("/\\"):
         next_url = "/"
 
     if p == admin_password:

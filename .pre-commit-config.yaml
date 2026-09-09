@@ -41,8 +41,11 @@ repos:
     hooks:
     - id: mdformat
       name: Format Markdown Files
-      additional_dependencies:
-      - mdformat-black
+      # mdformat-black hardcodes black's default line-length (88), conflicting
+      # with the repo standard (100, enforced by ruff-format) — so it is not
+      # installed. Skill docs use YAML frontmatter that mdformat mangles, so
+      # those dirs are excluded.
+      exclude: ^\.agents/|^\.claude/
       args: [--number]
 
   # Security
