@@ -118,7 +118,6 @@
     "buffer_size": "Buffer Size",
     "normalize_audio": "Normalize Audio (EBU R128)",
     "complete_transcode_before_play": "Complete video transcoding before starting",
-    "high_quality": "High Quality Rendering",
     "splash_display_mode": "Splash Screen Mode",
     "bg_music_volume": "Background Music Volume",
     "splash_delay": "Splash Delay (seconds)",

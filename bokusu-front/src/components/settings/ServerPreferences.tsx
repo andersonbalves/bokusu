@@ -31,7 +31,6 @@ export function ServerPreferences() {
             <PrefNumber prefKey="buffer_size" label={t('prefs.buffer_size')} />
             <PrefToggle prefKey="normalize_audio" label={t('prefs.normalize_audio')} />
             <PrefToggle prefKey="complete_transcode_before_play" label={t('prefs.complete_transcode_before_play')} />
-            <PrefToggle prefKey="high_quality" label={t('prefs.high_quality')} />
           </div>
         </div>
       </section>

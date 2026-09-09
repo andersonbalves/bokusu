@@ -43,7 +43,6 @@ export interface Preferences {
   hide_overlay: boolean
   show_splash_clock: boolean
   normalize_audio: boolean
-  high_quality: boolean
   complete_transcode_before_play: boolean
   buffer_size: number
   limit_user_songs_by: number
