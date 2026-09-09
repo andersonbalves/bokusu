@@ -6,7 +6,7 @@ from flask import jsonify, make_response
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 
-from pikaraoke.lib.current_app import get_admin_password, is_admin
+from pikaraoke.lib.current_app import admin_cookie_value, get_admin_password, is_admin
 
 api_auth_bp = Blueprint("api_auth", __name__, url_prefix="/api")
 
@@ -31,5 +31,5 @@ def auth_login(body):
     resp = make_response(jsonify({"isAdmin": True}))
     if admin_password is not None:
         expires = datetime.datetime.now() + datetime.timedelta(days=90)
-        resp.set_cookie("admin", admin_password, expires=expires)
+        resp.set_cookie("admin", admin_cookie_value(admin_password), expires=expires)
     return resp

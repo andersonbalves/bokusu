@@ -23,7 +23,7 @@ from pikaraoke import VERSION, karaoke
 from pikaraoke.constants import LANGUAGES
 from pikaraoke.lib.args import parse_pikaraoke_args
 from pikaraoke.lib.browser import Browser
-from pikaraoke.lib.current_app import get_karaoke_instance
+from pikaraoke.lib.current_app import _get_persisted_secret_key, get_karaoke_instance
 from pikaraoke.lib.ffmpeg import is_ffmpeg_installed
 from pikaraoke.lib.file_resolver import delete_tmp_dir
 from pikaraoke.lib.get_platform import (
@@ -52,7 +52,7 @@ babel = Babel()
 
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = _get_persisted_secret_key()
 app.jinja_env.add_extension("jinja2.ext.i18n")
 app.config["BABEL_TRANSLATION_DIRECTORIES"] = "translations"
 app.config["JSON_SORT_KEYS"] = False

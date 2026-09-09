@@ -13,7 +13,12 @@ from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 
 from pikaraoke.karaoke import Karaoke
-from pikaraoke.lib.current_app import get_admin_password, get_karaoke_instance, is_admin
+from pikaraoke.lib.current_app import (
+    admin_cookie_value,
+    get_admin_password,
+    get_karaoke_instance,
+    is_admin,
+)
 from pikaraoke.lib.youtube_dl import upgrade_youtubedl
 
 _ = flask_babel.gettext
@@ -173,7 +178,7 @@ def auth(form):
         resp = make_response(redirect(next_url))
         expire_date = datetime.datetime.now()
         expire_date = expire_date + datetime.timedelta(days=90)
-        resp.set_cookie("admin", admin_password, expires=expire_date)
+        resp.set_cookie("admin", admin_cookie_value(admin_password), expires=expire_date)
         # MSG: Message shown after logging in as admin successfully
         flash(_("Admin mode granted!"), "is-success")
     else:

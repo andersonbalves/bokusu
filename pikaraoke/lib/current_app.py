@@ -1,5 +1,6 @@
 """Flask application context utilities for PiKaraoke."""
 
+import hashlib
 import logging
 import os
 import subprocess
@@ -7,25 +8,80 @@ import sys
 import time
 from typing import Any
 
-from flask import current_app, request
+from flask import Flask, current_app, request
 from flask_socketio import emit
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from pikaraoke.karaoke import Karaoke
+from pikaraoke.lib.get_platform import get_data_directory
+
+ADMIN_COOKIE_MAX_AGE = 90 * 24 * 3600  # 90 days, in seconds
+
+
+def _password_digest(password: str) -> str:
+    """Return the sha256 hex digest of a password (what the cookie stores, never the password)."""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+def _get_persisted_secret_key() -> str:
+    """Read-or-create a persistent secret key so signed cookies survive app restarts.
+
+    Returns:
+        str: Hex secret key stored in `<data directory>/.secret_key`.
+    """
+    path = os.path.join(get_data_directory(), ".secret_key")
+    if not os.path.exists(path):
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, "w") as f:
+            f.write(os.urandom(24).hex())
+    with open(path) as f:
+        return f.read()
+
+
+def _admin_serializer(app: Flask) -> URLSafeTimedSerializer:
+    """Build the serializer used to sign admin cookie values."""
+    return URLSafeTimedSerializer(app.secret_key, salt="admin-cookie")
+
+
+def admin_cookie_value(password: str, app: Flask | None = None) -> str:
+    """Return a signed token proving knowledge of the admin password.
+
+    The cookie must not carry the password itself, so it stores a signed
+    sha256 digest that is re-verified against the current password.
+
+    Args:
+        password: The admin password.
+        app: Flask app providing the signing secret; defaults to the current app.
+
+    Returns:
+        str: Signed, URL-safe token for the "admin" cookie.
+    """
+    app = app or current_app
+    return _admin_serializer(app).dumps({"p": _password_digest(password)})
 
 
 def is_admin() -> bool:
-    """Determine if the current app's admin password matches the admin cookie value
-    This function checks if the provided password is `None` or if it matches
-    the value of the "admin" cookie in the current Flask request. If the password
-    is `None`, the function assumes the user is an admin. If the "admin" cookie
-    is present and its value matches the provided password, the function returns `True`.
-    Otherwise, it returns `False`.
+    """Determine if the current request is authenticated as admin.
+
+    The "admin" cookie holds a signed token (not the plaintext password) that
+    is verified against the current admin password. No password configured
+    (`None`) grants admin to everyone.
+
     Returns:
-        bool: `True` if the password matches the admin cookie or if the password is `None`,
-              `False` otherwise.
+        bool: `True` if the admin cookie is a valid, unexpired token for the
+              current password, or if no password is configured; `False` otherwise.
     """
     password = get_admin_password()
-    return password is None or request.cookies.get("admin") == password
+    if password is None:
+        return True
+    token = request.cookies.get("admin")
+    if not token:
+        return False
+    try:
+        data = _admin_serializer(current_app).loads(token, max_age=ADMIN_COOKIE_MAX_AGE)
+    except (BadSignature, SignatureExpired):
+        return False
+    return data["p"] == _password_digest(password)
 
 
 def get_karaoke_instance() -> Karaoke:

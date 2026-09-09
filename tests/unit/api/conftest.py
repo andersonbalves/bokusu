@@ -6,6 +6,7 @@ import pytest
 from flask import Flask
 from flask_smorest import Api
 
+from pikaraoke.lib.current_app import admin_cookie_value
 from pikaraoke.lib.preference_manager import PreferenceManager
 
 
@@ -67,5 +68,5 @@ def client(app):
 @pytest.fixture
 def admin_client(app):
     c = app.test_client()
-    c.set_cookie("admin", "secret")
+    c.set_cookie("admin", admin_cookie_value("secret", app))
     return c
