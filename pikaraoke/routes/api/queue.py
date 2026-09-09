@@ -14,10 +14,6 @@ class QueueItemBodySchema(Schema):
     user = fields.String(required=True)
 
 
-class QueueEditBodySchema(Schema):
-    user = fields.String(required=True)
-
-
 class ReorderBodySchema(Schema):
     old_index = fields.Integer(required=True)
     new_index = fields.Integer(required=True)
@@ -53,27 +49,6 @@ def add_to_queue(body: dict) -> tuple[Response, int] | Response:
     return jsonify({"success": True})
 
 
-@api_queue_bp.route("/queue/<path:item_id>", methods=["PUT"])
-@require_admin
-@api_queue_bp.arguments(QueueEditBodySchema, location="json")
-def edit_queue(body: dict, item_id: str) -> tuple[Response, int] | Response:
-    k = current_app.config["KARAOKE_INSTANCE"]
-    success = k.queue_manager.edit_user(item_id, body["user"])
-    if not success:
-        return jsonify({"error": "Item not found"}), 404
-    return jsonify({"success": True})
-
-
-@api_queue_bp.route("/queue/<path:item_id>", methods=["DELETE"])
-@require_admin
-def delete_queue_item(item_id: str) -> tuple[Response, int] | Response:
-    k = current_app.config["KARAOKE_INSTANCE"]
-    success = k.queue_manager.queue_edit(item_id, "delete")
-    if not success:
-        return jsonify({"error": "Item not found"}), 404
-    return jsonify({"success": True})
-
-
 @api_queue_bp.route("/queue", methods=["DELETE"])
 @require_admin
 def clear_queue() -> Response:
@@ -101,31 +76,18 @@ def move_queue_item(body: dict) -> tuple[Response, int] | Response:
     song_path = body["song"]
     action = body["action"]
 
-    # 1. Find the index
-    index = -1
-    for i, item in enumerate(k.queue_manager.queue):
-        if item["file"] == song_path:
-            index = i
-            break
-
-    if index == -1:
+    if not k.queue_manager.is_song_in_queue(song_path):
         return jsonify({"error": "Song not found in queue"}), 404
 
-    # 2. Calculate the new index
     if action == "top":
-        new_index = 0
+        k.queue_manager.move_to_top(song_path)
     elif action == "bottom":
-        new_index = len(k.queue_manager.queue) - 1
-    elif action == "up":
-        new_index = max(0, index - 1)
-    elif action == "down":
-        new_index = min(len(k.queue_manager.queue) - 1, index + 1)
+        k.queue_manager.move_to_bottom(song_path)
+    elif action in ("up", "down"):
+        k.queue_manager.queue_edit(song_path, action)
     else:
         return jsonify({"error": f"Unknown action: {action}"}), 400
-
-    success = k.queue_manager.reorder(index, new_index)
-    if not success:
-        return jsonify({"error": "Failed to reorder item"}), 400
+    # False is a no-op (already in position) — treat as success
     return jsonify({"success": True})
 
 

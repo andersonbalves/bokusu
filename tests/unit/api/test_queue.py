@@ -24,40 +24,6 @@ def test_post_queue_error(client, fake_karaoke):
     fake_karaoke.queue_manager.enqueue.assert_called_once_with("dQw4w9WgXcQ", "Singer")
 
 
-def test_put_queue_item_requires_admin(client):
-    assert client.put("/api/queue/1", json={"user": "New"}).status_code == 403
-
-
-def test_put_queue_item_admin(admin_client, fake_karaoke):
-    fake_karaoke.queue_manager.edit_user.return_value = True
-    resp = admin_client.put("/api/queue/1", json={"user": "New"})
-    assert resp.status_code == 200
-    fake_karaoke.queue_manager.edit_user.assert_called_once_with("1", "New")
-
-
-def test_put_queue_item_not_found(admin_client, fake_karaoke):
-    fake_karaoke.queue_manager.edit_user.return_value = False
-    resp = admin_client.put("/api/queue/1", json={"user": "New"})
-    assert resp.status_code == 404
-
-
-def test_delete_queue_item_requires_admin(client):
-    assert client.delete("/api/queue/1").status_code == 403
-
-
-def test_delete_queue_item_admin(admin_client, fake_karaoke):
-    fake_karaoke.queue_manager.queue_edit.return_value = True
-    resp = admin_client.delete("/api/queue/1")
-    assert resp.status_code == 200
-    fake_karaoke.queue_manager.queue_edit.assert_called_once_with("1", "delete")
-
-
-def test_delete_queue_item_not_found(admin_client, fake_karaoke):
-    fake_karaoke.queue_manager.queue_edit.return_value = False
-    resp = admin_client.delete("/api/queue/1")
-    assert resp.status_code == 404
-
-
 def test_delete_queue_all_requires_admin(client):
     assert client.delete("/api/queue").status_code == 403
 
@@ -96,16 +62,15 @@ def test_move_queue_item_requires_admin(client):
 
 
 def test_move_queue_item_admin_success(admin_client, fake_karaoke):
-    fake_karaoke.queue_manager.queue = [{"file": "/x/a.mp4", "title": "A"}]
-    fake_karaoke.queue_manager.reorder.return_value = True
+    fake_karaoke.queue_manager.is_song_in_queue.return_value = True
     resp = admin_client.patch("/api/queue/item", json={"song": "/x/a.mp4", "action": "top"})
     assert resp.status_code == 200
     assert resp.get_json() == {"success": True}
-    fake_karaoke.queue_manager.reorder.assert_called_once_with(0, 0)
+    fake_karaoke.queue_manager.move_to_top.assert_called_once_with("/x/a.mp4")
 
 
 def test_move_queue_item_admin_not_found(admin_client, fake_karaoke):
-    fake_karaoke.queue_manager.queue = []
+    fake_karaoke.queue_manager.is_song_in_queue.return_value = False
     resp = admin_client.patch("/api/queue/item", json={"song": "/x/a.mp4", "action": "top"})
     assert resp.status_code == 404
     assert resp.get_json() == {"error": "Song not found in queue"}
