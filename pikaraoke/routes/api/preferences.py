@@ -32,7 +32,7 @@ def put_preference(body, key):
     if success:
         broadcast_event("preferences_update", {"key": key, "value": body["value"]})
         if key in ["low_score_phrases", "mid_score_phrases", "high_score_phrases"]:
-            from pikaraoke.routes.splash import _get_active_score_phrases
+            from pikaraoke.routes.preferences import _get_active_score_phrases
 
             broadcast_event("score_phrases_update", _get_active_score_phrases(k))
     status_code = 200 if success else 500

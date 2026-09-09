@@ -26,6 +26,15 @@ def test_put_preference_updates_value(mock_broadcast, admin_client, fake_karaoke
     mock_broadcast.assert_called_once_with("preferences_update", {"key": "volume", "value": 0.5})
 
 
+@patch("pikaraoke.routes.api.preferences.broadcast_event")
+def test_put_score_phrases_succeeds(mock_broadcast, admin_client, fake_karaoke):
+    resp = admin_client.put(
+        "/api/preferences/high_score_phrases",
+        json={"value": "Parabens, Show, Bravo"},
+    )
+    assert resp.status_code == 200
+
+
 def test_put_preference_unknown_key(admin_client):
     resp = admin_client.put("/api/preferences/unknown_invalid_key", json={"value": "foo"})
     assert resp.status_code == 404
