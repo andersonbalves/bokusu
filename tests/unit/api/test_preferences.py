@@ -35,6 +35,13 @@ def test_put_score_phrases_succeeds(mock_broadcast, admin_client, fake_karaoke):
     assert resp.status_code == 200
 
 
+@patch("pikaraoke.routes.api.preferences.broadcast_event")
+def test_put_preferred_language(mock_broadcast, admin_client, fake_karaoke):
+    resp = admin_client.put("/api/preferences/preferred_language", json={"value": "pt_BR"})
+    assert resp.status_code == 200
+    assert fake_karaoke.preferences.get("preferred_language") == "pt_BR"
+
+
 def test_put_preference_unknown_key(admin_client):
     resp = admin_client.put("/api/preferences/unknown_invalid_key", json={"value": "foo"})
     assert resp.status_code == 404

@@ -261,6 +261,7 @@ def test_preference_manager_unicode_characters(temp_config_file):
 def test_preference_manager_defaults_exist():
     """Test that DEFAULTS dictionary contains all expected preferences."""
     expected_keys = {
+        "preferred_language",
         "hide_url",
         "hide_notifications",
         "high_quality",

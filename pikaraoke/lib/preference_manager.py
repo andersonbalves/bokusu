@@ -22,6 +22,7 @@ class PreferenceManager:
 
     # Default values for all user preferences (single source of truth)
     DEFAULTS: ClassVar[dict[str, Any]] = {
+        "preferred_language": "en",
         "hide_url": False,
         "hide_notifications": False,
         "high_quality": True,
