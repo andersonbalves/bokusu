@@ -17,7 +17,7 @@ export function RemoteDrawer({ open, onClose }: RemoteDrawerProps) {
   const { isAdmin, openAdminModal } = useAppStore()
 
   const [volume, setVolumeState] = useState(data?.volume ?? 0.85)
-  const volumeTimer = useRef<any>(null)
+  const volumeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (data?.volume !== undefined) {

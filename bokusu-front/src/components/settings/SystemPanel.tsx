@@ -171,7 +171,7 @@ export function SystemPanel() {
       {/* Confirm Action Modals */}
       <ConfirmModal
         open={confirmAction !== null}
-        title={t(`system.${confirmAction || 'reboot'}` as any)}
+        title={t(`system.${confirmAction || 'reboot'}`)}
         message={t('system.confirmDanger')}
         onConfirm={handleDangerAction}
         onCancel={() => setConfirmAction(null)}

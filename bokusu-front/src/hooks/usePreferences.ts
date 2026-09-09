@@ -26,8 +26,9 @@ export function usePreferences() {
 }
 
 export type SetPreferenceVariables = {
-  [K in keyof Preferences]-?: { key: K; value: Preferences[K] }
-}[keyof Preferences]
+  key: string
+  value: string | number | boolean
+}
 
 export function useSetPreference() {
   const queryClient = useQueryClient()

@@ -61,7 +61,7 @@ export function LibraryPage() {
         pushToast(t('library.deletedSuccess') || 'Arquivo excluído!', 'success')
         setDeletePath(null)
       },
-      onError: (err: any) => {
+      onError: (err: Error) => {
         const msg = err?.message || t('library.deletedError') || 'Erro ao excluir o arquivo'
         pushToast(msg, 'danger')
         setDeletePath(null)
@@ -78,7 +78,7 @@ export function LibraryPage() {
           pushToast(t('library.renamedSuccess') || 'Arquivo renomeado com sucesso!', 'success')
           setEditFile(null)
         },
-        onError: (err: any) => {
+        onError: (err: Error) => {
           const msg = err?.message || t('library.renamedError') || 'Erro ao renomear o arquivo'
           pushToast(msg, 'danger')
           setEditFile(null)

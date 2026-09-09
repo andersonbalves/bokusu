@@ -143,7 +143,7 @@ function PrefToggle({ prefKey, label }: { prefKey: keyof Preferences; label: str
         type="checkbox"
         className="checkbox checkbox-primary checkbox-sm"
         checked={checked}
-        onChange={(e) => setPreference.mutate({ key: prefKey, value: e.target.checked } as any)}
+        onChange={(e) => setPreference.mutate({ key: prefKey, value: e.target.checked })}
         aria-label={label}
       />
     </label>
@@ -166,7 +166,7 @@ function PrefSlider({ prefKey, label, min, max, step }: { prefKey: keyof Prefere
     setVal(newVal)
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
-      setPreference.mutate({ key: prefKey, value: newVal } as any)
+      setPreference.mutate({ key: prefKey, value: newVal })
     }, 300)
   }
 
@@ -212,7 +212,7 @@ function PrefNumber({ prefKey, label, min, max }: { prefKey: keyof Preferences; 
         onChange={(e) => {
           const num = parseInt(e.target.value)
           if (!isNaN(num)) {
-            setPreference.mutate({ key: prefKey, value: num } as any)
+            setPreference.mutate({ key: prefKey, value: num })
           }
         }}
       />
@@ -236,7 +236,7 @@ function PrefTextarea({ prefKey, label }: { prefKey: keyof Preferences; label: s
     setVal(newVal)
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
-      setPreference.mutate({ key: prefKey, value: newVal } as any)
+      setPreference.mutate({ key: prefKey, value: newVal })
     }, 400)
   }
 

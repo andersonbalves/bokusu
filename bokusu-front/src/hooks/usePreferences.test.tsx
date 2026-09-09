@@ -96,7 +96,7 @@ it('invalidates React Query cache when preferences_reset socket event is receive
   const onPreferencesReset = calls.find((c) => c[0] === 'preferences_reset')?.[1]
   expect(onPreferencesReset).toBeDefined()
 
-  onPreferencesReset!()
+  onPreferencesReset!(undefined)
   await waitFor(() => expect(result.current.data?.volume).toBe(0.87))
   expect(fetchCount).toBe(2)
 })

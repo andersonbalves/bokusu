@@ -29,9 +29,9 @@ export function SettingsPage() {
                   value={themeName}
                   checked={theme === themeName}
                   onChange={() => setTheme(themeName)}
-                  aria-label={t(`settings.${themeName}` as any)}
+                  aria-label={t(`settings.${themeName}`)}
                 />
-                <span className="capitalize">{t(`settings.${themeName}` as any)}</span>
+                <span className="capitalize">{t(`settings.${themeName}`)}</span>
               </label>
             ))}
           </div>
