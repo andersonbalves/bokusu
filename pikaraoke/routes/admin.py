@@ -64,7 +64,7 @@ def update_ytdl():
     else:
         # MSG: Message shown after trying to update yt-dlp without admin permissions.
         flash(_("You don't have permission to update yt-dlp"), "is-danger")
-    return redirect(url_for("info.info"))
+    return redirect(url_for("home.home"))
 
 
 @admin_bp.route("/library_stats")
@@ -177,7 +177,7 @@ def auth(form):
         # MSG: Message shown after logging in as admin successfully
         flash(_("Admin mode granted!"), "is-success")
     else:
-        resp = make_response(redirect(url_for("admin.login", next=next_url)))
+        resp = make_response(redirect(next_url))
         # MSG: Message shown after failing to login as admin
         flash(_("Incorrect admin password!"), "is-danger")
     return resp
@@ -186,7 +186,7 @@ def auth(form):
 @admin_bp.route("/logout")
 def logout():
     """Log out of admin mode."""
-    resp = make_response(redirect(url_for("info.info")))
+    resp = make_response(redirect(url_for("home.home")))
     resp.set_cookie("admin", "")
     # MSG: Message shown after logging out as admin successfully
     flash(_("Logged out of admin mode!"), "is-success")

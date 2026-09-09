@@ -34,7 +34,6 @@ from pikaraoke.lib.youtube_dl import upgrade_youtubedl
 from pikaraoke.routes.admin import admin_bp
 from pikaraoke.routes.background_music import background_music_bp
 from pikaraoke.routes.controller import controller_bp
-from pikaraoke.routes.files import files_bp
 from pikaraoke.routes.home import home_bp
 from pikaraoke.routes.images import images_bp
 from pikaraoke.routes.metadata_api import metadata_bp
@@ -75,7 +74,6 @@ api = Api(app)
 
 # Blueprints shown in /apidocs when swagger is enabled
 _api_blueprints = [
-    files_bp,
     preferences_bp,
     admin_bp,
     controller_bp,

@@ -83,7 +83,7 @@ def change_preferences(query):
     else:
         # MSG: Message shown after trying to change preferences without admin permissions.
         flash(_("You don't have permission to change preferences"), "is-danger")
-    return redirect(url_for("info.info"))
+    return redirect(url_for("home.home"))
 
 
 @preferences_bp.route("/clear_preferences", methods=["GET"])
@@ -100,4 +100,4 @@ def clear_preferences():
     else:
         # MSG: Message shown after trying to clear preferences without admin permissions.
         flash(_("You don't have permission to clear preferences"), "is-danger")
-    return redirect(url_for("info.info"))
+    return redirect(url_for("home.home"))

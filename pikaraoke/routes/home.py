@@ -1,18 +1,19 @@
 """Home page route."""
 
 import flask_babel
-from flask import render_template
-from flask_smorest import Blueprint
+from flask import Blueprint, render_template
 
 _ = flask_babel.gettext
 
 
+# ponytail: plain Flask Blueprint — flask_smorest.Blueprint drops route defaults,
+# which breaks url_for("home.home"); smorest features unused by this HTML-only route.
 home_bp = Blueprint("home", __name__)
 
 
 @home_bp.route("/", defaults={"path": ""})
 @home_bp.route("/<path:path>")
-def catch_all(path):
+def home(path):
     """Fallback route for React SPA."""
 
     # Evitar conflitos com rotas de API e estáticos
