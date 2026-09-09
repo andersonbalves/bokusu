@@ -239,6 +239,34 @@ class TestUpgradeYoutubedl:
             assert "pip" in second_call_args
             assert "--break-system-packages" in second_call_args
 
+    def test_uv_pip_upgrade_targets_current_interpreter(self):
+        """Test that uv pip fallback passes --python with the current interpreter."""
+        pip_message = b"You installed yt-dlp with pip or using the wheel from PyPi"
+        error = subprocess.CalledProcessError(1, "yt-dlp", pip_message)
+        error.output = pip_message
+
+        with (
+            patch("pikaraoke.lib.youtube_dl.get_youtubedl_version", return_value="2024.02.01"),
+            patch("shutil.which", return_value="/usr/bin/uv"),
+            patch("subprocess.check_output") as mock_check,
+        ):
+            # First call raises error suggesting pip, second call succeeds
+            mock_check.side_effect = [error, b"Successfully installed yt-dlp"]
+            result = upgrade_youtubedl()
+
+            assert result == "2024.02.01"
+            assert mock_check.call_count == 2
+            pip_cmd = mock_check.call_args_list[1][0][0]
+            assert pip_cmd == [
+                "uv",
+                "pip",
+                "install",
+                "--upgrade",
+                "--python",
+                sys.executable,
+                "yt-dlp",
+            ]
+
     @patch("pikaraoke.lib.youtube_dl.get_youtubedl_version", return_value="2024.01.01")
     def test_returns_version_after_upgrade(self, mock_version):
         """Test that current version is returned after upgrade."""

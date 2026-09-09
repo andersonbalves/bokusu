@@ -92,7 +92,7 @@ def upgrade_youtubedl() -> str:
     if "pip" in output.lower():
         # Prefer uv pip (project uses uv), fall back to plain pip
         if shutil.which("uv"):
-            pip_cmd = ["uv", "pip", "install", "--upgrade", "yt-dlp"]
+            pip_cmd = ["uv", "pip", "install", "--upgrade", "--python", sys.executable, "yt-dlp"]
         else:
             pip_cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "yt-dlp"]
             # Outside a venv, pip requires --break-system-packages on modern Python
