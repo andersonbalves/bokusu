@@ -1,5 +1,7 @@
 """Shared helpers for the /api mirror blueprints."""
 
+import re
+import unicodedata
 from collections.abc import Callable
 from functools import wraps
 from typing import Any
@@ -19,10 +21,6 @@ def require_admin(fn: Callable[..., Any]) -> Callable[..., Any]:
         return fn(*args, **kwargs)
 
     return wrapper
-
-
-import re
-import unicodedata
 
 
 def normalize_name_for_comparison(name: str) -> str:

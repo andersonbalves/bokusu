@@ -1,10 +1,10 @@
 """Player control endpoints for the /api mirror."""
 
-from flask import current_app, jsonify
+from flask import jsonify
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields, validate
 
-from pikaraoke.lib.current_app import broadcast_event
+from pikaraoke.lib.current_app import broadcast_event, get_karaoke_instance
 from pikaraoke.routes.api._utils import require_admin
 
 api_player_bp = Blueprint("api_player", __name__, url_prefix="/api/player")
@@ -27,7 +27,7 @@ class PitchBody(Schema):
 @api_player_bp.route("", methods=["GET"])
 def get_player_state():
     """Get the currently playing song state. Public access so any connected client can render playback state."""
-    k = current_app.config["KARAOKE_INSTANCE"]
+    k = get_karaoke_instance()
     return jsonify(k.get_now_playing())
 
 
@@ -35,7 +35,7 @@ def get_player_state():
 @require_admin
 @api_player_bp.arguments(ActionBody, location="json")
 def player_action(body):
-    k = current_app.config["KARAOKE_INSTANCE"]
+    k = get_karaoke_instance()
     pc = k.playback_controller
     action = body["action"]
 
@@ -69,7 +69,7 @@ def player_action(body):
 @api_player_bp.route("/volume", methods=["GET"])
 @require_admin
 def get_player_volume():
-    k = current_app.config["KARAOKE_INSTANCE"]
+    k = get_karaoke_instance()
     return jsonify({"volume": k.volume})
 
 
@@ -77,7 +77,7 @@ def get_player_volume():
 @require_admin
 @api_player_bp.arguments(VolumeBody, location="json")
 def player_volume(body):
-    k = current_app.config["KARAOKE_INSTANCE"]
+    k = get_karaoke_instance()
     success = k.volume_change(body["level"])
     if not success:
         return jsonify({"success": False, "volume": body["level"]}), 409
@@ -87,7 +87,7 @@ def player_volume(body):
 @api_player_bp.route("/pitch", methods=["GET"])
 @require_admin
 def get_player_pitch():
-    k = current_app.config["KARAOKE_INSTANCE"]
+    k = get_karaoke_instance()
     return jsonify({"pitch": k.playback_controller.now_playing_transpose})
 
 
@@ -95,7 +95,7 @@ def get_player_pitch():
 @require_admin
 @api_player_bp.arguments(PitchBody, location="json")
 def player_pitch(body):
-    k = current_app.config["KARAOKE_INSTANCE"]
+    k = get_karaoke_instance()
     if not k.playback_controller.is_playing:
         return jsonify({"success": False, "pitch": body["level"]}), 409
     k.transpose_current(body["level"])
@@ -107,5 +107,5 @@ def get_score_phrases():
     """Active score phrases for the TV score screen. Public: the TV is not an admin client."""
     from pikaraoke.routes.preferences import _get_active_score_phrases
 
-    k = current_app.config["KARAOKE_INSTANCE"]
+    k = get_karaoke_instance()
     return jsonify(_get_active_score_phrases(k))

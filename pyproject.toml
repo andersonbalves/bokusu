@@ -109,7 +109,6 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "pikaraoke/app.py" = ["E402"]                      # gevent monkey patching must precede all imports
 "pikaraoke/routes/stream.py" = ["E402"]            # flask_babel gettext alias before imports
-"pikaraoke/routes/batch_song_renamer.py" = ["E101"] # tabs in Jinja2 template string literals
 
 [tool.ruff.format]
 quote-style = "double"

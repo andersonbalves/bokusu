@@ -1,5 +1,6 @@
 """Tests for /api/search."""
 
+import subprocess
 from unittest.mock import patch
 
 
@@ -27,6 +28,14 @@ def test_search_non_karaoke_skips_suffix(mock_get_results, client):
     resp = client.get("/api/search?q=queen&non_karaoke=true")
     assert resp.status_code == 200
     mock_get_results.assert_called_once_with("queen")
+
+
+@patch("pikaraoke.routes.api.search.get_search_results")
+def test_search_500_generic_error_on_ytdl_failure(mock_get_results, client):
+    mock_get_results.side_effect = subprocess.CalledProcessError(1, "yt-dlp")
+    resp = client.get("/api/search?q=queen")
+    assert resp.status_code == 500
+    assert resp.get_json() == {"error": "Search failed"}
 
 
 def test_autocomplete_matches_local_songs(client, fake_karaoke):

@@ -26,7 +26,7 @@ def system_info() -> Response:
     k = get_karaoke_instance()
     try:
         cpu = f"{psutil.cpu_percent(interval=1)}%"
-    except Exception:
+    except psutil.Error:
         cpu = "unsupported"
     memory = psutil.virtual_memory()
     mem_str = (

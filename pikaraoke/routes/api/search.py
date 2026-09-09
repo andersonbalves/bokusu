@@ -1,5 +1,8 @@
 """Search endpoints for the /api mirror."""
 
+import logging
+import subprocess
+
 from flask import Response, jsonify
 from flask_smorest import Blueprint
 from marshmallow import Schema, fields
@@ -33,8 +36,9 @@ def api_search(args: dict) -> tuple[Response, int] | Response:
 
     try:
         raw_results = get_search_results(query_str)
-    except Exception as exc:
-        return jsonify({"error": f"Search failed: {exc}"}), 500
+    except subprocess.CalledProcessError as exc:
+        logging.error(f"Search failed: {exc}")
+        return jsonify({"error": "Search failed"}), 500
 
     results = []
     for item in raw_results:

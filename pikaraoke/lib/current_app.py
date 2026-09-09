@@ -1,6 +1,7 @@
 """Flask application context utilities for PiKaraoke."""
 
 import hashlib
+import hmac
 import logging
 import os
 import subprocess
@@ -30,8 +31,11 @@ def _get_persisted_secret_key() -> str:
         str: Hex secret key stored in `<data directory>/.secret_key`.
     """
     path = os.path.join(get_data_directory(), ".secret_key")
-    if not os.path.exists(path):
+    try:
         fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError:
+        pass
+    else:
         with os.fdopen(fd, "w") as f:
             f.write(os.urandom(24).hex())
     with open(path) as f:
@@ -81,7 +85,7 @@ def is_admin() -> bool:
         data = _admin_serializer(current_app).loads(token, max_age=ADMIN_COOKIE_MAX_AGE)
     except (BadSignature, SignatureExpired):
         return False
-    return data["p"] == _password_digest(password)
+    return hmac.compare_digest(data["p"], _password_digest(password))
 
 
 def get_karaoke_instance() -> Karaoke:
