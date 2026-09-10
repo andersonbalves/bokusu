@@ -2,9 +2,7 @@
 
 import ntpath
 import os
-from unittest.mock import MagicMock, mock_open, patch
-
-import pytest
+from unittest.mock import mock_open, patch
 
 from pikaraoke.lib.get_platform import (
     get_data_directory,
@@ -25,24 +23,24 @@ class TestIsRaspberryPi:
     def test_raspberry_pi_detected(self):
         """Test detection when running on Raspberry Pi."""
         mock_file = mock_open(read_data="Raspberry Pi 4 Model B Rev 1.2")
-        with patch("io.open", mock_file):
+        with patch("builtins.open", mock_file):
             assert is_raspberry_pi() is True
 
     def test_raspberry_pi_lowercase(self):
         """Test detection with lowercase model string."""
         mock_file = mock_open(read_data="raspberry pi 3 model b")
-        with patch("io.open", mock_file):
+        with patch("builtins.open", mock_file):
             assert is_raspberry_pi() is True
 
     def test_not_raspberry_pi(self):
         """Test detection on non-Pi hardware."""
         mock_file = mock_open(read_data="Generic ARM Board")
-        with patch("io.open", mock_file):
+        with patch("builtins.open", mock_file):
             assert is_raspberry_pi() is False
 
     def test_file_not_found(self):
         """Test when device-tree file doesn't exist."""
-        with patch("io.open", side_effect=FileNotFoundError):
+        with patch("builtins.open", side_effect=FileNotFoundError):
             assert is_raspberry_pi() is False
 
 

@@ -12,7 +12,6 @@ from queue import Queue
 from threading import Thread
 from typing import Any
 
-from pikaraoke.lib.events import EventSystem
 from pikaraoke.lib.ffmpeg import build_ffmpeg_cmd
 from pikaraoke.lib.file_resolver import FileResolver, is_transcoding_required
 from pikaraoke.lib.preference_manager import PreferenceManager
@@ -287,8 +286,7 @@ class StreamManager:
                 stream_size = fr.get_current_stream_size()
                 if stream_size >= buffer_size:
                     logging.debug(
-                        f"Buffering complete. Stream size: {stream_size}, "
-                        f"Segments: {segment_count}"
+                        f"Buffering complete. Stream size: {stream_size}, Segments: {segment_count}"
                     )
                     return True
         except FileNotFoundError:

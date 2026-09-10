@@ -224,7 +224,6 @@ class DownloadManager:
         cmd = build_ytdl_download_command(
             video_url,
             self._download_path,
-            self._preferences.get_or_default("high_quality"),
             self._youtubedl_proxy,
             self._additional_ytdl_args,
         )

@@ -163,7 +163,7 @@ def test_preference_manager_clear_resets_to_defaults(temp_config_file):
     assert prefs.get("splash_delay") == 10
 
     # Clear preferences
-    success, message = prefs.clear()
+    success, _message = prefs.clear()
     assert success is True
 
     # Verify preferences reset to defaults (using get_or_default)
@@ -261,6 +261,7 @@ def test_preference_manager_unicode_characters(temp_config_file):
 def test_preference_manager_defaults_exist():
     """Test that DEFAULTS dictionary contains all expected preferences."""
     expected_keys = {
+        "preferred_language",
         "hide_url",
         "hide_notifications",
         "high_quality",
@@ -285,6 +286,7 @@ def test_preference_manager_defaults_exist():
         "high_score_phrases",
         "show_splash_clock",
         "enable_title_tidy",
+        "splash_display_mode",
     }
 
     assert set(PreferenceManager.DEFAULTS.keys()) == expected_keys
@@ -333,7 +335,7 @@ def test_preference_manager_get_or_default_returns_default(temp_config_file):
     assert result == 0.85
 
     result = prefs.get_or_default("high_quality")
-    assert result is False
+    assert result is True
 
     result = prefs.get_or_default("splash_delay")
     assert result == 2
@@ -491,7 +493,7 @@ def test_set_syncs_target_object(temp_config_file):
     prefs = PreferenceManager(temp_config_file, target=target)
 
     # Set a preference
-    success, message = prefs.set("volume", "0.7")
+    success, _message = prefs.set("volume", "0.7")
     assert success is True
 
     # Verify target object was synced with typed value
@@ -504,7 +506,7 @@ def test_set_without_target_does_not_fail(temp_config_file):
     """Test that set() works normally when no target is registered."""
     prefs = PreferenceManager(temp_config_file)  # No target
 
-    success, message = prefs.set("volume", "0.7")
+    success, _message = prefs.set("volume", "0.7")
     assert success is True
 
     # Preference is still persisted to config
@@ -527,7 +529,7 @@ def test_apply_all_hydrates_target(temp_config_file):
     prefs.apply_all()
 
     # Verify all DEFAULTS are hydrated on target
-    for pref, default in PreferenceManager.DEFAULTS.items():
+    for pref, _default in PreferenceManager.DEFAULTS.items():
         assert hasattr(new_target, pref), f"Missing attribute: {pref}"
 
     # Verify config values override defaults
@@ -624,7 +626,7 @@ def test_reset_all_restores_defaults(temp_config_file):
     # Verify target attributes are reset to defaults
     assert target.volume == 0.85  # Default
     assert target.splash_delay == 2  # Default
-    assert target.high_quality is False  # Default
+    assert target.high_quality is True  # Default
 
 
 def test_reset_all_without_target(temp_config_file):
@@ -635,7 +637,7 @@ def test_reset_all_without_target(temp_config_file):
     prefs.set("volume", "0.5")
 
     # Reset all
-    success, message = prefs.reset_all()
+    success, _message = prefs.reset_all()
     assert success is True
 
     # Config file should still exist (section removed, not file deleted)

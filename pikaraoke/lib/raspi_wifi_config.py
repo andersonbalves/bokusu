@@ -19,7 +19,7 @@ def get_raspi_wifi_conf_vals() -> tuple[str, str, str, str]:
         - https://github.com/jasbur/RaspiWiFi/blob/master/initial_setup.py
         - https://github.com/jasbur/RaspiWiFi/blob/master/libs/reset_device/static_files/raspiwifi.conf
     """
-    f = open(raspi_wifi_conf_file, "r")
+    f = open(raspi_wifi_conf_file)
 
     # Define default values.
     server_port = "80"

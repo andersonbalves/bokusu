@@ -177,7 +177,7 @@ if [ $INSTALL_SHORTCUTS -eq 1 ]; then
     SHARE_DIR="$HOME/.local/share/pikaraoke"
     mkdir -p "$SHARE_DIR"
     ICON_PATH="$SHARE_DIR/logo.icns"
-    ICON_URL="https://raw.githubusercontent.com/vicwomg/pikaraoke/refs/heads/master/pikaraoke/static/icons/logo.icns"
+    ICON_URL="https://raw.githubusercontent.com/andersonbalves/bokusu/refs/heads/main/pikaraoke/static/icons/logo.icns"
     if [ ! -f "$ICON_PATH" ]; then
         curl -fsSL "$ICON_URL" -o "$ICON_PATH" || echo "Warning: Could not download icon"
     fi

@@ -1444,4 +1444,3 @@ msgstr ""
 #: templates/splash.html:145
 msgid "Confirm"
 msgstr "確認"
-

@@ -345,7 +345,7 @@ class TestStreamManagerTranscodeFile:
         sm = StreamManager(test_prefs)
         mock_cmd, _ = self._make_mock_ffmpeg(mock_build_cmd, poll_return=0)
 
-        is_complete, is_buffered = sm._transcode_file(
+        is_complete, _is_buffered = sm._transcode_file(
             self._make_mock_fr(), semitones=2, is_hls=False
         )
 
@@ -392,7 +392,7 @@ class TestStreamManagerTranscodeFile:
         self._make_mock_ffmpeg(mock_build_cmd, poll_return=None)
 
         with patch.object(sm, "_check_hls_buffer", return_value=True) as mock_hls:
-            is_complete, is_buffered = sm._transcode_file(
+            _is_complete, is_buffered = sm._transcode_file(
                 self._make_mock_fr(), semitones=0, is_hls=True
             )
 

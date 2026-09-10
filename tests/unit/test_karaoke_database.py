@@ -176,7 +176,7 @@ class TestApplyScanDiff:
         )
         # Moving two rows to the same path violates UNIQUE on file_path.
         # The entire transaction (including the delete) should roll back.
-        with pytest.raises(Exception):
+        with pytest.raises(Exception):  # noqa: B017
             db.apply_scan_diff(
                 moves=[("/songs/a.mp4", "/songs/clash.mp4"), ("/songs/b.mp4", "/songs/clash.mp4")],
                 inserts=[],

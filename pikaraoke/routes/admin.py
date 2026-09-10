@@ -13,8 +13,13 @@ from flask_smorest import Blueprint
 from marshmallow import Schema, fields
 
 from pikaraoke.karaoke import Karaoke
-from pikaraoke.lib.current_app import get_admin_password, get_karaoke_instance, is_admin
-from pikaraoke.lib.youtube_dl import get_youtubedl_version, upgrade_youtubedl
+from pikaraoke.lib.current_app import (
+    admin_cookie_value,
+    get_admin_password,
+    get_karaoke_instance,
+    is_admin,
+)
+from pikaraoke.lib.youtube_dl import upgrade_youtubedl
 
 _ = flask_babel.gettext
 
@@ -64,7 +69,7 @@ def update_ytdl():
     else:
         # MSG: Message shown after trying to update yt-dlp without admin permissions.
         flash(_("You don't have permission to update yt-dlp"), "is-danger")
-    return redirect(url_for("info.info"))
+    return redirect(url_for("home.home"))
 
 
 @admin_bp.route("/library_stats")
@@ -166,18 +171,20 @@ def auth(form):
     next_url = form["next"]
 
     # Validate next_url to prevent open redirect vulnerabilities
-    if not next_url.startswith("/"):
+    # (also reject protocol-relative URLs like "//evil.com" and "/\evil.com",
+    # which some browsers normalize to "//evil.com")
+    if not next_url.startswith("/") or next_url.startswith("//") or next_url.startswith("/\\"):
         next_url = "/"
 
     if p == admin_password:
         resp = make_response(redirect(next_url))
         expire_date = datetime.datetime.now()
         expire_date = expire_date + datetime.timedelta(days=90)
-        resp.set_cookie("admin", admin_password, expires=expire_date)
+        resp.set_cookie("admin", admin_cookie_value(admin_password), expires=expire_date)
         # MSG: Message shown after logging in as admin successfully
         flash(_("Admin mode granted!"), "is-success")
     else:
-        resp = make_response(redirect(url_for("admin.login", next=next_url)))
+        resp = make_response(redirect(next_url))
         # MSG: Message shown after failing to login as admin
         flash(_("Incorrect admin password!"), "is-danger")
     return resp
@@ -186,7 +193,7 @@ def auth(form):
 @admin_bp.route("/logout")
 def logout():
     """Log out of admin mode."""
-    resp = make_response(redirect(url_for("info.info")))
+    resp = make_response(redirect(url_for("home.home")))
     resp.set_cookie("admin", "")
     # MSG: Message shown after logging out as admin successfully
     flash(_("Logged out of admin mode!"), "is-success")

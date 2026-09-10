@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Michroma&family=Space+Grotesk:wght@400;600&display=swap');
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: aqua, acid;
+}
+
+:root {
+  --font-display: "Michroma", sans-serif;
+  --font-body: "Space Grotesk", sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+}
+
+[data-theme="acid"],
+[data-theme="aqua"] {
+  --radius-box: 1rem;
+  --radius-field: 1.5rem;
+  --radius-selector: 1.5rem;
+}
+
+/* TV legibility: contrast outline for text over any background */
+.text-outlined {
+  text-shadow:
+    -2px -2px 0 #000,
+     0   -2px 0 #000,
+     2px -2px 0 #000,
+     2px  0   0 #000,
+     2px  2px 0 #000,
+     0    2px 0 #000,
+    -2px  2px 0 #000,
+    -2px  0   0 #000,
+     0px  4px 10px rgba(0,0,0,0.8);
+}

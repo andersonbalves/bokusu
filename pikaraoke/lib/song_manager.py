@@ -118,6 +118,16 @@ class SongManager:
         self._db.update_path(song_path, new_path)
         return new_path
 
+    def is_path_in_library(self, path: str) -> bool:
+        """Check a resolved path stays under the song library directory."""
+        try:
+            library = os.path.realpath(self.download_path)
+            candidate = os.path.realpath(path)
+            return os.path.commonpath([candidate, library]) == library
+        except ValueError:
+            # different drives (Windows) — never contained
+            return False
+
     def register_download(self, song_path: str) -> None:
         """Register a newly downloaded song in SongList and DB."""
         self.songs.add_if_valid(song_path)

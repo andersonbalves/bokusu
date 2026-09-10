@@ -8,6 +8,12 @@ from pikaraoke.lib.queue_manager import QueueManager
 from pikaraoke.lib.song_manager import SongManager
 
 
+@pytest.fixture(autouse=True)
+def songs_exist_by_default(monkeypatch):
+    """Tests enqueue fake paths; treat files as present unless a test opts out."""
+    monkeypatch.setattr("pikaraoke.lib.queue_manager.path_exists", lambda path: True)
+
+
 class MockPlaybackController:
     """Minimal mock of PlaybackController for testing queue operations."""
 

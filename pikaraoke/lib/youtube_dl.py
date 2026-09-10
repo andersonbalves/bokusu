@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 
@@ -28,7 +29,7 @@ def get_youtubedl_version() -> str:
         Version string of the installed yt-dlp or an error message.
     """
     try:
-        cmd = yt_dlp_cmd + ["--version"]
+        cmd = [*yt_dlp_cmd, "--version"]
         return subprocess.check_output(cmd).strip().decode("utf8")
     except (subprocess.CalledProcessError, FileNotFoundError, PermissionError) as e:
         logging.warning(f"Could not get yt-dlp version: {e}")
@@ -72,7 +73,7 @@ def upgrade_youtubedl() -> str:
     """
     try:
         output = (
-            subprocess.check_output(yt_dlp_cmd + ["-U"], stderr=subprocess.STDOUT)
+            subprocess.check_output([*yt_dlp_cmd, "-U"], stderr=subprocess.STDOUT)
             .decode("utf8")
             .strip()
         )
@@ -89,11 +90,14 @@ def upgrade_youtubedl() -> str:
 
     upgrade_success = False
     if "pip" in output.lower():
-        pip_cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "yt-dlp"]
-
-        # Outside a venv, pip requires --break-system-packages on modern Python
-        if sys.prefix == sys.base_prefix:
-            pip_cmd.append("--break-system-packages")
+        # Prefer uv pip (project uses uv), fall back to plain pip
+        if shutil.which("uv"):
+            pip_cmd = ["uv", "pip", "install", "--upgrade", "--python", sys.executable, "yt-dlp"]
+        else:
+            pip_cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "yt-dlp"]
+            # Outside a venv, pip requires --break-system-packages on modern Python
+            if sys.prefix == sys.base_prefix:
+                pip_cmd.append("--break-system-packages")
 
         try:
             logging.info(f"yt-dlp is outdated! Attempting upgrade via {pip_cmd}...")
@@ -113,16 +117,16 @@ def upgrade_youtubedl() -> str:
 def build_ytdl_download_command(
     video_url: str,
     download_path: str,
-    high_quality: bool = False,
     youtubedl_proxy: str | None = None,
     additional_args: str | None = None,
 ) -> list[str]:
     """Build the yt-dlp command line for downloading a video.
 
+    Always downloads the best available quality in mp4 container.
+
     Args:
         video_url: URL of the video to download.
         download_path: Directory path where videos will be saved.
-        high_quality: If True, download up to 1080p; otherwise download mp4.
         youtubedl_proxy: Optional proxy server URL.
         additional_args: Optional additional command-line arguments as a string.
 
@@ -130,14 +134,11 @@ def build_ytdl_download_command(
         List of command-line arguments for subprocess execution.
     """
     dl_path = os.path.join(download_path, "%(title)s---%(id)s.%(ext)s")
-    file_quality = (
-        "bestvideo[ext!=webm][height<=1080]+bestaudio[ext!=webm]/best[ext!=webm]"
-        if high_quality
-        else "mp4"
-    )
     args = [
         "-f",
-        file_quality,
+        "bestvideo[ext!=webm]+bestaudio[ext!=webm]/best[ext!=webm]",
+        "--merge-output-format",
+        "mp4",
         "-o",
         dl_path,
         "-S",
@@ -167,7 +168,7 @@ def get_search_results(query: str) -> list[list[str]]:
     logging.info(f"Searching YouTube for: {query}")
     num_results = 10
     yt_search = f'ytsearch{num_results}:"{query}"'
-    cmd = yt_dlp_cmd + ["-j", "--no-playlist", "--flat-playlist", yt_search]
+    cmd = [*yt_dlp_cmd, "-j", "--no-playlist", "--flat-playlist", yt_search]
     logging.debug(f"yt-dlp search command: {' '.join(cmd)}")
     try:
         output = subprocess.check_output(cmd).decode("utf-8", "ignore")
@@ -201,7 +202,7 @@ def get_stream_url(video_url: str) -> str | None:
     Returns:
         Direct playable stream URL, or None if yt-dlp failed.
     """
-    cmd = yt_dlp_cmd + ["-g", "-f", "worst[ext=mp4]/worst"] + _js_runtime_args()
+    cmd = [*yt_dlp_cmd, "-g", "-f", "worst[ext=mp4]/worst", *_js_runtime_args()]
     cmd += [video_url]
     logging.debug(f"yt-dlp get stream URL command: {' '.join(cmd)}")
     try:

@@ -50,7 +50,9 @@ class TestPlaybackControllerInit:
     def test_init_sets_attributes(self, test_prefs):
         """Test that init sets expected attributes."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: x
+
+        def filename_fn(x, remove_youtube_id=True):
+            return x
 
         pc = PlaybackController(test_prefs, events, filename_fn)
 
@@ -72,7 +74,9 @@ class TestPlaybackControllerPlayFile:
     def test_play_file_success(self, mock_sleep, mock_isfile, test_prefs):
         """Test successful playback."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: "Test Song"
+
+        def filename_fn(x, remove_youtube_id=True):
+            return "Test Song"
 
         pc = PlaybackController(test_prefs, events, filename_fn)
 
@@ -104,7 +108,9 @@ class TestPlaybackControllerPlayFile:
     def test_play_file_timeout(self, mock_gettext, mock_sleep, mock_isfile, test_prefs):
         """Test playback timeout when client never connects."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: "Test Song"
+
+        def filename_fn(x, remove_youtube_id=True):
+            return "Test Song"
 
         pc = PlaybackController(test_prefs, events, filename_fn)
 
@@ -128,7 +134,9 @@ class TestPlaybackControllerPlayFile:
     def test_play_file_stream_failure(self, mock_isfile, test_prefs):
         """Test playback when stream setup fails."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: "Test Song"
+
+        def filename_fn(x, remove_youtube_id=True):
+            return "Test Song"
 
         pc = PlaybackController(test_prefs, events, filename_fn)
 
@@ -148,7 +156,9 @@ class TestPlaybackControllerMissingFile:
     @patch("flask_babel._", side_effect=lambda x: x)
     def test_returns_error_for_nonexistent_file(self, mock_gettext, test_prefs):
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: x
+
+        def filename_fn(x, remove_youtube_id=True):
+            return x
 
         pc = PlaybackController(test_prefs, events, filename_fn)
         pc.stream_manager.play_file = MagicMock()
@@ -162,7 +172,9 @@ class TestPlaybackControllerMissingFile:
     @patch("pikaraoke.lib.playback_controller.time.sleep")
     def test_existing_file_proceeds_normally(self, mock_sleep, test_prefs, tmp_path):
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: "Test Song"
+
+        def filename_fn(x, remove_youtube_id=True):
+            return "Test Song"
 
         pc = PlaybackController(test_prefs, events, filename_fn)
 
@@ -185,7 +197,9 @@ class TestPlaybackControllerStartSong:
     def test_start_song_sets_playing(self, test_prefs):
         """Test that start_song sets is_playing to True."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: x
+
+        def filename_fn(x, remove_youtube_id=True):
+            return x
 
         pc = PlaybackController(test_prefs, events, filename_fn)
         pc.now_playing = "Test Song"
@@ -203,7 +217,9 @@ class TestPlaybackControllerEndSong:
     def test_end_song_cleans_up(self, mock_delete, mock_sleep, test_prefs):
         """Test that end_song cleans up resources."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: x
+
+        def filename_fn(x, remove_youtube_id=True):
+            return x
 
         pc = PlaybackController(test_prefs, events, filename_fn)
         pc.now_playing = "Test Song"
@@ -233,7 +249,9 @@ class TestPlaybackControllerSkip:
     def test_skip_when_playing(self, mock_gettext, mock_delete, mock_sleep, test_prefs):
         """Test skip when a song is playing."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: x
+
+        def filename_fn(x, remove_youtube_id=True):
+            return x
 
         pc = PlaybackController(test_prefs, events, filename_fn)
         pc.now_playing = "Test Song"
@@ -248,7 +266,9 @@ class TestPlaybackControllerSkip:
     def test_skip_when_not_playing(self, test_prefs):
         """Test skip when nothing is playing."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: x
+
+        def filename_fn(x, remove_youtube_id=True):
+            return x
 
         pc = PlaybackController(test_prefs, events, filename_fn)
 
@@ -264,7 +284,9 @@ class TestPlaybackControllerPause:
     def test_pause_when_playing(self, mock_gettext, test_prefs):
         """Test pause toggles pause state."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: x
+
+        def filename_fn(x, remove_youtube_id=True):
+            return x
 
         pc = PlaybackController(test_prefs, events, filename_fn)
         pc.is_playing = True
@@ -284,7 +306,9 @@ class TestPlaybackControllerPause:
     def test_pause_when_not_playing(self, test_prefs):
         """Test pause when nothing is playing."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: x
+
+        def filename_fn(x, remove_youtube_id=True):
+            return x
 
         pc = PlaybackController(test_prefs, events, filename_fn)
 
@@ -299,7 +323,9 @@ class TestPlaybackControllerGetNowPlaying:
     def test_get_now_playing_returns_state(self, test_prefs):
         """Test that get_now_playing returns current state."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: x
+
+        def filename_fn(x, remove_youtube_id=True):
+            return x
 
         pc = PlaybackController(test_prefs, events, filename_fn)
         pc.now_playing = "Test Song"
@@ -321,7 +347,9 @@ class TestPlaybackControllerResetNowPlaying:
     def test_reset_clears_all_state(self, test_prefs):
         """Test that reset clears all now playing state."""
         events = EventSystem()
-        filename_fn = lambda x, remove_youtube_id=True: x
+
+        def filename_fn(x, remove_youtube_id=True):
+            return x
 
         pc = PlaybackController(test_prefs, events, filename_fn)
         pc.now_playing = "Test Song"

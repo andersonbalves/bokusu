@@ -1,7 +1,7 @@
 """Playback control routes for skip, pause, volume, and transpose."""
 
 import flask_babel
-from flask import redirect, request, url_for
+from flask import redirect, url_for
 from flask_smorest import Blueprint
 
 from pikaraoke.lib.current_app import broadcast_event, get_karaoke_instance

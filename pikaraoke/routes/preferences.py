@@ -7,9 +7,52 @@ from marshmallow import Schema, fields
 
 from pikaraoke.lib.current_app import broadcast_event, get_karaoke_instance, is_admin
 from pikaraoke.lib.preference_manager import PreferenceManager
-from pikaraoke.routes.splash import _get_active_score_phrases
 
 _ = flask_babel.gettext
+
+
+def _default_score_phrases() -> dict[str, list[str]]:
+    """Translated built-in phrases, used when the user has not set custom ones."""
+    return {
+        "low": [
+            _("Never sing again... ever."),
+            _("That was a really good impression of a dying cat!"),
+            _("Thank God it's over."),
+            _("Pass the mic, please!"),
+            _("Well, I'm sure you're very good at your day job."),
+        ],
+        "mid": [
+            _("I've seen better."),
+            _("Ok... just ok."),
+            _("Not bad for an amateur."),
+            _("You put on a decent show."),
+            _("That was... something."),
+        ],
+        "high": [
+            _("Congratulations! That was unbelievable!"),
+            _("Wow, have you tried auditioning for The Voice?"),
+            _("Please, sing another one!"),
+            _("You rock! You know that?!"),
+            _("Woah, who let Freddie Mercury in here?"),
+        ],
+    }
+
+
+def _parse_stored_phrases(stored: str) -> list[str]:
+    """Split a stored phrase string on '|' (preferred) or '\\n' (legacy)."""
+    sep = "|" if "|" in stored else "\n"
+    return [p.strip() for p in stored.split(sep) if p.strip()]
+
+
+def _get_active_score_phrases(k) -> dict[str, list[str]]:
+    """Custom phrases if configured; translated built-in defaults otherwise."""
+    defaults = _default_score_phrases()
+    result = {}
+    for tier in ("low", "mid", "high"):
+        stored = getattr(k, f"{tier}_score_phrases")
+        result[tier] = (_parse_stored_phrases(stored) if stored else []) or defaults[tier]
+    return result
+
 
 _SCORE_PHRASE_KEYS = {"low_score_phrases", "mid_score_phrases", "high_score_phrases"}
 
@@ -40,7 +83,7 @@ def change_preferences(query):
     else:
         # MSG: Message shown after trying to change preferences without admin permissions.
         flash(_("You don't have permission to change preferences"), "is-danger")
-    return redirect(url_for("info.info"))
+    return redirect(url_for("home.home"))
 
 
 @preferences_bp.route("/clear_preferences", methods=["GET"])
@@ -57,4 +100,4 @@ def clear_preferences():
     else:
         # MSG: Message shown after trying to clear preferences without admin permissions.
         flash(_("You don't have permission to clear preferences"), "is-danger")
-    return redirect(url_for("info.info"))
+    return redirect(url_for("home.home"))

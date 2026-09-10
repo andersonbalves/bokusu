@@ -10,6 +10,7 @@ if not hasattr(werkzeug, "__version__"):
     werkzeug.__version__ = "3.0.0"
 
 from pikaraoke.lib.preference_manager import PreferenceManager
+from pikaraoke.routes.home import home_bp
 from pikaraoke.routes.preferences import preferences_bp
 
 ROUTE_PREFIX = "pikaraoke.routes.preferences"
@@ -20,6 +21,7 @@ def app():
     test_app = Flask(__name__)
     test_app.secret_key = "test"
     test_app.register_blueprint(preferences_bp)
+    test_app.register_blueprint(home_bp)
     return test_app
 
 
@@ -88,6 +90,21 @@ class TestChangePreferencesBroadcast:
         route_mocks["broadcast"].assert_called_once_with(
             "preferences_update", {"key": "hide_overlay", "value": "True"}
         )
+
+
+class TestChangePreferencesNonAdmin:
+    """Tests that change_preferences redirects non-admins."""
+
+    def test_non_admin_redirects_to_home(self, client, route_mocks):
+        with (
+            patch(f"{ROUTE_PREFIX}.is_admin", return_value=False),
+            # flash() gettext needs the babel extension, absent in the bare test app
+            patch(f"{ROUTE_PREFIX}._", side_effect=lambda s: s),
+        ):
+            resp = client.get("/change_preferences?pref=volume&val=0.5", follow_redirects=False)
+
+        assert resp.status_code == 302
+        assert resp.headers["Location"].endswith("/")
 
 
 class TestClearPreferencesBroadcast:

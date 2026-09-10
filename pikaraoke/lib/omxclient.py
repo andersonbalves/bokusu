@@ -9,12 +9,12 @@ import time
 class OMXClient:
     def __init__(self, path=None, adev=None, dual_screen=False, volume_offset=None):
         # Handle omxplayer paths
-        if path == None:
+        if path is None:
             self.path = "/usr/bin/omxplayer"
         else:
             self.path = path
 
-        if adev == None:
+        if adev is None:
             self.adev = "both"
         else:
             self.adev = adev
@@ -55,23 +55,23 @@ class OMXClient:
 
     def pause(self):
         if not self.paused:
-            self.process.stdin.write("p".encode("utf-8"))
+            self.process.stdin.write(b"p")
             self.process.stdin.flush()
             self.paused = True
 
     def play(self):
         if self.paused:
-            self.process.stdin.write("p".encode("utf-8"))
+            self.process.stdin.write(b"p")
             self.process.stdin.flush()
             self.paused = False
 
     def stop(self):
-        self.process.stdin.write("q".encode("utf-8"))
+        self.process.stdin.write(b"q")
         self.process.stdin.flush()
         self.paused = False
 
     def restart(self):
-        self.process.stdin.write("i".encode("utf-8"))
+        self.process.stdin.write(b"i")
         self.process.stdin.flush()
         if self.paused:
             time.sleep(0.2)
@@ -80,13 +80,13 @@ class OMXClient:
 
     def vol_up(self):
         logging.info("Volume up")
-        self.process.stdin.write("=".encode("utf-8"))
+        self.process.stdin.write(b"=")
         self.process.stdin.flush()
         self.volume_offset += 300
 
     def vol_down(self):
         logging.info("Volume down")
-        self.process.stdin.write("-".encode("utf-8"))
+        self.process.stdin.write(b"-")
         self.process.stdin.flush()
         self.volume_offset -= 300
 
@@ -95,18 +95,18 @@ class OMXClient:
             self.process.kill()
             logging.debug("Killing old omxplayer processes")
             player_kill = ["killall", "omxplayer.bin"]
-            FNULL = open(os.devnull, "w")
-            subprocess.Popen(player_kill, stdin=subprocess.PIPE, stdout=FNULL, stderr=FNULL)
+            fnull = open(os.devnull, "w")
+            subprocess.Popen(player_kill, stdin=subprocess.PIPE, stdout=fnull, stderr=fnull)
             self.paused = False
         except (OSError, AttributeError) as e:
             logging.error(e)
             return
 
     def is_running(self):
-        return self.process != None and self.process.poll() == None
+        return self.process is not None and self.process.poll() is None
 
     def is_playing(self):
-        is_playing = self.process != None and self.process.poll() == None and self.paused == False
+        is_playing = self.process is not None and self.process.poll() is None and not self.paused
         return is_playing
 
     def is_paused(self):

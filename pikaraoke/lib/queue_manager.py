@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import logging
 import random
-from typing import Any, Callable
+from collections.abc import Callable
+from os.path import exists as path_exists
+from typing import Any
 
 from flask_babel import _
 
@@ -104,6 +106,10 @@ class QueueManager:
         """Add a song to the queue. Returns [success, message]."""
         title = self._resolve_title(song_path)
 
+        if not path_exists(song_path):
+            logging.warning(f"Refusing to enqueue missing file: {song_path}")
+            return [False, _("Song file not found: %s") % title]
+
         if self.is_song_in_queue(song_path):
             logging.warning("Song is already in queue, will not add: " + song_path)
             return [
@@ -155,7 +161,7 @@ class QueueManager:
 
     def queue_add_random(self, amount: int) -> bool:
         """Add random songs to the queue. Returns False if ran out of songs."""
-        logging.info("Adding %d random songs to queue" % amount)
+        logging.info(f"Adding {amount} random songs to queue")
 
         if not self._get_available_songs:
             logging.error("No available songs callback provided!")
@@ -183,7 +189,7 @@ class QueueManager:
             self.enqueue(song, "Randomizer")
 
         if sample_size < amount:
-            logging.warning("Ran out of songs! Only added %d" % sample_size)
+            logging.warning(f"Ran out of songs! Only added {sample_size}")
             return False
 
         return True
@@ -251,6 +257,18 @@ class QueueManager:
         song = self.queue.pop(0)
         logging.info(f"Popped song from queue: {song['title']}")
         return song
+
+    def edit_user(self, song_path: str, new_user: str) -> bool:
+        """Edit the user of a queued song. Returns False if not found."""
+        index = self._find_song_index(song_path)
+        if index == -1:
+            logging.error("Song not found in queue: " + song_path)
+            return False
+
+        self.queue[index]["user"] = new_user
+        logging.info(f"Changed user for {song_path} to {new_user}")
+        self._events.emit("queue_update")
+        return True
 
     def queue_edit(self, song_path: str, action: str) -> bool:
         """Move or remove a song in the queue. Action: 'up', 'down', or 'delete'."""

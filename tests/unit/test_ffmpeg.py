@@ -2,8 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from pikaraoke.lib.ffmpeg import (
     get_ffmpeg_version,
     get_media_duration,

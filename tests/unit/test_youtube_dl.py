@@ -2,9 +2,7 @@
 
 import subprocess
 import sys
-from unittest.mock import MagicMock, PropertyMock, patch
-
-import pytest
+from unittest.mock import patch
 
 from pikaraoke.lib.youtube_dl import (
     build_ytdl_download_command,
@@ -75,27 +73,17 @@ class TestBuildYtdlDownloadCommand:
         assert "https://www.youtube.com/watch?v=test123" in cmd
 
     @patch("pikaraoke.lib.youtube_dl.get_installed_js_runtime", return_value=None)
-    def test_high_quality_format(self, mock_js):
-        """Test that high quality uses correct format string."""
+    def test_best_quality_format(self, mock_js):
+        """Test that best quality format is always used."""
         cmd = build_ytdl_download_command(
             video_url="https://www.youtube.com/watch?v=test123",
             download_path="/songs",
-            high_quality=True,
         )
         format_idx = cmd.index("-f") + 1
         assert "bestvideo" in cmd[format_idx]
-        assert "1080" in cmd[format_idx]
-
-    @patch("pikaraoke.lib.youtube_dl.get_installed_js_runtime", return_value=None)
-    def test_standard_quality_format(self, mock_js):
-        """Test that standard quality uses mp4 format."""
-        cmd = build_ytdl_download_command(
-            video_url="https://www.youtube.com/watch?v=test123",
-            download_path="/songs",
-            high_quality=False,
-        )
-        format_idx = cmd.index("-f") + 1
-        assert cmd[format_idx] == "mp4"
+        assert "--merge-output-format" in cmd
+        merge_idx = cmd.index("--merge-output-format") + 1
+        assert cmd[merge_idx] == "mp4"
 
     @patch("pikaraoke.lib.youtube_dl.get_installed_js_runtime", return_value=None)
     def test_with_proxy(self, mock_js):
@@ -207,14 +195,12 @@ class TestUpgradeYoutubedl:
         error = subprocess.CalledProcessError(1, "yt-dlp", pip_message)
         error.output = pip_message
 
-        with patch(
-            "pikaraoke.lib.youtube_dl.get_youtubedl_version", return_value="2024.02.01"
-        ), patch("shutil.which", return_value=None), patch(
-            "subprocess.check_output"
-        ) as mock_check, patch(
-            "pikaraoke.lib.youtube_dl.sys.prefix", "/venv"
-        ), patch(
-            "pikaraoke.lib.youtube_dl.sys.base_prefix", "/different"
+        with (
+            patch("pikaraoke.lib.youtube_dl.get_youtubedl_version", return_value="2024.02.01"),
+            patch("shutil.which", return_value=None),
+            patch("subprocess.check_output") as mock_check,
+            patch("pikaraoke.lib.youtube_dl.sys.prefix", "/venv"),
+            patch("pikaraoke.lib.youtube_dl.sys.base_prefix", "/different"),
         ):
             # First call raises error suggesting pip, second call succeeds
             mock_check.side_effect = [error, b"Successfully installed yt-dlp"]
@@ -234,14 +220,12 @@ class TestUpgradeYoutubedl:
         error = subprocess.CalledProcessError(1, "yt-dlp", pip_message)
         error.output = pip_message
 
-        with patch(
-            "pikaraoke.lib.youtube_dl.get_youtubedl_version", return_value="2024.02.01"
-        ), patch("shutil.which", return_value=None), patch(
-            "subprocess.check_output"
-        ) as mock_check, patch(
-            "pikaraoke.lib.youtube_dl.sys.prefix", "/usr"
-        ), patch(
-            "pikaraoke.lib.youtube_dl.sys.base_prefix", "/usr"
+        with (
+            patch("pikaraoke.lib.youtube_dl.get_youtubedl_version", return_value="2024.02.01"),
+            patch("shutil.which", return_value=None),
+            patch("subprocess.check_output") as mock_check,
+            patch("pikaraoke.lib.youtube_dl.sys.prefix", "/usr"),
+            patch("pikaraoke.lib.youtube_dl.sys.base_prefix", "/usr"),
         ):
             # First call raises error suggesting pip, second call succeeds
             mock_check.side_effect = [error, b"Successfully installed yt-dlp"]
@@ -254,6 +238,34 @@ class TestUpgradeYoutubedl:
             assert "-m" in second_call_args
             assert "pip" in second_call_args
             assert "--break-system-packages" in second_call_args
+
+    def test_uv_pip_upgrade_targets_current_interpreter(self):
+        """Test that uv pip fallback passes --python with the current interpreter."""
+        pip_message = b"You installed yt-dlp with pip or using the wheel from PyPi"
+        error = subprocess.CalledProcessError(1, "yt-dlp", pip_message)
+        error.output = pip_message
+
+        with (
+            patch("pikaraoke.lib.youtube_dl.get_youtubedl_version", return_value="2024.02.01"),
+            patch("shutil.which", return_value="/usr/bin/uv"),
+            patch("subprocess.check_output") as mock_check,
+        ):
+            # First call raises error suggesting pip, second call succeeds
+            mock_check.side_effect = [error, b"Successfully installed yt-dlp"]
+            result = upgrade_youtubedl()
+
+            assert result == "2024.02.01"
+            assert mock_check.call_count == 2
+            pip_cmd = mock_check.call_args_list[1][0][0]
+            assert pip_cmd == [
+                "uv",
+                "pip",
+                "install",
+                "--upgrade",
+                "--python",
+                sys.executable,
+                "yt-dlp",
+            ]
 
     @patch("pikaraoke.lib.youtube_dl.get_youtubedl_version", return_value="2024.01.01")
     def test_returns_version_after_upgrade(self, mock_version):

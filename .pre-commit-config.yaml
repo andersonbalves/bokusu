@@ -1,0 +1,105 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+
+
+# Exclude binary files and CHANGELOGS that are automanaged
+exclude: \.(deb|exe|bat)|^.*\/(CHANGELOG|bug_report|feature_request)\.md$|^\.claude\/agents\/
+
+repos:
+
+  # Python tools
+  # ----------------------------------------------------------------------------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.18
+    hooks:
+    - id: ruff
+      name: Lint Python Code
+      args: [--fix]
+    - id: ruff-format
+      name: Format Python Code
+
+  - repo: local
+    hooks:
+    - id: ty
+      name: Type Check Python
+      entry: uv run ty check pikaraoke tests
+      language: system
+      pass_filenames: false
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.9.4
+    hooks:
+    - id: bandit
+      name: Security Scan Python
+      args: ["-c", "pyproject.toml", "-r", "pikaraoke", "-ll"]
+      pass_filenames: false
+
+  # Markdown
+  # ----------------------------------------------------------------------------------------------
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 1.0.0
+    hooks:
+    - id: mdformat
+      name: Format Markdown Files
+      # mdformat-black hardcodes black's default line-length (88), conflicting
+      # with the repo standard (100, enforced by ruff-format) — so it is not
+      # installed. Skill docs use YAML frontmatter that mdformat mangles, so
+      # those dirs are excluded.
+      exclude: ^\.agents/|^\.claude/
+      args: [--number]
+
+  # Security
+  # ----------------------------------------------------------------------------------------------
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+    - id: gitleaks
+      name: Detect Secrets
+
+  - repo: https://github.com/google/osv-scanner
+    rev: v2.4.0
+    hooks:
+    - id: osv-scanner
+      name: Vulnerability Scan Dependencies
+
+  # Git
+  # ----------------------------------------------------------------------------------------------
+  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
+    rev: v9.25.0
+    hooks:
+    - id: commitlint
+      name: Lint Commit Messages
+      stages: [commit-msg]
+      additional_dependencies: ['@commitlint/config-conventional']
+
+  # General
+  # ----------------------------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+    - id: trailing-whitespace
+      name: Trim Trailing Whitespace
+      exclude: \.po$
+    - id: end-of-file-fixer
+      name: Fix End of Files
+    - id: check-yaml
+      name: Check YAML Parseable
+    - id: check-json
+      name: Check JSON Parseable
+      exclude: \.vscode/
+    - id: check-toml
+      name: Check TOML Parseable
+    - id: requirements-txt-fixer
+      name: Sort requirements.txt
+    - id: check-added-large-files
+      args: [--maxkb=3000]
+    - id: check-case-conflict
+    - id: check-merge-conflict
+    - id: fix-byte-order-marker
+    - id: mixed-line-ending
+    - id: check-executables-have-shebangs
+    - id: check-shebang-scripts-are-executable
+      exclude: .bat
+    - id: no-commit-to-branch
+      name: No Commit to main
+      args: [--branch, main]

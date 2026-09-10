@@ -23,32 +23,23 @@ from pikaraoke import VERSION, karaoke
 from pikaraoke.constants import LANGUAGES
 from pikaraoke.lib.args import parse_pikaraoke_args
 from pikaraoke.lib.browser import Browser
-from pikaraoke.lib.current_app import get_karaoke_instance
+from pikaraoke.lib.current_app import _get_persisted_secret_key, get_karaoke_instance
 from pikaraoke.lib.ffmpeg import is_ffmpeg_installed
 from pikaraoke.lib.file_resolver import delete_tmp_dir
 from pikaraoke.lib.get_platform import (
-    get_data_directory,
     get_platform,
     has_js_runtime,
-    is_windows,
 )
-from pikaraoke.lib.song_manager import SongManager
 from pikaraoke.lib.youtube_dl import upgrade_youtubedl
 from pikaraoke.routes.admin import admin_bp
 from pikaraoke.routes.background_music import background_music_bp
-from pikaraoke.routes.batch_song_renamer import batch_song_renamer_bp
 from pikaraoke.routes.controller import controller_bp
-from pikaraoke.routes.files import files_bp
 from pikaraoke.routes.home import home_bp
 from pikaraoke.routes.images import images_bp
-from pikaraoke.routes.info import info_bp
 from pikaraoke.routes.metadata_api import metadata_bp
 from pikaraoke.routes.now_playing import nowplaying_bp
 from pikaraoke.routes.preferences import preferences_bp
-from pikaraoke.routes.queue import queue_bp
-from pikaraoke.routes.search import search_bp
 from pikaraoke.routes.socket_events import setup_socket_events
-from pikaraoke.routes.splash import splash_bp
 from pikaraoke.routes.stream import stream_bp
 
 _ = flask_babel.gettext
@@ -61,7 +52,7 @@ babel = Babel()
 
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = _get_persisted_secret_key()
 app.jinja_env.add_extension("jinja2.ext.i18n")
 app.config["BABEL_TRANSLATION_DIRECTORIES"] = "translations"
 app.config["JSON_SORT_KEYS"] = False
@@ -83,9 +74,6 @@ api = Api(app)
 
 # Blueprints shown in /apidocs when swagger is enabled
 _api_blueprints = [
-    queue_bp,
-    search_bp,
-    files_bp,
     preferences_bp,
     admin_bp,
     controller_bp,
@@ -99,9 +87,6 @@ _api_blueprints = [
 # Blueprints hidden from /apidocs (internal UI routes)
 _internal_blueprints = [
     home_bp,
-    info_bp,
-    splash_bp,
-    batch_song_renamer_bp,
 ]
 
 for bp in _api_blueprints:
@@ -109,6 +94,11 @@ for bp in _api_blueprints:
 
 for bp in _internal_blueprints:
     app.register_blueprint(bp)
+
+from pikaraoke.routes.api import api_blueprints
+
+for bp in api_blueprints:
+    api.register_blueprint(bp)
 
 
 def get_locale() -> str | None:
@@ -278,7 +268,7 @@ def main() -> None:
 
     spawn(upgrade_youtubedl)
 
-    server = WSGIServer(("0.0.0.0", int(args.port)), app, log=None, error_log=logging.getLogger())
+    server = WSGIServer(("0.0.0.0", int(args.port)), app, log=None, error_log=logging.getLogger())  # nosec B104
     server.start()
 
     # Handle sigterm, apparently cherrypy won't shut down without explicit handling

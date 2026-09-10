@@ -1,7 +1,5 @@
 """Unit tests for args module."""
 
-import pytest
-
 from pikaraoke.lib.args import arg_path_parse, parse_volume
 
 

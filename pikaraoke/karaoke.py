@@ -33,11 +33,9 @@ from pikaraoke.lib.preference_manager import PreferenceManager
 from pikaraoke.lib.queue_manager import QueueManager
 from pikaraoke.lib.song_manager import SongManager
 from pikaraoke.lib.youtube_dl import (
-    get_search_results,
     get_youtubedl_version,
-    upgrade_youtubedl,
 )
-from pikaraoke.version import __version__ as VERSION
+from pikaraoke.version import __version__ as VERSION  # noqa: N812
 
 
 class Karaoke:
@@ -366,7 +364,7 @@ class Karaoke:
 
         logging.debug("IP address (for QR code and splash screen): " + self.ip)
 
-        if self.url_override != None:
+        if self.url_override is not None:
             logging.debug("Overriding URL with " + self.url_override)
             url = self.url_override
         else:
@@ -409,10 +407,6 @@ class Karaoke:
         # Color should be bulma compatible: primary, warning, success, danger
         hide_notifications = self.preferences.get_or_default("hide_notifications")
         if not hide_notifications:
-            # don't allow new messages to clobber existing commands, one message at a time
-            # other commands have a higher priority
-            if self.now_playing_notification != None:
-                return
             self.now_playing_notification = message + "::is-" + color
             # Emit notification via SocketIO for event-driven architecture
             if self.socketio:

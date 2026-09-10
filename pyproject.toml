@@ -1,8 +1,8 @@
 [project]
-name = "pikaraoke"
+name = "bokusu"
 version = "1.19.0"
-description = "Youtube-based Karaoke machine for Raspberry Pi, OSX, Windows, and Linux"
-authors = [{name = "Vic Wong"}]
+description = "React UI fork of PiKaraoke - Youtube-based Karaoke machine"
+authors = [{name = "Vic Wong (Original Creator)"}, {name = "Anderson Alves"}]
 readme = "docs/README.md"
 requires-python = ">=3.10"
 keywords = ["karaoke", "ktv", "video", "audio", "youtube", "raspberry-pi", "osx", "windows", "linux"]
@@ -15,13 +15,13 @@ dependencies = [
   "Flask>=3.1.0,<3.1.3",  # 3.1.3 breaks flask-socketio; remove cap when fixed
   "qrcode[png]==8.2",
   "psutil==7.2.1",
-  "requests==2.32.5",
+  "requests>=2.33.0",
   "flask-paginate==2024.4.12",
   "flask-smorest>=0.46.0",
   "Babel==2.17.0",
   "Flask-Babel==4.0.0",
   "ffmpeg-python==0.2.0",
-  "yt-dlp[default]>=2026.03.03",
+  "yt-dlp[default]>=2026.6.9",
   "flask-socketio>=5.5.0",
   "gevent>=24.11.1",
 ]
@@ -29,7 +29,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "pre-commit>=3.7.1",
-  "pytest>=9.0.2",
+  "pytest>=9.0.3",
   "pytest-cov>=7.0.0",
 
 ]
@@ -37,8 +37,11 @@ dev = [
 [dependency-groups]
 dev = [
     "pre-commit>=4.5.0",
-    "pytest>=9.0.2",
+    "pytest>=9.0.3",
     "pytest-cov>=7.0.0",
+    "ruff>=0.11.0",
+    "ty>=0.0.1",
+    "bandit>=1.8.0",
 ]
 translations = [
     "deep-translator>=1.11.4",
@@ -49,8 +52,9 @@ translations = [
 pikaraoke = "pikaraoke.app:main"
 
 [project.urls]
-Homepage = "https://github.com/vicwomg/pikaraoke"
-Repository = "https://github.com/vicwomg/pikaraoke"
+Homepage = "https://github.com/andersonbalves/bokusu"
+Repository = "https://github.com/andersonbalves/bokusu"
+"Original Repository" = "https://github.com/vicwomg/pikaraoke"
 
 [build-system]
 requires = ["hatchling"]
@@ -66,22 +70,52 @@ package-mode = true
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.7.1"
 
-[tool.pyright]
-include = ["src"]
-exclude = ["**/node_modules",
-    "**/__pycache__",
-    "src/experimental",
-    "src/typestubs"
+[tool.ty]
+environment.python-version = "3.10"
+
+[tool.ty.rules]
+# Suppressed: pre-existing issues in upstream pikaraoke code.
+# Re-enable once codebase is cleaned up or Jinja templates replaced by SPA.
+invalid-argument-type = "ignore"
+invalid-return-type = "ignore"
+unresolved-attribute = "ignore"
+unsupported-operator = "ignore"
+missing-argument = "ignore"
+unknown-argument = "ignore"
+deprecated = "ignore"
+possibly-missing-submodule = "ignore"
+unused-type-ignore-comment = "ignore"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes (includes unused imports F401)
+    "I",   # isort
+    "N",   # pep8-naming
+    "C4",  # flake8-comprehensions
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "RUF", # ruff-specific rules
 ]
-ignore = ["src/oldstuff"]
-defineConstant = { DEBUG = true }
-stubPath = "src/stubs"
+ignore = [
+    "E501", # line length enforced by formatter
+]
 
-reportMissingImports = "error"
-reportMissingTypeStubs = false
+[tool.ruff.lint.per-file-ignores]
+"pikaraoke/app.py" = ["E402"]                      # gevent monkey patching must precede all imports
+"pikaraoke/routes/stream.py" = ["E402"]            # flask_babel gettext alias before imports
 
-pythonVersion = "3.10"
-pythonPlatform = "Linux"
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv"]
 
 [tool.coverage.run]
 omit = [
