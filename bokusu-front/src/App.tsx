@@ -26,6 +26,7 @@ export default function App() {
         <Route element={<PlayerLayout />}>
           <Route path="/player" element={<PlayerPage />} />
         </Route>
+        <Route path="*" element={<Navigate to="/queue" replace />} />
       </Routes>
     </BrowserRouter>
   )

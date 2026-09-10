@@ -543,7 +543,7 @@ class Karaoke:
         This method blocks until stop() is called or KeyboardInterrupt.
         """
         logging.debug("Starting PiKaraoke run loop")
-        logging.info(f"Connect the player host to: {self.url}/splash")
+        logging.info(f"Connect the player host to: {self.url}/player")
         self.running = True
         while self.running:
             try:
